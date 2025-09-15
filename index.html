@@ -49,6 +49,29 @@
                 filter: brightness(0.6);
                 contain: layout;
             }
+            /* Critical profile section styles */
+            .profile-section {
+                display: flex;
+                flex-direction: column;
+                gap: clamp(20px, 4vw, 24px);
+                padding: clamp(20px, 4vw, 24px);
+                backdrop-filter: blur(12px);
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 16px;
+            }
+            .profile-picture {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+            }
+            .profile-img {
+                width: clamp(80px, 20vw, 120px);
+                height: clamp(80px, 20vw, 120px);
+                border-radius: 50%;
+                object-fit: cover;
+            }
         </style>
         <!-- Performance optimizations - Preload critical resources -->
         <link rel="preload" href="styles.css" as="style" />
@@ -59,14 +82,10 @@
             as="image"
             type="image/webp"
         />
-        <link
-            rel="preload"
-            href="assets/back-o.mp4"
-            as="video"
-            type="video/mp4"
-        />
 
         <link rel="stylesheet" href="styles.css" />
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -77,7 +96,14 @@
     <body>
         <!-- Background Video -->
         <div class="background-video" aria-hidden="true">
-            <video autoplay muted loop playsinline id="bg-video">
+            <video
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="metadata"
+                id="bg-video"
+            >
                 <source src="assets/back-o.mp4" type="video/mp4" />
             </video>
         </div>
@@ -100,6 +126,8 @@
                             src="assets/profile.webp"
                             alt="Bryan Morales"
                             class="profile-img"
+                            width="120"
+                            height="120"
                         />
                         <div class="profile-badge" aria-hidden="true">🔮</div>
                     </div>
@@ -360,26 +388,35 @@
                                         <div class="carousel-slide is-active">
                                             <img
                                                 src="assets/keeptive/keeptive-1.webp"
+                                                alt="Keeptive Screenshot 1"
                                             />
                                         </div>
                                         <div class="carousel-slide">
                                             <img
+                                                loading="lazy"
                                                 src="assets/keeptive/keeptive-2.webp"
+                                                alt="Keeptive Screenshot 2"
                                             />
                                         </div>
                                         <div class="carousel-slide">
                                             <img
+                                                loading="lazy"
                                                 src="assets/keeptive/keeptive-3.webp"
+                                                alt="Keeptive Screenshot 3"
                                             />
                                         </div>
                                         <div class="carousel-slide">
                                             <img
+                                                loading="lazy"
                                                 src="assets/keeptive/keeptive-4.webp"
+                                                alt="Keeptive Screenshot 4"
                                             />
                                         </div>
                                         <div class="carousel-slide">
                                             <img
+                                                loading="lazy"
                                                 src="assets/keeptive/keeptive-5.webp"
+                                                alt="Keeptive Screenshot 5"
                                             />
                                         </div>
                                     </div>
@@ -604,17 +641,23 @@
                                     <div class="carousel-track">
                                         <div class="carousel-slide is-active">
                                             <img
+                                                loading="lazy"
                                                 src="assets/genetic-algorithm/genetic-algorithm-1.webp"
+                                                alt="Genetic Algorithm Screenshot 1"
                                             />
                                         </div>
                                         <div class="carousel-slide">
                                             <img
+                                                loading="lazy"
                                                 src="assets/genetic-algorithm/genetic-algorithm-2.webp"
+                                                alt="Genetic Algorithm Screenshot 2"
                                             />
                                         </div>
                                         <div class="carousel-slide">
                                             <img
+                                                loading="lazy"
                                                 src="assets/genetic-algorithm/genetic-algorithm-3.webp"
+                                                alt="Genetic Algorithm Screenshot 3"
                                             />
                                         </div>
                                     </div>
@@ -813,22 +856,30 @@
                                     <div class="carousel-track">
                                         <div class="carousel-slide is-active">
                                             <img
+                                                loading="lazy"
                                                 src="assets/api-restful/api-restful-1.webp"
+                                                alt="API RESTful Screenshot 1"
                                             />
                                         </div>
                                         <div class="carousel-slide">
                                             <img
+                                                loading="lazy"
                                                 src="assets/api-restful/api-restful-2.webp"
+                                                alt="API RESTful Screenshot 2"
                                             />
                                         </div>
                                         <div class="carousel-slide">
                                             <img
+                                                loading="lazy"
                                                 src="assets/api-restful/api-restful-3.webp"
+                                                alt="API RESTful Screenshot 3"
                                             />
                                         </div>
                                         <div class="carousel-slide">
                                             <img
+                                                loading="lazy"
                                                 src="assets/api-restful/api-restful-4.webp"
+                                                alt="API RESTful Screenshot 4"
                                             />
                                         </div>
                                     </div>
@@ -1038,17 +1089,23 @@
                                     <div class="carousel-track">
                                         <div class="carousel-slide is-active">
                                             <img
+                                                loading="lazy"
                                                 src="assets/deterministic-finite-automaton/deterministic-finite-automaton-1.webp"
+                                                alt="Deterministic Finite Automaton Screenshot 1"
                                             />
                                         </div>
                                         <div class="carousel-slide">
                                             <img
+                                                loading="lazy"
                                                 src="assets/deterministic-finite-automaton/deterministic-finite-automaton-2.webp"
+                                                alt="Deterministic Finite Automaton Screenshot 2"
                                             />
                                         </div>
                                         <div class="carousel-slide">
                                             <img
+                                                loading="lazy"
                                                 src="assets/deterministic-finite-automaton/deterministic-finite-automaton-3.webp"
+                                                alt="Deterministic Finite Automaton Screenshot 3"
                                             />
                                         </div>
                                     </div>
