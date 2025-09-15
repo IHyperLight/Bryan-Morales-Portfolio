@@ -84,7 +84,9 @@
                     ) {
                         capabilities.performanceLevel = "high";
                     } else {
-                        capabilities.performanceLevel = "medium";
+                        // Previously medium devices are now classified as low for more aggressive optimization
+                        capabilities.performanceLevel = "low";
+                        capabilities.isLowEndDevice = true;
                     }
                 } catch (e) {
                     capabilities.performanceLevel = "low";
