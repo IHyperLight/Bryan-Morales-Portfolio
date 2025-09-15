@@ -43,6 +43,28 @@ const willChangeManager = {
 
         const capabilities = hardwareCapabilities.getCapabilities();
 
+        // Ultra-conservative approach for ultra-low end devices
+        if (capabilities.performanceLevel === "ultra-low") {
+            // Never use will-change on ultra-low end to save memory
+            return;
+        }
+
+        // Conservative approach for low-end devices
+        if (
+            capabilities.performanceLevel &&
+            capabilities.performanceLevel.includes("low")
+        ) {
+            // Only use will-change for critical animations and for short durations
+            if (property !== "transform" && property !== "opacity") {
+                return; // Skip non-essential properties
+            }
+
+            // Limit concurrent will-change elements
+            if (this.activeElements.size && this.activeElements.size >= 2) {
+                return; // Max 2 elements with will-change on low-end
+            }
+        }
+
         // Only use will-change on capable devices to reduce memory pressure
         if (capabilities.performanceLevel !== "low" && capabilities.hasGPU) {
             element.style.willChange = property;
@@ -53,19 +75,44 @@ const willChangeManager = {
     clear(element, delay = 100) {
         if (!element || !this.activeElements.has(element)) return;
 
+        const capabilities = hardwareCapabilities.getCapabilities();
+
+        // Clear immediately on low-end devices to free memory faster
+        const clearDelay =
+            capabilities.performanceLevel &&
+            capabilities.performanceLevel.includes("low")
+                ? 0
+                : delay;
+
         const timerId = setTimeout(() => {
             if (element.style) {
                 element.style.willChange = "auto";
                 this.activeElements.delete(element);
             }
             performanceCache.timers.delete(timerId);
-        }, delay);
+        }, clearDelay);
         performanceCache.timers.add(timerId);
     },
 
     clearAll() {
-        // Cleanup function for page unload
+        // Enhanced cleanup function for low-end devices
         this.activeElements = new WeakSet();
+
+        // Force clear all will-change properties on low-end devices
+        const capabilities = hardwareCapabilities.getCapabilities();
+        if (
+            capabilities.performanceLevel &&
+            capabilities.performanceLevel.includes("low")
+        ) {
+            const allElements = document.querySelectorAll(
+                '[style*="will-change"]'
+            );
+            allElements.forEach((el) => {
+                if (el.style.willChange && el.style.willChange !== "auto") {
+                    el.style.willChange = "auto";
+                }
+            });
+        }
     },
 };
 
@@ -93,25 +140,103 @@ const hardwareCapabilities = (() => {
                 CSS.supports("backdrop-filter", "blur(1px)") ||
                 CSS.supports("-webkit-backdrop-filter", "blur(1px)");
 
-            // Detect low-end devices
-            capabilities.isLowEndDevice =
-                capabilities.hardwareConcurrency < 4 ||
-                navigator.deviceMemory < 4 || // If available
-                /Android.*4\.|iPhone.*OS [5-9]_/.test(navigator.userAgent);
+            // Enhanced multi-factor low-end device detection
+            const getDeviceMemory = () =>
+                navigator.deviceMemory ||
+                (navigator.storage && navigator.storage.estimate ? 2 : 1);
 
-            // Determine performance level with more granular detection
-            if (capabilities.isLowEndDevice || !capabilities.hasTransform3D) {
+            const getConnectionSpeed = () => {
+                if ("connection" in navigator) {
+                    const conn = navigator.connection;
+                    return {
+                        effectiveType: conn.effectiveType || "unknown",
+                        downlink: conn.downlink || 0,
+                        saveData: conn.saveData || false,
+                    };
+                }
+                return {
+                    effectiveType: "unknown",
+                    downlink: 0,
+                    saveData: false,
+                };
+            };
+
+            const deviceMemory = getDeviceMemory();
+            const connection = getConnectionSpeed();
+
+            // Multi-factor ultra-low-end device detection with granular scoring
+            const ultraLowEndFactors = [
+                capabilities.hardwareConcurrency < 2,
+                deviceMemory < 1.5,
+                /Android.*[2-4]\.|iPhone.*OS [4-8]_/.test(navigator.userAgent),
+                connection.effectiveType === "slow-2g",
+                screen.width <= 320 && deviceMemory < 2,
+                navigator.maxTouchPoints > 0 && deviceMemory < 1,
+            ];
+
+            const lowEndFactors = [
+                capabilities.hardwareConcurrency < 4,
+                deviceMemory < 3,
+                /Android.*4\.|iPhone.*OS [5-9]_|Windows Phone/.test(
+                    navigator.userAgent
+                ),
+                connection.effectiveType === "2g",
+                connection.saveData === true,
+                screen.width <= 480 && deviceMemory < 2,
+                navigator.maxTouchPoints > 0 && deviceMemory < 3,
+            ];
+
+            const ultraLowScore = ultraLowEndFactors.filter(Boolean).length;
+            const lowScore = lowEndFactors.filter(Boolean).length;
+
+            // Granular performance level classification
+            if (ultraLowScore >= 2) {
+                capabilities.isLowEndDevice = true;
+                capabilities.performanceLevel = "ultra-low";
+                capabilities.hasGPU = false;
+                capabilities.lowEndSeverity = "ultra";
+            } else if (lowScore >= 3) {
+                capabilities.isLowEndDevice = true;
                 capabilities.performanceLevel = "low";
                 capabilities.hasGPU = false;
-            } else if (
-                capabilities.hardwareConcurrency < 8 ||
-                !capabilities.hasBackdropFilter ||
-                navigator.deviceMemory < 8 // More conservative memory threshold
-            ) {
-                capabilities.performanceLevel = "medium";
+                capabilities.lowEndSeverity = "severe";
+            } else if (lowScore >= 1 || ultraLowScore >= 1) {
+                capabilities.isLowEndDevice = true;
+                capabilities.performanceLevel = "low-medium";
+                capabilities.hasGPU = capabilities.hasTransform3D;
+                capabilities.lowEndSeverity = "moderate";
             } else {
-                capabilities.performanceLevel = "high";
+                capabilities.isLowEndDevice = false;
+                capabilities.lowEndSeverity = "none";
+
+                // High-end classification
+                if (
+                    capabilities.hardwareConcurrency >= 12 &&
+                    deviceMemory >= 16 &&
+                    connection.downlink > 10
+                ) {
+                    capabilities.performanceLevel = "ultra-high";
+                } else if (
+                    capabilities.hardwareConcurrency >= 8 &&
+                    capabilities.hasBackdropFilter &&
+                    deviceMemory >= 8
+                ) {
+                    capabilities.performanceLevel = "high";
+                } else {
+                    capabilities.performanceLevel = "medium";
+                }
             }
+
+            // Store additional metrics for fine-tuning
+            capabilities.deviceMetrics = {
+                memory: deviceMemory,
+                cores: capabilities.hardwareConcurrency,
+                connection: connection.effectiveType,
+                saveData: connection.saveData,
+                downlink: connection.downlink,
+                ultraLowScore,
+                lowScore,
+            };
         } catch (e) {
             capabilities.hasGPU = false;
             capabilities.hasTransform3D = false;
@@ -125,24 +250,66 @@ const hardwareCapabilities = (() => {
     const applyOptimizations = () => {
         const root = document.documentElement;
 
-        if (!capabilities.hasGPU || capabilities.performanceLevel === "low") {
+        // GPU and transform optimizations
+        if (
+            !capabilities.hasGPU ||
+            capabilities.performanceLevel.includes("low")
+        ) {
             // Apply CPU-optimized styles
             root.style.setProperty("--gpu-layer", "scale(1)");
             root.style.setProperty("--gpu-transform3d", "translate(0, 0)");
             root.classList.add("cpu-optimized");
         }
 
+        // Backdrop filter optimizations
         if (!capabilities.hasBackdropFilter) {
-            // Apply backdrop-filter fallbacks
             root.classList.add("no-backdrop-filter");
         }
 
+        // Ultra-granular low-end device classifications
         if (capabilities.isLowEndDevice) {
             root.classList.add("low-end-device");
+
+            // Apply severity-specific optimizations
+            if (capabilities.performanceLevel === "ultra-low") {
+                root.classList.add("performance-ultra-low");
+                // Disable all non-essential visual effects
+                root.style.setProperty("--transition-fast", "none");
+                root.style.setProperty("--transition-medium", "none");
+                root.style.setProperty("--transition-smooth", "none");
+                // Reduce animation complexity
+                root.style.setProperty("--enable-animations", "0");
+                root.style.setProperty("--raf-throttle", "50"); // 20fps
+            } else if (capabilities.performanceLevel === "low") {
+                root.classList.add("performance-low");
+                // Reduce transition durations significantly
+                root.style.setProperty("--transition-fast", "50ms");
+                root.style.setProperty("--transition-medium", "100ms");
+                root.style.setProperty("--transition-smooth", "150ms");
+                root.style.setProperty("--raf-throttle", "33"); // 30fps
+            } else if (capabilities.performanceLevel === "low-medium") {
+                root.classList.add("performance-low-medium");
+                // Moderate reductions
+                root.style.setProperty("--transition-fast", "100ms");
+                root.style.setProperty("--transition-medium", "200ms");
+                root.style.setProperty("--transition-smooth", "300ms");
+                root.style.setProperty("--raf-throttle", "22"); // 45fps
+            }
         }
 
-        // Set performance level class
+        // Set performance level class for all levels
         root.classList.add(`performance-${capabilities.performanceLevel}`);
+
+        // Memory pressure optimizations for ultra-low end devices
+        if (capabilities.performanceLevel === "ultra-low") {
+            // Disable intersection observers for non-critical elements
+            root.style.setProperty("--enable-intersection-observers", "0");
+            // Disable will-change usage entirely
+            root.style.setProperty("--enable-will-change", "0");
+        } else if (capabilities.performanceLevel.includes("low")) {
+            // Reduce will-change usage
+            root.style.setProperty("--enable-will-change", "limited");
+        }
     };
 
     return {
@@ -1672,3 +1839,157 @@ window.addEventListener("error", function (e) {
         return true;
     }
 });
+
+// Ultra-Low End Device Memory Management System
+(() => {
+    "use strict";
+
+    // Enhanced memory cleanup system for ultra-low end devices
+    const ultraLowEndOptimizer = {
+        cleanupInterval: null,
+        isUltraLowEnd: false,
+        lastCleanup: Date.now(),
+
+        init() {
+            // Check if we're on an ultra-low end device
+            this.detectUltraLowEndDevice();
+
+            if (this.isUltraLowEnd) {
+                this.setupAggressiveCleanup();
+                console.log("🔧 Ultra-low end optimizations activated");
+            }
+        },
+
+        detectUltraLowEndDevice() {
+            try {
+                const factors = [
+                    (navigator.hardwareConcurrency || 1) < 2,
+                    (navigator.deviceMemory || 4) < 2,
+                    /Android.*[2-4]\.|iPhone.*OS [4-8]_/.test(
+                        navigator.userAgent
+                    ),
+                    navigator.connection &&
+                        navigator.connection.effectiveType === "slow-2g",
+                    screen.width <= 480 && (navigator.deviceMemory || 4) < 2,
+                ];
+
+                const score = factors.filter(Boolean).length;
+                this.isUltraLowEnd = score >= 2;
+            } catch (e) {
+                this.isUltraLowEnd = false;
+            }
+        },
+
+        setupAggressiveCleanup() {
+            // Cleanup every 15 seconds for ultra-low end devices
+            this.cleanupInterval = setInterval(() => {
+                this.performAggressiveCleanup();
+            }, 15000);
+
+            // Additional cleanup on visibility change
+            document.addEventListener(
+                "visibilitychange",
+                () => {
+                    if (document.hidden) {
+                        this.performAggressiveCleanup();
+                    }
+                },
+                { passive: true }
+            );
+        },
+
+        performAggressiveCleanup() {
+            try {
+                // Clear will-change properties aggressively
+                if (typeof willChangeManager !== "undefined") {
+                    const elements = document.querySelectorAll(
+                        '[style*="will-change"]'
+                    );
+                    elements.forEach((el) => {
+                        if (
+                            el.style.willChange &&
+                            el.style.willChange !== "auto"
+                        ) {
+                            el.style.willChange = "auto";
+                        }
+                    });
+                }
+
+                // Clear unused RAF callbacks
+                if (
+                    typeof performanceCache !== "undefined" &&
+                    performanceCache.rafIds
+                ) {
+                    if (performanceCache.rafIds.size > 1) {
+                        const idsArray = Array.from(performanceCache.rafIds);
+                        idsArray.slice(0, -1).forEach((id) => {
+                            cancelAnimationFrame(id);
+                            performanceCache.rafIds.delete(id);
+                        });
+                    }
+                }
+
+                // Clear old timers
+                if (
+                    typeof performanceCache !== "undefined" &&
+                    performanceCache.timers
+                ) {
+                    if (performanceCache.timers.size > 3) {
+                        const timersArray = Array.from(performanceCache.timers);
+                        timersArray.slice(0, -2).forEach((timer) => {
+                            clearTimeout(timer);
+                            performanceCache.timers.delete(timer);
+                        });
+                    }
+                }
+
+                // Suggest garbage collection if available
+                if (window.gc && typeof window.gc === "function") {
+                    try {
+                        window.gc();
+                    } catch (e) {
+                        // GC not available in this context
+                    }
+                }
+
+                this.lastCleanup = Date.now();
+            } catch (e) {
+                console.warn("Cleanup error:", e);
+            }
+        },
+
+        destroy() {
+            if (this.cleanupInterval) {
+                clearInterval(this.cleanupInterval);
+                this.cleanupInterval = null;
+            }
+        },
+    };
+
+    // Initialize when DOM is ready
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", () => {
+            ultraLowEndOptimizer.init();
+        });
+    } else {
+        ultraLowEndOptimizer.init();
+    }
+
+    // Enhanced cleanup on page unload
+    window.addEventListener(
+        "beforeunload",
+        () => {
+            try {
+                ultraLowEndOptimizer.destroy();
+
+                // Final aggressive cleanup
+                if (ultraLowEndOptimizer.isUltraLowEnd) {
+                    ultraLowEndOptimizer.performAggressiveCleanup();
+                }
+            } catch (e) {
+                // Silent cleanup on unload
+            }
+        },
+        { once: true }
+    );
+})();
