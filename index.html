@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Bryan Morales - Portfolio</title>
+        <link rel="icon" type="image/png" href="assets/favicon.png" />
+        <!-- Critical CSS inline for instant rendering -->
+        <style>
+            /* Critical above-the-fold styles */
+            body {
+                background: #000;
+                margin: 0;
+                padding: 0;
+                font-family: Inter, -apple-system, BlinkMacSystemFont,
+                    "Segoe UI", Roboto, sans-serif;
+                color: rgb(208, 208, 208);
+                overflow-x: hidden;
+            }
+            .portfolio-container {
+                width: 100%;
+                max-width: clamp(320px, 96vw, 560px);
+                margin: 0 auto;
+                padding: clamp(40px, 8vw, 60px) clamp(16px, 4vw, 24px);
+                display: flex;
+                flex-direction: column;
+                position: relative;
+            }
+            .background-video {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                z-index: -1;
+                pointer-events: none;
+                overflow: hidden;
+            }
+            .background-video video {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 100vw;
+                height: 100vh;
+                min-width: 100%;
+                min-height: 100%;
+                object-fit: cover;
+                transform: translate(-50%, -50%) translateZ(0);
+                filter: brightness(0.6);
+                contain: layout;
+            }
+        </style>
+        <!-- Performance optimizations - Preload critical resources -->
+        <link rel="preload" href="styles.css" as="style" />
+        <link rel="preload" href="script.js" as="script" />
+        <link
+            rel="preload"
+            href="assets/back-o.mp4"
+            as="video"
+            type="video/mp4"
+        />
+        <link
+            rel="preload"
+            href="assets/profile.webp"
+            as="image"
+            type="image/webp"
+        />
+
+        <link rel="stylesheet" href="styles.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+    <body>
+        <!-- Background Video -->
+        <div class="background-video" aria-hidden="true">
+            <video autoplay muted loop playsinline id="bg-video">
+                <source src="assets/back-o.mp4" type="video/mp4" />
+            </video>
+        </div>
+        <div class="portfolio-container">
+            <!-- Menu Button -->
+            <button class="menu-button" aria-label="Abrir menú">
+                <img
+                    src="assets/icons/menu.svg"
+                    alt="Menu"
+                    width="24"
+                    height="24"
+                />
+            </button>
+            <!-- Main Content -->
+            <main class="portfolio-main">
+                <!-- Profile Section -->
+                <section class="profile-section glass-card">
+                    <div class="profile-picture">
+                        <img
+                            src="assets/profile.webp"
+                            alt="Bryan Morales"
+                            class="profile-img"
+                        />
+                        <div class="profile-badge" aria-hidden="true">🔮</div>
+                    </div>
+
+                    <div class="profile-info">
+                        <h1 class="profile-name">Bryan Morales 🪄</h1>
+                        <p class="profile-description">
+                            Hi 👋🏻 I'm an AI Engineering Student and a Freelance
+                            Developer, passionate about Full-stack Development
+                            and UX/UI Design ✨
+                        </p>
+                    </div>
+                    <!-- Contact Buttons -->
+                    <div class="contact-buttons">
+                        <button
+                            class="contact-btn glass-bubble"
+                            aria-label="Phone"
+                            data-href="tel:+5219614492956"
+                        >
+                            <img
+                                src="assets/icons/phone.svg"
+                                alt="Phone"
+                                width="30"
+                                height="30"
+                            />
+                        </button>
+                        <button
+                            class="contact-btn glass-bubble"
+                            aria-label="Email"
+                            data-href="mailto:bryan.a.morales@outlook.com"
+                        >
+                            <img
+                                src="assets/icons/mail.svg"
+                                alt="Email"
+                                width="30"
+                                height="30"
+                            />
+                        </button>
+                        <button
+                            class="contact-btn glass-bubble"
+                            aria-label="CV"
+                            data-href="#"
+                        >
+                            <img
+                                src="assets/icons/cv.svg"
+                                alt="CV"
+                                width="30"
+                                height="30"
+                            />
+                        </button>
+                    </div>
+                    <!-- Social Media -->
+                    <div class="social-media glass-container">
+                        <div class="social-lines">
+                            <button
+                                class="social-btn glass-button"
+                                aria-label="LinkedIn"
+                                data-url="https://www.linkedin.com/in/bryan-alexander-morales-roblero-080214381/"
+                            >
+                                <img
+                                    src="assets/icons/linkedin.svg"
+                                    alt="LinkedIn"
+                                    width="30"
+                                    height="30"
+                                />
+                            </button>
+                            <button
+                                class="social-btn glass-button"
+                                aria-label="GitHub"
+                                data-url="https://github.com/IHyperLight"
+                            >
+                                <img
+                                    src="assets/icons/github.svg"
+                                    alt="GitHub"
+                                    width="30"
+                                    height="30"
+                                />
+                            </button>
+                            <button
+                                class="social-btn glass-button"
+                                aria-label="Discord"
+                                data-url="https://discord.com/users/bryan.a.morales"
+                            >
+                                <img
+                                    src="assets/icons/discord.svg"
+                                    alt="Discord"
+                                    width="30"
+                                    height="30"
+                                />
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Certificates Section -->
+                    <section class="certificates-section">
+                        <div
+                            class="certificate-item glass-pill"
+                            role="button"
+                            tabindex="0"
+                        >
+                            <div class="certificate-logo aws-logo-composite">
+                                <img
+                                    src="assets/icons/medal.svg"
+                                    alt="Medal"
+                                    width="30"
+                                    height="30"
+                                />
+                                <img
+                                    src="assets/icons/aws.svg"
+                                    alt="AWS"
+                                    width="30"
+                                    height="30"
+                                />
+                            </div>
+                            <div class="certificate-text">
+                                <span
+                                    >AWS Academy Graduate - AWS Academy Cloud
+                                    Foundations</span
+                                >
+                            </div>
+                            <button
+                                class="external-link"
+                                aria-label="External link"
+                                data-url="https://www.credly.com/badges/b4d4815f-123c-46da-915d-578d8fb47efc/print"
+                            >
+                                <img
+                                    src="assets/icons/external.svg"
+                                    alt="External"
+                                    width="16"
+                                    height="16"
+                                />
+                            </button>
+                        </div>
+
+                        <div
+                            class="certificate-item glass-pill"
+                            role="button"
+                            tabindex="0"
+                        >
+                            <div class="certificate-logo aws-logo-composite">
+                                <img
+                                    src="assets/icons/medal.svg"
+                                    alt="Medal"
+                                    width="30"
+                                    height="30"
+                                />
+                                <img
+                                    src="assets/icons/aws.svg"
+                                    alt="AWS"
+                                    width="30"
+                                    height="30"
+                                />
+                            </div>
+                            <div class="certificate-text">
+                                <span
+                                    >AWS Academy Graduate - AWS Academy Cloud
+                                    Operations</span
+                                >
+                            </div>
+                            <button
+                                class="external-link"
+                                aria-label="External link"
+                                data-url="https://www.credly.com/badges/815d6a30-2132-4c58-a52f-d6b3a18ff041/print"
+                            >
+                                <img
+                                    src="assets/icons/external.svg"
+                                    alt="External"
+                                    width="16"
+                                    height="16"
+                                />
+                            </button>
+                        </div>
+
+                        <div
+                            class="certificate-item glass-pill"
+                            role="button"
+                            tabindex="0"
+                        >
+                            <div class="certificate-logo aws-logo-composite">
+                                <img
+                                    src="assets/icons/medal.svg"
+                                    alt="Medal"
+                                    width="30"
+                                    height="30"
+                                />
+                                <img
+                                    src="assets/icons/google.svg"
+                                    alt="AWS"
+                                    width="30"
+                                    height="30"
+                                />
+                            </div>
+                            <div class="certificate-text">
+                                <span>Curso de Desarrollo de Apps Móviles</span>
+                            </div>
+                            <button
+                                class="external-link"
+                                aria-label="External link"
+                                data-url="https://skillshop.exceedlms.com/student/award/5qyTSF5MqjSC3aqb8oXqX78f"
+                            >
+                                <img
+                                    src="assets/icons/external.svg"
+                                    alt="External"
+                                    width="16"
+                                    height="16"
+                                />
+                            </button>
+                        </div>
+                    </section>
+                </section>
+
+                <!-- Filters Section -->
+                <section class="filters-section">
+                    <div class="filter-container glass-border">
+                        <div class="filter-selector" aria-hidden="true"></div>
+                        <button class="filter-btn active" aria-label="All">
+                            <img
+                                src="assets/icons/all.svg"
+                                alt="All"
+                                width="26"
+                                height="26"
+                            />
+                        </button>
+                        <button class="filter-btn" aria-label="Code">
+                            <img
+                                src="assets/icons/code.svg"
+                                alt="Code"
+                                width="26"
+                                height="26"
+                            />
+                        </button>
+                        <button class="filter-btn" aria-label="Design">
+                            <img
+                                src="assets/icons/design.svg"
+                                alt="Design"
+                                width="28"
+                                height="28"
+                            />
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Projects Section -->
+                <section class="projects-section">
+                    <!-- Project 1: Keeptive -->
+                    <article class="project-item glass-card">
+                        <!-- Project Media Carousel -->
+                        <div class="project-media">
+                            <div
+                                class="carousel"
+                                role="region"
+                                aria-roledescription="carousel"
+                                aria-label="Galería del proyecto Keeptive"
+                                tabindex="0"
+                            >
+                                <div class="carousel-viewport">
+                                    <div class="carousel-track">
+                                        <div class="carousel-slide is-active">
+                                            <img
+                                                src="assets/keeptive/keeptive-1.webp"
+                                            />
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img
+                                                src="assets/keeptive/keeptive-2.webp"
+                                            />
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img
+                                                src="assets/keeptive/keeptive-3.webp"
+                                            />
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img
+                                                src="assets/keeptive/keeptive-4.webp"
+                                            />
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img
+                                                src="assets/keeptive/keeptive-5.webp"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Carousel Controls -->
+                        <div
+                            class="carousel-controls"
+                            aria-label="Controles del carrusel"
+                        >
+                            <div class="carousel-controls-top">
+                                <button
+                                    class="carousel-btn prev"
+                                    aria-label="Anterior"
+                                ></button>
+                                <div class="carousel-center">
+                                    <div
+                                        class="carousel-indicators"
+                                        role="tablist"
+                                        aria-label="Paginación de imágenes"
+                                    >
+                                        <button
+                                            class="carousel-dot is-active"
+                                            role="tab"
+                                            aria-selected="true"
+                                            aria-label="Ir a imagen 1"
+                                            data-index="0"
+                                        ></button>
+                                        <button
+                                            class="carousel-dot"
+                                            role="tab"
+                                            aria-label="Ir a imagen 2"
+                                            data-index="1"
+                                        ></button>
+                                        <button
+                                            class="carousel-dot"
+                                            role="tab"
+                                            aria-label="Ir a imagen 3"
+                                            data-index="2"
+                                        ></button>
+                                        <button
+                                            class="carousel-dot"
+                                            role="tab"
+                                            aria-label="Ir a imagen 4"
+                                            data-index="3"
+                                        ></button>
+                                        <button
+                                            class="carousel-dot"
+                                            role="tab"
+                                            aria-label="Ir a imagen 5"
+                                            data-index="4"
+                                        ></button>
+                                    </div>
+                                    <div
+                                        class="carousel-progress"
+                                        aria-hidden="true"
+                                    >
+                                        <div
+                                            class="carousel-progress-fill"
+                                        ></div>
+                                    </div>
+                                </div>
+                                <button
+                                    class="carousel-btn next"
+                                    aria-label="Siguiente"
+                                ></button>
+                            </div>
+                        </div>
+                        <!-- Project Header -->
+                        <div class="project-header">
+                            <div class="project-title glass-tag">
+                                <h2>🟢 Keeptive</h2>
+                            </div>
+                        </div>
+
+                        <!-- Project Meta -->
+                        <div class="project-meta">
+                            <button
+                                class="project-icon glass-button"
+                                aria-label="Tipo de proyecto: Código"
+                            >
+                                <img
+                                    src="assets/icons/code.svg"
+                                    alt="Project icon"
+                                    width="26"
+                                    height="26"
+                                />
+                            </button>
+                            <p class="project-category">
+                                <strong>Software</strong>
+                                <span class="separator">·</span>
+                                Discreet Window Interaction Tool
+                            </p>
+                        </div>
+
+                        <!-- Tech Stack -->
+                        <div class="tech-stack">
+                            <div class="tech-row">
+                                <span class="tech-tag">🐍 Python</span>
+                                <span class="tech-tag">⚛️ Electron</span>
+                                <span class="tech-tag">🖼️ HTML</span>
+                                <span class="tech-tag">🎨 CSS</span>
+                                <span class="tech-tag">🪟 Windows</span>
+                                <span class="tech-tag">⚙️ Automation</span>
+                            </div>
+                        </div>
+
+                        <!-- Project Description -->
+                        <div class="project-description glass-container">
+                            <div class="description-content">
+                                <p>
+                                    🟢 Overview<br /><br />
+                                    📌 Keeptive is a Python-based Windows
+                                    automation tool designed to interact with
+                                    the windows on your system by simulating
+                                    user actions such as clicks and mouse
+                                    movements discreetly and without
+                                    interrupting your activity.<br /><br />
+                                    📌 The script can handle one or multiple
+                                    windows simultaneously, manage their states
+                                    (minimized or restored) to ensure they
+                                    receive the interaction, and even keep your
+                                    entire PC awake for as long as you
+                                    choose.<br /><br />
+                                    📌 It also offers options to pause based on
+                                    a window focus, select the on-screen
+                                    location for some activation modes, define
+                                    the interval between interactions, and run
+                                    for a set duration or indefinitely.<br /><br />
+                                    🩷 Features<br /><br />
+                                    ⚡ Four Automated Modes for Different
+                                    Situations: Clicking, Movement, Passive, and
+                                    Key: Simulates four types of interaction
+                                    with target windows or the entire system, as
+                                    appropriate.<br /><br />
+                                    🚥 Window State Management: Handles
+                                    minimized windows discreetly, restores them
+                                    for interaction, and then positions them in
+                                    the background without disrupting the user
+                                    experience.<br /><br />
+                                    👀 Focus-Aware Activation: Optional pause
+                                    functionality to avoid interaction when the
+                                    target window is already in the
+                                    foreground.<br /><br />
+                                    📍 Screen Location Selector: Optional
+                                    functionality to select a specific location
+                                    on the screen for click and mouse movement
+                                    activation modes.<br /><br />
+                                    ⌚ Customizable Timed Execution: Run your
+                                    activation or interaction task for a
+                                    specified duration or continuously until
+                                    manually stopped.
+                                </p>
+                            </div>
+                            <div class="scroll-indicator">
+                                <div class="scroll-track">
+                                    <div class="scroll-thumb"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project Link -->
+                        <div class="project-buttons">
+                            <div
+                                class="project-link glass-pill"
+                                role="link"
+                                tabindex="0"
+                                data-url="https://github.com/IHyperLight/Keeptive"
+                            >
+                                <img
+                                    src="assets/icons/github.svg"
+                                    alt="GitHub"
+                                    width="30"
+                                    height="30"
+                                />
+                                <span>Code On GitHub</span>
+                                <img
+                                    src="assets/icons/external.svg"
+                                    alt="External"
+                                    width="16"
+                                    height="16"
+                                />
+                            </div>
+
+                            <div
+                                class="project-link glass-pill download-btn"
+                                role="button"
+                                tabindex="0"
+                                data-download="https://github.com/IHyperLight/Keeptive/releases/tag/v1.1.1"
+                            >
+                                <img
+                                    src="assets/icons/down.svg"
+                                    alt="Download"
+                                    width="28"
+                                    height="28"
+                                />
+                                <span>Download Now</span>
+                                <img
+                                    src="assets/icons/external.svg"
+                                    alt="External"
+                                    width="16"
+                                    height="16"
+                                />
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Project 2: Genetic Algorithm -->
+                    <article class="project-item glass-card">
+                        <!-- Project Media Carousel -->
+                        <div class="project-media">
+                            <div
+                                class="carousel"
+                                role="region"
+                                aria-roledescription="carousel"
+                                aria-label="Galería del proyecto Keeptive Pro"
+                                tabindex="0"
+                            >
+                                <div class="carousel-viewport">
+                                    <div class="carousel-track">
+                                        <div class="carousel-slide is-active">
+                                            <img
+                                                src="assets/genetic-algorithm/genetic-algorithm-1.webp"
+                                            />
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img
+                                                src="assets/genetic-algorithm/genetic-algorithm-2.webp"
+                                            />
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img
+                                                src="assets/genetic-algorithm/genetic-algorithm-3.webp"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Carousel Controls -->
+                        <div
+                            class="carousel-controls"
+                            aria-label="Controles del carrusel"
+                        >
+                            <div class="carousel-controls-top">
+                                <button
+                                    class="carousel-btn prev"
+                                    aria-label="Anterior"
+                                ></button>
+                                <div class="carousel-center">
+                                    <div
+                                        class="carousel-indicators"
+                                        role="tablist"
+                                        aria-label="Paginación de imágenes"
+                                    >
+                                        <button
+                                            class="carousel-dot is-active"
+                                            role="tab"
+                                            aria-selected="true"
+                                            aria-label="Ir a imagen 1"
+                                            data-index="0"
+                                        ></button>
+                                        <button
+                                            class="carousel-dot"
+                                            role="tab"
+                                            aria-label="Ir a imagen 2"
+                                            data-index="1"
+                                        ></button>
+                                        <button
+                                            class="carousel-dot"
+                                            role="tab"
+                                            aria-label="Ir a imagen 3"
+                                            data-index="2"
+                                        ></button>
+                                    </div>
+                                    <div
+                                        class="carousel-progress"
+                                        aria-hidden="true"
+                                    >
+                                        <div
+                                            class="carousel-progress-fill"
+                                        ></div>
+                                    </div>
+                                </div>
+                                <button
+                                    class="carousel-btn next"
+                                    aria-label="Siguiente"
+                                ></button>
+                            </div>
+                        </div>
+                        <!-- Project Header -->
+                        <div class="project-header">
+                            <div class="project-title glass-tag">
+                                <h2>🧬 Genetic Algorithm</h2>
+                            </div>
+                        </div>
+
+                        <!-- Project Meta -->
+                        <div class="project-meta">
+                            <button
+                                class="project-icon glass-button"
+                                aria-label="Tipo de proyecto: Código"
+                            >
+                                <img
+                                    src="assets/icons/code.svg"
+                                    alt="Project icon"
+                                    width="26"
+                                    height="26"
+                                />
+                            </button>
+                            <p class="project-category">
+                                <strong>Software</strong>
+                                <span class="separator">·</span>
+                                Genetic Algorithm for Nutritional Diet
+                                Optimization
+                            </p>
+                        </div>
+
+                        <!-- Tech Stack -->
+                        <div class="tech-stack">
+                            <div class="tech-row">
+                                <span class="tech-tag">🐍 Python</span>
+                                <span class="tech-tag">🍷 Flask</span>
+                                <span class="tech-tag">🖼️ HTML</span>
+                                <span class="tech-tag">🎨 CSS</span>
+                                <span class="tech-tag">✨ AI</span>
+                                <span class="tech-tag">🧬 GA</span>
+                                <span class="tech-tag">📊 Graphs</span>
+                            </div>
+                        </div>
+
+                        <!-- Project Description -->
+                        <div class="project-description glass-container">
+                            <div class="description-content">
+                                <p>
+                                    This project implements a Genetic Algorithm
+                                    🧬 for Nutritional Diet Optimization 🥗
+                                    using Flask as the web framework 🌐 to
+                                    create an interactive interface 🖥️.<br /><br />
+                                    The system allows users 👤 to upload a food
+                                    dataset in Excel format 📊 and specify their
+                                    daily nutritional requirements (energy ⚡,
+                                    proteins 🍗, fats 🥑, vitamins 🍊, and
+                                    minerals 🧂).<br /><br />
+                                    The genetic algorithm generates an optimal
+                                    diet 🥦 by selecting food combinations 🍱
+                                    and quantities ⚖️ that best satisfy these
+                                    requirements while minimizing deviations
+                                    📉.<br /><br />
+                                    The application includes configurable
+                                    algorithm parameters (population size 👥,
+                                    generations 🔄, crossover ➕ and mutation 🔀
+                                    probabilities), result visualization with
+                                    fitness evolution graphs 📈, and a
+                                    responsive web interface 📱💻 with dark mode
+                                    support 🌙.<br /><br />
+                                    The project comes pre-configured with a
+                                    default food dataset 🍽️, making it
+                                    immediately usable 🚀 without needing to
+                                    upload additional files 📂.
+                                </p>
+                            </div>
+                            <div class="scroll-indicator">
+                                <div class="scroll-track">
+                                    <div class="scroll-thumb"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project Link -->
+                        <div class="project-buttons">
+                            <div
+                                class="project-link glass-pill"
+                                role="link"
+                                tabindex="0"
+                                data-url="https://github.com/IHyperLight/Genetic-Algorithm"
+                            >
+                                <img
+                                    src="assets/icons/github.svg"
+                                    alt="GitHub"
+                                    width="30"
+                                    height="30"
+                                />
+                                <span>Code On GitHub</span>
+                                <img
+                                    src="assets/icons/external.svg"
+                                    alt="External"
+                                    width="16"
+                                    height="16"
+                                />
+                            </div>
+
+                            <div
+                                class="project-link glass-pill download-btn"
+                                role="button"
+                                tabindex="0"
+                                data-download="https://genetic-algorithm.onrender.com"
+                            >
+                                <img
+                                    src="assets/icons/try.svg"
+                                    alt="Download"
+                                    width="28"
+                                    height="28"
+                                />
+                                <span>Try Now</span>
+                                <img
+                                    src="assets/icons/external.svg"
+                                    alt="External"
+                                    width="16"
+                                    height="16"
+                                />
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Project 3: RESTful API -->
+                    <article class="project-item glass-card">
+                        <!-- Project Media Carousel -->
+                        <div class="project-media">
+                            <div
+                                class="carousel"
+                                role="region"
+                                aria-roledescription="carousel"
+                                aria-label="Galería del proyecto Keeptive Cloud"
+                                tabindex="0"
+                            >
+                                <div class="carousel-viewport">
+                                    <div class="carousel-track">
+                                        <div class="carousel-slide is-active">
+                                            <img
+                                                src="assets/api-restful/api-restful-1.webp"
+                                            />
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img
+                                                src="assets/api-restful/api-restful-2.webp"
+                                            />
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img
+                                                src="assets/api-restful/api-restful-3.webp"
+                                            />
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img
+                                                src="assets/api-restful/api-restful-4.webp"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Carousel Controls -->
+                        <div
+                            class="carousel-controls"
+                            aria-label="Controles del carrusel"
+                        >
+                            <div class="carousel-controls-top">
+                                <button
+                                    class="carousel-btn prev"
+                                    aria-label="Anterior"
+                                ></button>
+                                <div class="carousel-center">
+                                    <div
+                                        class="carousel-indicators"
+                                        role="tablist"
+                                        aria-label="Paginación de imágenes"
+                                    >
+                                        <button
+                                            class="carousel-dot is-active"
+                                            role="tab"
+                                            aria-selected="true"
+                                            aria-label="Ir a imagen 1"
+                                            data-index="0"
+                                        ></button>
+                                        <button
+                                            class="carousel-dot"
+                                            role="tab"
+                                            aria-label="Ir a imagen 2"
+                                            data-index="1"
+                                        ></button>
+                                        <button
+                                            class="carousel-dot"
+                                            role="tab"
+                                            aria-label="Ir a imagen 3"
+                                            data-index="2"
+                                        ></button>
+                                        <button
+                                            class="carousel-dot"
+                                            role="tab"
+                                            aria-label="Ir a imagen 4"
+                                            data-index="3"
+                                        ></button>
+                                    </div>
+                                    <div
+                                        class="carousel-progress"
+                                        aria-hidden="true"
+                                    >
+                                        <div
+                                            class="carousel-progress-fill"
+                                        ></div>
+                                    </div>
+                                </div>
+                                <button
+                                    class="carousel-btn next"
+                                    aria-label="Siguiente"
+                                ></button>
+                            </div>
+                        </div>
+                        <!-- Project Header -->
+                        <div class="project-header">
+                            <div class="project-title glass-tag">
+                                <h2>🌐 RESTful API</h2>
+                            </div>
+                        </div>
+
+                        <!-- Project Meta -->
+                        <div class="project-meta">
+                            <button
+                                class="project-icon glass-button"
+                                aria-label="Tipo de proyecto: Código"
+                            >
+                                <img
+                                    src="assets/icons/code.svg"
+                                    alt="Project icon"
+                                    width="26"
+                                    height="26"
+                                />
+                            </button>
+                            <p class="project-category">
+                                <strong>Software</strong>
+                                <span class="separator">·</span>
+                                RESTful User Management API
+                            </p>
+                        </div>
+
+                        <!-- Tech Stack -->
+                        <div class="tech-stack">
+                            <div class="tech-row">
+                                <span class="tech-tag">🐍 Python</span>
+                                <span class="tech-tag">🐢 Django</span>
+                                <span class="tech-tag">⚛️ React</span>
+                                <span class="tech-tag">📜 JavaScript</span>
+                                <span class="tech-tag">✖️ JSX</span>
+                                <span class="tech-tag">🌐 RESTful</span>
+                                <span class="tech-tag">🛠️ API</span>
+                                <span class="tech-tag">💾 SQLite</span>
+                                <span class="tech-tag">🖼️ HTML</span>
+                                <span class="tech-tag">🎨 CSS</span>
+                            </div>
+                        </div>
+
+                        <!-- Project Description -->
+                        <div class="project-description glass-container">
+                            <div class="description-content">
+                                <p>
+                                    This is a full-stack RESTful API application
+                                    ⚙️🌐 built with Django REST Framework 🐍 for
+                                    the backend and React.js ⚛️ for the
+                                    frontend.<br /><br />
+                                    The project implements a complete user
+                                    authentication 🔑 and profile management
+                                    system 👤 featuring user registration 📝,
+                                    login functionality 🔐 with JWT token-based
+                                    authentication 🎫, and comprehensive profile
+                                    management capabilities including image
+                                    uploads 🖼️.<br /><br />
+                                    The backend utilizes SQLite 🗄️ as the
+                                    database for simplicity and portability 📦,
+                                    while the frontend provides a responsive 📱
+                                    and intuitive 🖥️ user interface for seamless
+                                    interaction 🔄 with the API endpoints.<br /><br />
+                                    The application follows REST architectural
+                                    principles 📑 with proper HTTP methods 📡,
+                                    JSON data exchange 📦➡️📦, and stateless
+                                    communication between client and server
+                                    🤝.<br /><br />
+                                    It's designed to be easily deployable ☁️ on
+                                    cloud platforms like Render 🚀, with dynamic
+                                    API URL configuration 🌍 for both
+                                    development 💻 and production 🏭
+                                    environments, making it a robust 💪 and
+                                    scalable 📈 solution for user management
+                                    systems 👥.
+                                </p>
+                            </div>
+                            <div class="scroll-indicator">
+                                <div class="scroll-track">
+                                    <div class="scroll-thumb"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project Link -->
+                        <div class="project-buttons">
+                            <div
+                                class="project-link glass-pill"
+                                role="link"
+                                tabindex="0"
+                                data-url="https://github.com/IHyperLight/API-RESTful"
+                            >
+                                <img
+                                    src="assets/icons/github.svg"
+                                    alt="GitHub"
+                                    width="30"
+                                    height="30"
+                                />
+                                <span>Code On GitHub</span>
+                                <img
+                                    src="assets/icons/external.svg"
+                                    alt="External"
+                                    width="16"
+                                    height="16"
+                                />
+                            </div>
+
+                            <div
+                                class="project-link glass-pill download-btn"
+                                role="button"
+                                tabindex="0"
+                                data-download="https://api-restful-1-aul3.onrender.com"
+                            >
+                                <img
+                                    src="assets/icons/try.svg"
+                                    alt="Download"
+                                    width="28"
+                                    height="28"
+                                />
+                                <span>Try Now</span>
+                                <img
+                                    src="assets/icons/external.svg"
+                                    alt="External"
+                                    width="16"
+                                    height="16"
+                                />
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Project 4: Deterministic Finite Automaton -->
+                    <article class="project-item glass-card">
+                        <!-- Project Media Carousel -->
+                        <div class="project-media">
+                            <div
+                                class="carousel"
+                                role="region"
+                                aria-roledescription="carousel"
+                                aria-label="Galería del proyecto Keeptive Cloud"
+                                tabindex="0"
+                            >
+                                <div class="carousel-viewport">
+                                    <div class="carousel-track">
+                                        <div class="carousel-slide is-active">
+                                            <img
+                                                src="assets/deterministic-finite-automaton/deterministic-finite-automaton-1.webp"
+                                            />
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img
+                                                src="assets/deterministic-finite-automaton/deterministic-finite-automaton-2.webp"
+                                            />
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img
+                                                src="assets/deterministic-finite-automaton/deterministic-finite-automaton-3.webp"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Carousel Controls -->
+                        <div
+                            class="carousel-controls"
+                            aria-label="Controles del carrusel"
+                        >
+                            <div class="carousel-controls-top">
+                                <button
+                                    class="carousel-btn prev"
+                                    aria-label="Anterior"
+                                ></button>
+                                <div class="carousel-center">
+                                    <div
+                                        class="carousel-indicators"
+                                        role="tablist"
+                                        aria-label="Paginación de imágenes"
+                                    >
+                                        <button
+                                            class="carousel-dot is-active"
+                                            role="tab"
+                                            aria-selected="true"
+                                            aria-label="Ir a imagen 1"
+                                            data-index="0"
+                                        ></button>
+                                        <button
+                                            class="carousel-dot"
+                                            role="tab"
+                                            aria-label="Ir a imagen 2"
+                                            data-index="1"
+                                        ></button>
+                                        <button
+                                            class="carousel-dot"
+                                            role="tab"
+                                            aria-label="Ir a imagen 3"
+                                            data-index="2"
+                                        ></button>
+                                    </div>
+                                    <div
+                                        class="carousel-progress"
+                                        aria-hidden="true"
+                                    >
+                                        <div
+                                            class="carousel-progress-fill"
+                                        ></div>
+                                    </div>
+                                </div>
+                                <button
+                                    class="carousel-btn next"
+                                    aria-label="Siguiente"
+                                ></button>
+                            </div>
+                        </div>
+                        <!-- Project Header -->
+                        <div class="project-header">
+                            <div class="project-title glass-tag">
+                                <h2>🔀 Deterministic Finite Automaton</h2>
+                            </div>
+                        </div>
+
+                        <!-- Project Meta -->
+                        <div class="project-meta">
+                            <button
+                                class="project-icon glass-button"
+                                aria-label="Tipo de proyecto: Código"
+                            >
+                                <img
+                                    src="assets/icons/code.svg"
+                                    alt="Project icon"
+                                    width="26"
+                                    height="26"
+                                />
+                            </button>
+                            <p class="project-category">
+                                <strong>Software</strong>
+                                <span class="separator">·</span>
+                                HTTPS URL Extractor Using DFA
+                            </p>
+                        </div>
+
+                        <!-- Tech Stack -->
+                        <div class="tech-stack">
+                            <div class="tech-row">
+                                <span class="tech-tag">🐍 Python</span>
+                                <span class="tech-tag">🍷 Flask</span>
+                                <span class="tech-tag">🖼️ HTML</span>
+                                <span class="tech-tag">🎨 CSS</span>
+                                <span class="tech-tag">🔀 DFA</span>
+                                <span class="tech-tag">🕸️ Web Scraping</span>
+                            </div>
+                        </div>
+
+                        <!-- Project Description -->
+                        <div class="project-description glass-container">
+                            <div class="description-content">
+                                <p>
+                                    This is a web application 🌐 that
+                                    demonstrates the practical implementation of
+                                    automata theory 🤖📚 in computer science
+                                    💻.<br /><br />
+                                    The project features a deterministic finite
+                                    automaton (DFA) 🔄 designed to parse and
+                                    extract secure HTTPS external links 🔒🔗
+                                    from web pages 📄.<br /><br />
+                                    Built with Flask 🐍🔥 and Python 🐍, the
+                                    application takes a URL 🌍 as input, fetches
+                                    the webpage content 📥, and uses a
+                                    custom-built finite state machine ⚙️ to
+                                    identify and validate HTTPS URLs ✅🔗 while
+                                    filtering out internal links 🚫🏠.<br /><br />
+                                    The automaton processes each character 🔤 of
+                                    the HTML content through defined states and
+                                    transitions 🔀➡️, showcasing how theoretical
+                                    computer science concepts 🧩 can be applied
+                                    to real-world web scraping 🕷️ and URL
+                                    validation tasks ✔️.<br /><br />
+                                    This educational tool 🎓 combines web
+                                    development 🌐 with formal language theory
+                                    📖, making it an excellent example 🌟 of how
+                                    automata can be used for pattern recognition
+                                    🔎 and text processing ✍️ in modern
+                                    applications 📱💻.
+                                </p>
+                            </div>
+                            <div class="scroll-indicator">
+                                <div class="scroll-track">
+                                    <div class="scroll-thumb"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project Link -->
+                        <div class="project-buttons">
+                            <div
+                                class="project-link glass-pill"
+                                role="link"
+                                tabindex="0"
+                                data-url="https://github.com/IHyperLight/Automata-finito-determinista"
+                            >
+                                <img
+                                    src="assets/icons/github.svg"
+                                    alt="GitHub"
+                                    width="30"
+                                    height="30"
+                                />
+                                <span>Code On GitHub</span>
+                                <img
+                                    src="assets/icons/external.svg"
+                                    alt="External"
+                                    width="16"
+                                    height="16"
+                                />
+                            </div>
+
+                            <div
+                                class="project-link glass-pill download-btn"
+                                role="button"
+                                tabindex="0"
+                                data-download="https://automata-finito-determinista.onrender.com"
+                            >
+                                <img
+                                    src="assets/icons/try.svg"
+                                    alt="Download"
+                                    width="28"
+                                    height="28"
+                                />
+                                <span>Try Now</span>
+                                <img
+                                    src="assets/icons/external.svg"
+                                    alt="External"
+                                    width="16"
+                                    height="16"
+                                />
+                            </div>
+                        </div>
+                    </article>
+                </section>
+            </main>
+        </div>
+
+        <script src="script.js"></script>
+    </body>
+</html>

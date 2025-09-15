@@ -1,0 +1,2504 @@
+/* CSS Variables */
+:root {
+    /* Glass morphism effects */
+    --glass-bg: linear-gradient(
+        90deg,
+        rgba(208, 208, 208, 0.02) 0%,
+        rgba(208, 208, 208, 0.05) 50%,
+        rgba(208, 208, 208, 0.11) 100%
+    );
+    --glass-border: rgba(208, 208, 208, 0.5);
+    --blur-filter: blur(7px) saturate(130%) brightness(130%);
+    --drop-shadow: 0 0 100px rgba(0, 0, 0, 0.5);
+
+    /* Colors */
+    --text-primary: rgb(208, 208, 208);
+
+    /* Unified Spacing System */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 12px;
+    --space-lg: 16px;
+    --space-xl: 20px;
+    --space-2xl: 30px;
+
+    /* Component-specific spacing */
+    --card-padding: clamp(26px, 5.5vw, 46px);
+    --card-xpad: clamp(18px, 5vw, 26px);
+
+    --container-padding: clamp(40px, 8vw, 60px) clamp(16px, 4vw, 24px);
+    --container-gap: clamp(20px, 4vw, 30px);
+
+    /* Project-specific spacing - increased further for better separation */
+    --projects-gap: clamp(45px, 7vw, 65px);
+
+    /* Component sizing */
+    --button-size: 50px;
+    --button-padding: 10px;
+    --button-radius-sm: 10px;
+    --button-radius-md: 15px;
+    --button-radius-lg: 25px;
+    --button-radius-xl: 30px;
+
+    /* Border radius scale */
+    --radius-xs: 3px;
+    --radius-sm: 8px;
+    --radius-md: 10px;
+    --radius-lg: 20px;
+    --radius-xl: 25px;
+    --radius-2xl: 30px;
+    --radius-pill: 50px;
+    --radius-full: 100px;
+
+    /* Z-index scale */
+    --z-base: 0;
+    --z-low: 1;
+    --z-mid: 2;
+    --z-high: 10;
+    --z-overlay: 1000;
+    --z-modal: 10000;
+    --z-tooltip: 10001;
+
+    /* Certificate sizing */
+    --cert-logo-w: 100px;
+    --cert-external-w: 16px;
+    --cert-row-gap: var(--space-lg);
+
+    /* Interactions */
+    --hover-tint: rgba(208, 208, 208, 0.22);
+    --hover-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    --focus-ring: rgba(208, 208, 208, 0.7);
+
+    /* Effects */
+    --image-shadow: 0 1px 4px rgba(0, 0, 0, 0.2), 0 3px 8px rgba(0, 0, 0, 0.06);
+
+    /* GPU Acceleration System - Progressive Enhancement */
+    --gpu-layer: translateZ(0); /* Default GPU acceleration */
+    --gpu-fallback: scale(1); /* CPU fallback for transforms */
+    --gpu-transform3d: translate3d(0, 0, 0); /* GPU 3D transform */
+    --cpu-transform2d: translate(0, 0); /* CPU 2D fallback */
+
+    /* Backdrop Filter Fallbacks */
+    --glass-fallback-bg: linear-gradient(
+        90deg,
+        rgba(208, 208, 208, 0.08) 0%,
+        rgba(208, 208, 208, 0.12) 50%,
+        rgba(208, 208, 208, 0.18) 100%
+    );
+    --glass-fallback-border: rgba(208, 208, 208, 0.7);
+
+    /* Smooth Transitions */
+    --transition-ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: 200ms var(--transition-ease-out);
+    --transition-medium: 300ms var(--transition-ease-out);
+    --transition-slow: 500ms var(--transition-ease-out);
+    --transition-smooth: 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* Responsive Typography */
+    --font-size-sm: clamp(12px, 2vw, 14px);
+    --font-size-base: clamp(14px, 2.5vw, 16px);
+    --font-size-lg: clamp(16px, 3vw, 18px);
+    --font-size-xl: clamp(32px, 5vw, 40px);
+}
+
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Transiciones específicas solo para elementos interactivos críticos */
+.glass-card,
+.glass-bubble,
+.glass-button,
+.glass-pill,
+.glass-tag,
+.filter-btn,
+.carousel-btn,
+.carousel-dot,
+.social-btn,
+.contact-btn,
+.project-link,
+.certificate-item {
+    transition: transform var(--transition-medium),
+        opacity var(--transition-medium),
+        background-color var(--transition-medium);
+}
+
+/* Excepciones para elementos que requieren transiciones específicas */
+.carousel-progress-fill,
+.filter-selector {
+    transition: width var(--transition-fast), transform var(--transition-medium);
+}
+
+html {
+    scroll-behavior: smooth;
+    /* Performance optimizations for font rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeSpeed;
+}
+
+body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+    background: #000;
+    min-height: 100vh;
+    color: var(--text-primary);
+    overflow-x: hidden;
+    transition: color var(--transition-medium),
+        background var(--transition-medium);
+}
+
+/* Image effects */
+img[src$=".svg"],
+img[src$=".webp"],
+img[src$=".SVG"],
+img[src$=".WEBP"] {
+    filter: drop-shadow(var(--image-shadow))
+        drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+    /* Performance optimizations for images */
+    image-rendering: -webkit-optimize-contrast;
+    backface-visibility: hidden;
+}
+
+/* Utility classes for common patterns */
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.flex-center-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.mx-auto {
+    margin: 0 auto;
+}
+
+/* CPU Optimization Classes */
+.cpu-optimized * {
+    transform: var(--gpu-fallback) !important;
+}
+
+.cpu-optimized .carousel-slide img,
+.cpu-optimized .profile-img,
+.cpu-optimized .project-screenshot {
+    transform: none !important;
+}
+
+/* Backdrop Filter Fallbacks */
+.no-backdrop-filter .glass-card,
+.no-backdrop-filter .glass-bubble,
+.no-backdrop-filter .glass-button,
+.no-backdrop-filter .glass-pill,
+.no-backdrop-filter .glass-tag,
+.no-backdrop-filter .glass-container,
+.no-backdrop-filter .glass-border {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: var(--glass-fallback-bg) !important;
+    border-color: var(--glass-fallback-border) !important;
+}
+
+/* Low-end device optimizations */
+.low-end-device .carousel-progress-fill,
+.low-end-device .filter-selector {
+    transition: none !important;
+}
+
+.low-end-device *[class*="glass-"]:hover::after {
+    display: none !important;
+}
+
+/* Performance level optimizations */
+.performance-low * {
+    will-change: auto !important;
+    transform: var(--cpu-transform2d) !important;
+}
+
+.performance-low .carousel-slide,
+.performance-low .project-media {
+    transform: none !important;
+}
+
+.performance-medium *[class*="glass-"] {
+    backdrop-filter: blur(3px) saturate(120%) brightness(115%) !important;
+}
+
+.performance-high *[class*="glass-"] {
+    backdrop-filter: var(--blur-filter);
+}
+
+/* Optimized drop-shadows for better performance */
+.social-btn img,
+.contact-btn img,
+.filter-btn img,
+.project-icon img,
+.certificate-logo img,
+.menu-button img,
+.carousel-btn::before,
+.external-link img,
+.tech-tag,
+.project-link img {
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.22));
+}
+
+.profile-img,
+.carousel-slide img,
+.project-screenshot {
+    filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.22));
+}
+
+.social-btn[aria-label="Discord"] img {
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.11));
+}
+
+.social-btn[aria-label="LinkedIn"] img {
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.055));
+}
+
+/* Background video */
+.background-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.background-video video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 100vh;
+    min-width: 100%;
+    min-height: 100%;
+    object-fit: cover;
+    transform: translate(-50%, -50%);
+    filter: brightness(0.6);
+    contain: layout;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .background-video {
+        display: none;
+    }
+}
+
+.portfolio-container {
+    width: 100%;
+    max-width: clamp(320px, 96vw, 560px);
+    margin: 0 auto;
+    padding: var(--container-padding);
+    display: flex;
+    flex-direction: column;
+    gap: var(--container-gap);
+    position: relative;
+    padding-right: clamp(18px, 4.5vw, 24px);
+    transition: all var(--transition-smooth), padding var(--transition-medium),
+        gap var(--transition-medium);
+}
+
+/* Menu Button - Solo icono, sin contenedor */
+.menu-button {
+    position: fixed;
+    top: clamp(16px, 6vw, 70px);
+    right: clamp(32px, 8vw, 48px);
+    width: 24px; /* Solo el tamaño del icono */
+    height: 24px; /* Solo el tamaño del icono */
+    padding: 0; /* Sin padding */
+    border: none;
+    border-radius: 0; /* Sin border radius */
+    background: transparent; /* Fondo transparente */
+    color: var(--text-primary);
+    cursor: pointer !important;
+    z-index: var(--z-overlay);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all var(--transition-medium), top var(--transition-smooth),
+        right var(--transition-smooth);
+}
+
+.menu-button:hover {
+    transform: translateY(-2px) scale(1.1); /* Efecto de elevación y escala */
+    filter: drop-shadow(
+        0 4px 12px rgba(0, 0, 0, 0.3)
+    ); /* Sombra más prominente */
+}
+
+.menu-button::after {
+    display: none;
+}
+
+/* Glass Effects with Progressive Enhancement */
+.glass-card {
+    padding: var(--card-padding);
+    border-radius: var(--button-radius-xl);
+    border: 0.1px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-filter);
+    box-shadow: var(--drop-shadow);
+    transition: padding var(--transition-smooth),
+        border-radius var(--transition-smooth),
+        transform var(--transition-medium), box-shadow var(--transition-medium);
+    /* Performance optimizations with fallbacks */
+    will-change: transform;
+    transform: var(--gpu-layer);
+    contain: layout;
+    backface-visibility: hidden;
+}
+
+/* CPU-only fallback for glass-card */
+.cpu-optimized .glass-card,
+.performance-low .glass-card {
+    will-change: auto;
+    transform: none;
+    contain: none;
+}
+
+.glass-bubble {
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-pill);
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-filter);
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-medium), padding var(--transition-smooth);
+}
+
+.glass-bubble:hover {
+    background: var(--hover-tint);
+    transform: translateY(-2px);
+}
+
+/* CPU fallback for glass-bubble hover */
+.cpu-optimized .glass-bubble:hover,
+.performance-low .glass-bubble:hover {
+    transform: none;
+}
+
+.glass-container {
+    padding: clamp(12px, 3.5vw, 18px) clamp(20px, 5vw, 26px);
+    border-radius: var(--button-radius-lg);
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-filter);
+}
+
+.glass-button {
+    width: var(--button-size);
+    height: var(--button-size);
+    padding: var(--button-padding);
+    border-radius: var(--button-radius-md);
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-filter);
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-medium), width var(--transition-smooth),
+        height var(--transition-smooth);
+    /* Performance optimizations with fallbacks */
+    will-change: transform;
+    transform: var(--gpu-layer);
+    contain: layout style;
+    backface-visibility: hidden;
+}
+
+/* CPU fallback for glass-button */
+.cpu-optimized .glass-button,
+.performance-low .glass-button {
+    will-change: auto;
+    transform: none;
+    contain: none;
+}
+
+.glass-button:hover {
+    background: var(--hover-tint);
+    transform: translateY(-2px);
+}
+
+/* CPU fallback for glass-button hover */
+.cpu-optimized .glass-button:hover,
+.performance-low .glass-button:hover {
+    transform: none;
+}
+
+.glass-border {
+    padding: 1px;
+    border-radius: var(--button-radius-sm);
+    border: 0.5px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-filter);
+}
+
+.glass-pill {
+    padding: clamp(12px, 3.5vw, 16px) clamp(20px, 5vw, 26px);
+    border-radius: var(--radius-full);
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-filter);
+}
+
+.glass-tag {
+    height: var(--button-size);
+    padding: 5px clamp(18px, 4.5vw, 24px);
+    border-radius: var(--button-radius-sm);
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-filter);
+    display: flex;
+    align-items: center;
+}
+
+/* Unified hover/focus effects for interactive elements */
+.contact-btn.glass-bubble,
+.social-btn.glass-button,
+.certificate-item.glass-pill,
+.filter-btn,
+.project-link.glass-pill,
+.project-icon.glass-button,
+.tech-tag,
+.glass-tag {
+    position: relative;
+    transition: transform var(--transition-fast),
+        background var(--transition-fast), box-shadow var(--transition-medium),
+        width var(--transition-smooth), height var(--transition-smooth),
+        padding var(--transition-smooth);
+}
+.contact-btn.glass-bubble::after,
+.social-btn.glass-button::after,
+.certificate-item.glass-pill::after,
+.filter-btn::after,
+.project-link.glass-pill::after,
+.project-icon.glass-button::after,
+.glass-tag::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+        circle at center,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 70%
+    );
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.contact-btn.glass-bubble:hover,
+.social-btn.glass-button:hover,
+.filter-btn:hover,
+.project-icon.glass-button:hover,
+.glass-tag:hover {
+    background: var(--hover-tint);
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+/* Hover específico para botón GitHub - sobrescribe el estilo general */
+.project-link.glass-pill:not(.download-btn) {
+    background: #d0d0d0 !important; /* Color D0D0D0 como solicitado */
+    color: #000000 !important; /* Texto e iconos en negro */
+}
+
+.project-link.glass-pill:not(.download-btn):hover {
+    background: #b8b8b8 !important; /* Ligeramente más oscuro en hover */
+    color: #000000 !important; /* Mantener texto negro */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+    transform: translateY(-2px);
+}
+
+/* Iconos del botón GitHub en negro */
+.project-link.glass-pill:not(.download-btn) img {
+    filter: brightness(0) saturate(100%) !important; /* Logo GitHub y icono externo en negro */
+}
+
+/* Hover más sutil para certificados */
+.certificate-item.glass-pill:hover {
+    background: rgba(208, 208, 208, 0.12);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.contact-btn.glass-bubble:hover::after,
+.social-btn.glass-button:hover::after,
+.filter-btn:hover::after,
+.project-icon.glass-button:hover::after,
+.glass-tag:hover::after {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* Desactivar pseudo-elemento de hover para botón GitHub */
+.project-link.glass-pill:hover::after {
+    opacity: 0 !important;
+    display: none !important;
+}
+
+/* Pseudo-elemento más sutil para certificados */
+.certificate-item.glass-pill:hover::after {
+    opacity: 0.6;
+    transform: translateY(0) scale(1);
+}
+
+.contact-btn.glass-bubble:active,
+.social-btn.glass-button:active,
+.certificate-item.glass-pill:active,
+.filter-btn:active,
+.project-link.glass-pill:active,
+.project-icon.glass-button:active,
+.glass-tag:active {
+    transform: translateY(-1px) scale(0.98);
+    filter: brightness(1.05);
+}
+
+.contact-btn.glass-bubble:focus-visible,
+.social-btn.glass-button:focus-visible,
+.certificate-item.glass-pill:focus-visible,
+.filter-btn:focus-visible,
+.project-link.glass-pill:focus-visible,
+.project-icon.glass-button:focus-visible,
+.glass-tag:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+/* Profile Section */
+.profile-section {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: var(--space-2xl);
+    margin-inline: 0;
+    transition: grid-template-columns var(--transition-smooth),
+        gap var(--transition-smooth), transform var(--transition-medium);
+}
+
+.profile-section > * {
+    min-width: 0;
+}
+
+.profile-picture {
+    width: 125px;
+    height: 125px;
+    border-radius: var(--radius-xl);
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-filter);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-medium), width var(--transition-smooth),
+        height var(--transition-smooth);
+}
+
+.profile-img {
+    width: 100px;
+    height: 100px;
+    border-radius: var(--radius-pill);
+    object-fit: cover;
+    transition: all var(--transition-medium), width var(--transition-smooth),
+        height var(--transition-smooth);
+}
+
+.profile-badge {
+    position: absolute;
+    top: 0;
+    right: -12.5px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-filter);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 900;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2xl);
+    width: 100%;
+}
+
+.profile-name {
+    font-size: var(--font-size-xl);
+    font-weight: 900;
+    color: var(--text-primary);
+    text-align: left;
+    width: 100%;
+    margin: 0;
+    transition: font-size var(--transition-smooth),
+        color var(--transition-medium);
+}
+
+.profile-description {
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    color: var(--text-primary);
+    text-align: left;
+    line-height: 1.5;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    transition: font-size var(--transition-smooth),
+        color var(--transition-medium);
+}
+
+/* Contact Buttons */
+.contact-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-2xl);
+    width: 100%;
+    padding: 0 var(--card-xpad);
+    transition: gap var(--transition-smooth), padding var(--transition-smooth);
+}
+
+.contact-btn {
+    width: 60px;
+    height: 60px;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-sm);
+    transition: all var(--transition-medium), width var(--transition-smooth),
+        height var(--transition-smooth), padding var(--transition-smooth);
+}
+
+/* Social Media */
+.social-media {
+    height: 90px;
+    padding: 0 clamp(8px, 3vw, var(--card-xpad));
+    border-radius: 25px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-medium), height var(--transition-smooth),
+        padding var(--transition-smooth);
+}
+
+.social-lines {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    gap: clamp(var(--space-sm), 5vw, var(--space-lg));
+    row-gap: var(--space-lg);
+    transition: gap var(--transition-smooth),
+        justify-content var(--transition-medium);
+}
+
+.social-btn {
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+    transition: all var(--transition-medium), width var(--transition-smooth),
+        height var(--transition-smooth);
+}
+
+/* Mobile responsive optimization - consolidated */
+@media (max-width: 640px) {
+    .social-media {
+        height: auto;
+        min-height: 90px;
+        padding: var(--space-lg) clamp(2px, 3vw, var(--card-xpad));
+    }
+
+    .social-lines {
+        gap: clamp(4px, 5vw, var(--space-lg));
+        row-gap: clamp(var(--space-sm), 2vw, var(--space-lg));
+        justify-content: center;
+        display: flex;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        width: 100%;
+    }
+
+    /* Project optimizations for mobile */
+    .project-meta {
+        gap: var(--space-sm);
+    }
+
+    .project-title.glass-tag {
+        width: fit-content;
+        max-width: 100%;
+    }
+}
+
+/* Certificates Section */
+.certificates-section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px; /* Reducido de 24px a 18px para menor separación */
+    width: 100%;
+    transition: grid-template-columns var(--transition-smooth),
+        gap var(--transition-smooth), transform var(--transition-medium);
+}
+
+.certificate-item {
+    width: 100%;
+    padding-right: clamp(8px, 2.5vw, 12px);
+    display: flex;
+    align-items: center;
+    gap: var(--cert-row-gap);
+    min-height: 36px;
+}
+
+.certificate-item.glass-pill {
+    --cert-pr: var(--card-xpad);
+    height: 50px;
+    padding: 0 var(--cert-pr) 0 0;
+    cursor: pointer;
+    transition: transform var(--transition-fast),
+        background var(--transition-fast), height var(--transition-smooth),
+        padding var(--transition-smooth);
+}
+
+/* Hover ya definido arriba con menor intensidad */
+
+.certificate-item.glass-pill:active {
+    transform: translateY(-1px) scale(0.99);
+}
+
+.certificate-item.glass-pill:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
+}
+
+.certificate-item > * {
+    min-width: 0;
+}
+
+.certificate-logo {
+    width: var(--cert-logo-w);
+    height: 50px;
+    border-radius: 100px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-filter);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 13px;
+    flex-shrink: 0;
+}
+
+.aws-logo-composite {
+    padding: 0;
+    overflow: hidden;
+}
+
+.certificate-text {
+    flex: 1;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-primary);
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
+}
+
+.external-link {
+    width: var(--cert-external-w);
+    height: var(--cert-external-w);
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.external-link:hover {
+    opacity: 1;
+}
+
+/* Responsive adjustments for certificates on small screens */
+@media (max-width: 360px) {
+    .certificate-item.glass-pill {
+        --cert-pr: calc(var(--card-xpad) - 8px);
+    }
+    :root {
+        --cert-logo-w: 88px;
+        --cert-external-w: 28px;
+        --cert-row-gap: var(--space-xs);
+    }
+    .certificate-logo {
+        gap: 10px;
+    }
+    .certificate-text {
+        font-size: 11.5px;
+        min-width: 0;
+    }
+
+    /* Asegurar que el contenedor del título siga adaptándose correctamente en móvil */
+    .project-title.glass-tag {
+        width: fit-content; /* Mantener adaptación al contenido en móvil */
+        max-width: 100%; /* Evitar overflow horizontal */
+    }
+
+    .project-meta {
+        flex-wrap: nowrap;
+        align-items: flex-start;
+    }
+
+    .project-category {
+        min-width: 0;
+        flex: 1;
+    }
+}
+
+/* Filters Section */
+.filters-section {
+    display: flex;
+    justify-content: center;
+    margin: clamp(40px, 8vw, 60px) 0;
+}
+
+.filter-container {
+    /* Encajar exactamente al ancho de los botones (sin espacio sobrante) */
+    width: auto;
+    height: 52px;
+    display: inline-flex; /* shrink-wrap al contenido */
+    justify-content: flex-start; /* sin distribución extra */
+    align-items: center;
+    gap: var(--space-xs); /* un poco menos separación entre botones */
+}
+
+/* Eliminar relleno interno del borde vidrio en el contenedor de filtros para que no haya aire lateral */
+.filter-container.glass-border {
+    /* Encaje exacto: sin padding que sume ancho y sin borde físico que altere el layout */
+    padding: 0;
+    position: relative;
+    border: none; /* anula el borde de .glass-border solo en este caso */
+    overflow: hidden; /* recorta el contenido al radio y evita que el activo sobresalga */
+    z-index: 0; /* base para apilar el ::before encima sin crear contexto externo */
+}
+
+/* Dibujar el hairline border sin afectar el ancho del contenedor */
+.filter-container.glass-border::before {
+    content: "";
+    position: absolute;
+    inset: 0; /* cubre todo el contenedor */
+    border-radius: var(--radius-md); /* igual que .glass-border */
+    border: 0.5px solid var(--glass-border);
+    pointer-events: none;
+    z-index: var(
+        --z-low
+    ); /* asegura que el borde se dibuje por encima de los hijos */
+}
+
+.filter-btn {
+    width: var(--button-size);
+    height: var(--button-size);
+    border: none;
+    border-radius: var(--button-radius-sm);
+    background: transparent; /* el highlight lo provee el selector deslizante */
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-medium);
+    opacity: 1; /* sin cambios visuales en hover; el selector hace el highlight */
+    position: relative;
+    z-index: var(--z-mid); /* por encima del selector */
+}
+
+.filter-btn.active {
+    background: transparent; /* sin tinte, lo da el selector */
+    opacity: 1;
+    pointer-events: none; /* desactiva hover y clic en el seleccionado */
+    cursor: default;
+}
+
+/* Desactiva el tinte de hover para evitar "fantasma"; deja solo cambio de opacidad */
+.filter-btn:hover {
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Hover sutil solo sobre el icono: no usa fondo ni sombra para no competir con el selector */
+.filter-btn img {
+    transition: transform 160ms ease, filter 160ms ease;
+    transform-origin: center;
+}
+.filter-btn:hover img {
+    transform: scale(1.06);
+    filter: brightness(1.12) saturate(110%);
+}
+
+/* Sin hover visual en el botón activo */
+.filter-btn.active img {
+    transform: none !important;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.22))
+        drop-shadow(0 2px 6px rgba(0, 0, 0, 0.12))
+        drop-shadow(0 1px 2px rgba(0, 0, 0, 0.28)) !important;
+}
+
+/* Mientras el selector se mueve, desactiva cualquier hover para evitar solaparse con la animación */
+.filter-container.animating .filter-btn:hover img {
+    transform: none !important;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35))
+        drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))
+        drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45)) !important;
+}
+.filter-container.animating .filter-btn img {
+    transition: none; /* elimina fading/jitter durante el movimiento */
+}
+
+/* Evitar efectos visuales extra en el activo */
+.filter-btn.active:hover {
+    background: transparent;
+    transform: none;
+    box-shadow: none;
+}
+.filter-btn.active::after {
+    display: none;
+}
+
+/* Sin brillo de pseudo-elemento en los botones del filtro */
+.filter-btn::after {
+    display: none !important;
+}
+
+/* Selector deslizante del filtro (resaltado móvil) */
+.filter-selector {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 50px; /* igual al botón */
+    height: 50px; /* igual al botón */
+    border-radius: var(--radius-md);
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-filter);
+    border: none; /* Sin stroke/border */
+    transform: translate3d(0, -50%, 0);
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: var(
+        --z-base
+    ); /* por debajo de los botones, por encima del fondo */
+    box-shadow: var(--drop-shadow);
+    will-change: transform;
+}
+
+/* Optimización para dispositivos de bajo rendimiento */
+.low-end-device .filter-selector {
+    transform: var(--cpu-transform2d);
+    transition: none;
+    will-change: auto;
+    backdrop-filter: var(--glass-fallback-bg);
+}
+
+/* Reducir tamaño SOLO de los íconos All y Design */
+.filter-btn img[alt="All"],
+.filter-btn img[alt="Design"] {
+    width: 22px;
+    height: 22px;
+}
+
+/* Projects Section - Multiple Projects Container */
+.projects-section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--projects-gap); /* Increased spacing between projects */
+    width: 100%;
+    transition: grid-template-columns var(--transition-smooth),
+        gap var(--transition-smooth);
+}
+
+/* Individual Project Item */
+.project-item {
+    width: 100%;
+    transition: all var(--transition-medium);
+    /* Performance optimization for multiple projects */
+    contain: layout style;
+    will-change: transform;
+    transform: var(--gpu-layer);
+}
+
+/* Project Section - Individual Project Layout */
+.project-item {
+    display: grid;
+    grid-template-areas:
+        "image"
+        "controls"
+        "header"
+        "meta"
+        "tech"
+        "desc"
+        "link";
+    gap: var(--space-2xl); /* separación uniforme interna */
+    padding-top: 0;
+    margin-inline: 0; /* eliminar márgenes laterales */
+    transition: gap var(--transition-medium), padding var(--transition-medium);
+}
+/* Evitar overflows de hijos en grid de proyecto */
+.project-item > * {
+    min-width: 0;
+}
+
+/* Media full-bleed 16:9 (encaja a los bordes de la tarjeta con margen de 1px) */
+.project-media {
+    grid-area: image;
+    /* expandir a los bordes laterales de la glass-card con margen de 1px en cada lado */
+    margin-left: calc(-1 * clamp(26px, 5.5vw, 46px) + 1px);
+    margin-right: calc(-1 * clamp(26px, 5.5vw, 46px) + 1px);
+    margin-top: 1px; /* 1px de margen superior */
+    width: calc(
+        100% + 2 * clamp(26px, 5.5vw, 46px) - 2px
+    ); /* -2px para compensar los márgenes laterales */
+    border-radius: var(
+        --radius-2xl
+    ); /* mismo radio que la tarjeta para que el borde parezca parte de la imagen */
+    overflow: hidden;
+    isolation: isolate; /* Crear nuevo contexto de apilamiento para evitar conflictos */
+}
+
+/* Asegurar que el carousel-viewport mantenga el border-radius */
+.project-media .carousel-viewport {
+    border-radius: var(--radius-2xl);
+    overflow: hidden;
+}
+
+/* Controles del carrusel debajo de la imagen */
+.carousel-controls {
+    grid-area: controls;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs); /* Gap entre la imagen y los controles */
+    padding: 0 var(--card-xpad);
+    margin-top: -2px; /* Ligeramente negativo para acercar aún más a la imagen */
+}
+.carousel-controls-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+/* Contenedor para el conjunto de indicadores + barra de progreso */
+.carousel-controls .carousel-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(
+        --space-sm
+    ); /* Aumentado de 6px a var(--space-sm) [8px] para más espacio entre bolitas y barra */
+    transition: gap var(--transition-smooth), transform var(--transition-medium);
+    /* Asegurar que no afecte la altura de los elementos hijos */
+    min-height: auto;
+    max-height: none;
+}
+
+/* Anular posicionamiento absoluto cuando los botones están fuera de la imagen */
+.carousel-controls .carousel-btn {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    transform: none;
+}
+.carousel-controls .carousel-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Indicadores fuera de la imagen: estáticos y centrados */
+.carousel-controls .carousel-indicators {
+    position: static;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(
+        --space-sm
+    ); /* Aumentado de var(--space-xs) [4px] a var(--space-sm) [8px] */
+    transition: gap var(--transition-smooth), transform var(--transition-medium);
+}
+
+/* Barra de progreso dentro del contenedor central con indicadores */
+.carousel-controls .carousel-progress {
+    position: static;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    width: auto; /* Se ajustará dinámicamente por JS al ancho de los indicadores */
+    margin: 0;
+    height: 3px; /* Altura fija consistente - incrementada para mayor visibilidad */
+    min-height: 3px; /* Asegurar altura mínima fija */
+    max-height: 3px; /* Asegurar altura máxima fija */
+    border-radius: 1.5px; /* Ajustado proporcionalmente */
+    background: rgba(208, 208, 208, 0.4);
+    /* Centrado perfecto con los indicadores */
+    display: block;
+    flex-shrink: 0; /* Evitar que se reduzca en contenedores flex */
+    transition: width var(--transition-smooth),
+        transform var(--transition-medium);
+}
+.carousel-controls .carousel-progress-fill {
+    height: 100%; /* Asegurar que ocupe toda la altura del contenedor */
+    min-height: 3px; /* Altura mínima consistente */
+    max-height: 3px; /* Altura máxima consistente */
+    will-change: width;
+    transition: width linear; /* Mantener transición lineal para el progreso */
+}
+
+/* Carrusel accesible */
+.carousel {
+    position: relative;
+    color: var(--text-primary);
+}
+.carousel-viewport {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    position: relative;
+    background: #0a0a0a; /* evita flashes al cargar */
+    /* Performance optimizations */
+    transform: var(--gpu-layer);
+    will-change: transform;
+    contain: layout style;
+}
+.carousel-track {
+    display: block; /* no necesitamos flex en crossfade */
+    width: 100%;
+    height: 100%;
+    will-change: opacity;
+    position: relative; /* base para slides absolutas */
+    transform: var(--gpu-layer);
+    transition: none;
+    /* Performance optimizations */
+    contain: layout;
+}
+.carousel-slide {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    opacity: 0; /* crossfade por opacidad */
+    transition: opacity 380ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none;
+    /* Performance optimizations with fallbacks */
+    will-change: opacity;
+    transform: var(--gpu-layer);
+    contain: var(--contain-content);
+    backface-visibility: hidden;
+}
+
+/* CPU fallback for carousel-slide */
+.cpu-optimized .carousel-slide,
+.performance-low .carousel-slide {
+    will-change: auto;
+    transform: none;
+    contain: none;
+}
+.carousel-slide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* nunca distorsiona */
+    opacity: 0.9; /* más transparente para apreciar el fondo tipo cristal */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none; /* evita arrastres nativos y facilita el drag en el viewport */
+}
+/* Slide activa visible y clicable */
+.carousel-slide.is-active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Controles Prev/Next */
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px; /* Reducido de 32px a 26px para ser más compacto */
+    height: 26px; /* Reducido de 32px a 26px para ser más compacto */
+    padding: 0; /* Asegurar que no hay padding que afecte las dimensiones */
+    border-radius: var(
+        --radius-sm
+    ); /* Ajustado proporcionalmente de 10px a 8px */
+    border: none;
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-filter);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 160ms ease, background 160ms ease;
+    z-index: var(--z-mid);
+    box-sizing: border-box; /* Asegurar que width/height incluyan border y padding */
+}
+.carousel-btn:hover {
+    background: var(--hover-tint);
+    transform: translateY(-50%) translateY(-2px);
+}
+
+/* CPU fallback for carousel-btn hover */
+.cpu-optimized .carousel-btn:hover,
+.performance-low .carousel-btn:hover {
+    transform: translateY(-50%);
+}
+
+.carousel-btn:active {
+    transform: translateY(-50%) scale(0.95); /* Efecto activo consistente con el modal */
+}
+
+/* CPU fallback for carousel-btn active */
+.cpu-optimized .carousel-btn:active,
+.performance-low .carousel-btn:active {
+    transform: translateY(-50%);
+}
+.carousel-btn:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+.carousel-btn.prev {
+    left: 10px;
+}
+.carousel-btn.next {
+    right: 10px;
+}
+.carousel-btn.prev::before,
+.carousel-btn.next::before {
+    content: "";
+    position: absolute; /* centrar dentro del botón */
+    left: 50%;
+    top: 50%;
+    width: 8px; /* Reducido de 10px a 8px para hacer más pequeño */
+    height: 8px; /* Reducido de 10px a 8px para hacer más pequeño */
+    border-top: 3px solid currentColor; /* Aumentado de 2px a 3px para hacer más grueso */
+    border-right: 3px solid currentColor; /* Aumentado de 2px a 3px para hacer más grueso */
+    transform: translate(-50%, -50%);
+}
+.carousel-btn.prev::before {
+    /* Mueve 4px a la derecha para centrar visualmente */
+    left: calc(50% + 1.5px);
+    transform: translate(-50%, -50%) rotate(-135deg);
+}
+.carousel-btn.next::before {
+    /* Mueve 4px a la izquierda para centrar visualmente */
+    left: calc(50% - 1.5px);
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* Botón de maximizar pantalla completa - Solo icono, sin contenedor glass */
+.carousel-fullscreen-btn {
+    position: absolute;
+    top: 16px; /* Más margen desde la esquina superior */
+    right: 16px; /* Más margen desde la esquina derecha */
+    width: 26px; /* Tamaño exacto del icono */
+    height: 26px; /* Tamaño exacto del icono */
+    padding: 0; /* Sin padding */
+    border: none;
+    background: transparent; /* Sin fondo */
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-medium);
+    z-index: 10;
+    box-sizing: border-box; /* Asegurar que width/height incluyan border y padding */
+    /* Performance optimizations */
+    will-change: transform;
+    transform: var(--gpu-layer);
+    contain: layout style;
+    backface-visibility: hidden;
+    /* Sombra distinguible para mejor visibilidad */
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4))
+        drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+
+.carousel-fullscreen-btn:hover {
+    transform: scale(1.1); /* Solo escala al hacer hover */
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4)); /* Sombra en hover */
+}
+
+.carousel-fullscreen-btn:active {
+    transform: scale(0.95); /* Efecto de presión */
+    filter: brightness(1.1);
+}
+
+.carousel-fullscreen-btn:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+/* El icono SVG debe ocupar todo el botón */
+.carousel-fullscreen-btn svg {
+    width: 26px; /* Tamaño exacto solicitado */
+    height: 26px;
+}
+
+/* Fullscreen modal */
+.carousel-fullscreen-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-medium);
+    cursor: default !important; /* Cursor normal, NO pointer */
+}
+
+.carousel-fullscreen-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.carousel-fullscreen-content {
+    position: relative;
+    width: 90vw;
+    height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default !important; /* Cursor normal, NO pointer */
+}
+
+.carousel-fullscreen-viewport {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default !important; /* Cursor normal, NO pointer */
+}
+
+.carousel-fullscreen-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    cursor: default !important; /* Cursor normal en la imagen también */
+}
+
+.carousel-fullscreen-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 26px; /* Reducido de 32px a 26px para ser más compacto */
+    height: 26px; /* Reducido de 32px a 26px para ser más compacto */
+    padding: 0; /* Asegurar que no hay padding que afecte las dimensiones */
+    border-radius: 8px; /* Ajustado proporcionalmente de 10px a 8px */
+    border: none;
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-filter);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 160ms ease, background 160ms ease;
+    z-index: 10001;
+    box-sizing: border-box; /* Asegurar que width/height incluyan border y padding */
+}
+
+.carousel-fullscreen-close:hover {
+    background: var(--hover-tint);
+    transform: translateY(-2px);
+}
+
+.carousel-fullscreen-close:active {
+    transform: scale(0.95); /* Efecto activo consistente con el modal */
+}
+
+.carousel-fullscreen-close:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+/* Icono X del botón cerrar - usando pseudo-elemento como los botones del carrusel */
+.carousel-fullscreen-close::before,
+.carousel-fullscreen-close::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 14px; /* Aumentado de 10px a 14px para hacer el icono más grande */
+    height: 3px; /* Mismo grosor que las flechas del carrusel */
+    background-color: currentColor;
+    transform-origin: center;
+}
+
+.carousel-fullscreen-close::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.carousel-fullscreen-close::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.carousel-fullscreen-nav button {
+    position: absolute;
+    top: 50%;
+    transform: translate3d(0, -50%, 0);
+    width: 26px; /* Reducido de 32px a 26px para ser más compacto */
+    height: 26px; /* Reducido de 32px a 26px para ser más compacto */
+    padding: 0; /* Asegurar que no hay padding que afecte las dimensiones */
+    border-radius: 8px; /* Ajustado proporcionalmente de 10px a 8px */
+    border: none;
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-filter);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 160ms ease, background 160ms ease;
+    z-index: 10001;
+    box-sizing: border-box; /* Asegurar que width/height incluyan border y padding */
+    will-change: transform;
+}
+
+.carousel-fullscreen-nav button:hover {
+    background: var(--hover-tint);
+    transform: translate3d(0, -50%, 0) translate3d(0, -2px, 0);
+}
+
+.carousel-fullscreen-nav button:active {
+    transform: translate3d(0, -50%, 0) scale3d(0.95, 0.95, 1); /* Efecto activo consistente con el modal */
+}
+
+/* Optimización para dispositivos de bajo rendimiento */
+.low-end-device .carousel-fullscreen-nav button {
+    transform: translateY(-50%);
+    transition: none;
+    will-change: auto;
+    backdrop-filter: var(--glass-fallback-bg);
+}
+
+.low-end-device .carousel-fullscreen-nav button:hover {
+    transform: translateY(-50%) translateY(-2px);
+}
+
+.low-end-device .carousel-fullscreen-nav button:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.carousel-fullscreen-nav button:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+/* Flechas de navegación */
+.carousel-fullscreen-prev::before,
+.carousel-fullscreen-next::before {
+    content: "";
+    position: absolute; /* centrar dentro del botón */
+    left: 50%;
+    top: 50%;
+    width: 8px; /* Reducido de 10px a 8px para hacer más pequeño */
+    height: 8px; /* Reducido de 10px a 8px para hacer más pequeño */
+    border-top: 3px solid currentColor; /* Aumentado de 2px a 3px para hacer más grueso */
+    border-right: 3px solid currentColor; /* Aumentado de 2px a 3px para hacer más grueso */
+    transform: translate(-50%, -50%);
+}
+
+.carousel-fullscreen-prev::before {
+    /* Mueve 4px a la derecha para centrar visualmente */
+    left: calc(50% + 1.5px);
+    transform: translate(-50%, -50%) rotate(-135deg);
+}
+
+.carousel-fullscreen-next::before {
+    /* Mueve 4px a la izquierda para centrar visualmente */
+    left: calc(50% - 1.5px);
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* Posicionamiento de botones */
+.carousel-fullscreen-prev {
+    left: 10px; /* Exactamente igual que .carousel-btn.prev */
+}
+
+.carousel-fullscreen-next {
+    right: 10px; /* Exactamente igual que .carousel-btn.next */
+}
+
+.carousel-fullscreen-counter {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    /* Botones del carrusel normal - Mismo tamaño que los del modal */
+    .carousel-btn {
+        width: 24px; /* Mismo tamaño que los botones del modal en móvil */
+        height: 24px; /* Mismo tamaño que los botones del modal en móvil */
+    }
+
+    /* Ajustar el tamaño de las flechas del carrusel normal en móvil */
+    .carousel-btn.prev::before,
+    .carousel-btn.next::before {
+        width: 7px; /* Mismo tamaño que las flechas del modal en móvil */
+        height: 7px; /* Mismo tamaño que las flechas del modal en móvil */
+        border-top: 2px solid currentColor; /* Mismo grosor que las flechas del modal en móvil */
+        border-right: 2px solid currentColor; /* Mismo grosor que las flechas del modal en móvil */
+    }
+
+    .carousel-fullscreen-content {
+        width: 95vw;
+        height: 95vh;
+    }
+
+    .carousel-fullscreen-close {
+        top: 10px;
+        right: 10px;
+        width: 24px; /* Ligeramente más pequeño en móvil pero manteniendo proporciones */
+        height: 24px; /* Ligeramente más pequeño en móvil pero manteniendo proporciones */
+    }
+
+    /* Ajustar el tamaño del icono X en móvil */
+    .carousel-fullscreen-close::before,
+    .carousel-fullscreen-close::after {
+        width: 9px; /* Proporcional a las flechas reducidas en móvil */
+        height: 2px; /* Mismo grosor que las flechas en móvil */
+    }
+
+    .carousel-fullscreen-nav button {
+        width: 24px; /* Ligeramente más pequeño en móvil pero manteniendo proporciones */
+        height: 24px; /* Ligeramente más pequeño en móvil pero manteniendo proporciones */
+        padding: 0; /* Asegurar sin padding en móvil */
+        box-sizing: border-box; /* Consistencia en móvil */
+    }
+
+    /* Ajustar el tamaño de las flechas en móvil */
+    .carousel-fullscreen-prev::before,
+    .carousel-fullscreen-next::before {
+        width: 7px; /* Ligeramente más pequeño en móvil */
+        height: 7px; /* Ligeramente más pequeño en móvil */
+        border-top: 2px solid currentColor; /* Más delgado en móvil */
+        border-right: 2px solid currentColor; /* Más delgado en móvil */
+    }
+
+    .carousel-fullscreen-prev {
+        left: 5px; /* Aún más cerca del borde en móvil */
+    }
+
+    .carousel-fullscreen-next {
+        right: 5px; /* Aún más cerca del borde en móvil */
+    }
+
+    .carousel-fullscreen-counter {
+        bottom: 10px;
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+}
+
+/* Indicadores (bolitas) y barra de progreso */
+.carousel-indicators {
+    position: absolute;
+    bottom: 34px; /* un poco más cerca de la barra */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: var(
+        --space-sm
+    ); /* Aumentado de var(--space-xs) [4px] a var(--space-sm) [8px] para consistencia */
+    align-items: center;
+    z-index: 2;
+}
+.carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(208, 208, 208, 0.45);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0.7;
+    transform: scale(0.9);
+    transition: opacity var(--transition-fast), transform var(--transition-fast),
+        background var(--transition-fast);
+}
+.carousel-dot.is-active {
+    background: var(--text-primary);
+    opacity: 1;
+    transform: scale(1.1); /* leve realce al activarse */
+}
+
+.carousel-progress {
+    position: absolute;
+    bottom: 26px; /* mayor separación con el borde inferior de la imagen */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 3px; /* Altura fija consistente - incrementada para mayor visibilidad */
+    min-height: 3px; /* Asegurar altura mínima fija */
+    max-height: 3px; /* Asegurar altura máxima fija */
+    border-radius: 1.5px; /* Ajustado proporcionalmente */
+    background: rgba(208, 208, 208, 0.4);
+    overflow: hidden;
+    z-index: 2;
+    flex-shrink: 0; /* Evitar que se reduzca en contenedores flex */
+}
+.carousel-progress-fill {
+    width: 0%;
+    height: 100%; /* Asegurar que ocupe toda la altura del contenedor */
+    min-height: 3px; /* Altura mínima consistente */
+    max-height: 3px; /* Altura máxima consistente */
+    background: var(--text-primary);
+}
+
+/* Drag cursor hint removido: ya no hay arrastre; usar cursor por defecto limpio */
+.carousel-viewport {
+    cursor: default !important;
+}
+
+/* Descripción con scroll estilizado */
+.project-description {
+    width: 100%;
+    height: 200px; /* un poco más alto para textos largos */
+    position: relative;
+    display: flex;
+    gap: 8px;
+}
+.description-content {
+    flex: 1;
+    max-height: 100%;
+    overflow: auto;
+    scroll-behavior: smooth;
+    position: relative;
+    padding-bottom: var(--space-md);
+    padding-right: 2px;
+    /* Máscara inicial optimizada que se actualizará dinámicamente por JavaScript */
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 1) 85%,
+        rgba(0, 0, 0, 0.15) 95%,
+        rgba(0, 0, 0, 0) 100%
+    );
+    mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 1) 85%,
+        rgba(0, 0, 0, 0.15) 95%,
+        rgba(0, 0, 0, 0) 100%
+    );
+    /* Performance optimizations for smooth scrolling */
+    will-change: scroll-position, mask-image;
+    transform: var(--gpu-layer);
+    contain: layout;
+    /* Hardware-accelerated scrolling */
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: y proximity;
+    transition: -webkit-mask-image 0.15s ease-out, mask-image 0.15s ease-out;
+}
+/* Ocultar scrollbar nativo para usar solo el indicador personalizado */
+.description-content::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+}
+.description-content {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge legado */
+}
+/* Overlay de desvanecimiento al final del texto */
+.description-content::after {
+    content: none;
+}
+
+.project-header {
+    margin-bottom: 0; /* usar solo el gap del grid del contenedor */
+}
+
+.project-icon {
+    flex-shrink: 0;
+    cursor: default !important; /* Quitar cursor de manita */
+}
+
+.project-title h2 {
+    font-size: clamp(
+        32px,
+        4.5vw,
+        36px
+    ); /* Conservar tamaño mínimo de 32px como el profile-name */
+    font-weight: 900; /* Black en lugar de Bold (700) */
+    color: var(--text-primary);
+}
+
+/* Asegurar que el contenedor del título se adapte al contenido como antes */
+.project-title.glass-tag {
+    height: auto; /* Sobrescribir el height fijo del glass-tag */
+    min-height: auto; /* Sin altura mínima fija */
+    width: fit-content; /* Adaptarse exactamente al ancho del contenido */
+    max-width: 100%; /* No exceder el ancho del contenedor padre */
+}
+
+.project-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: 0; /* usar solo el gap del grid del contenedor */
+}
+
+.project-category {
+    font-size: clamp(14px, 2.5vw, 16px);
+    font-weight: 400;
+    color: var(--text-primary);
+}
+
+.project-category strong {
+    font-weight: 900; /* Black para "Software" */
+}
+
+/* Símbolo separador en light */
+.project-category .separator {
+    font-weight: 900; /* Light para el símbolo "|" */
+}
+
+/* Tech Stack */
+.tech-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md) var(--space-md); /* Aumentado el espaciado vertical entre filas de var(--space-sm) a var(--space-md) */
+    margin-bottom: 0; /* usar solo el gap del grid del contenedor */
+}
+
+/* Aplana contenedores de fila para que los chips fluyan */
+.tech-row {
+    display: contents;
+}
+
+.tech-tag {
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 100px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-filter);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-primary);
+    white-space: nowrap;
+    cursor: default; /* Quitar cursor de manita */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast), padding var(--transition-smooth),
+        height var(--transition-smooth);
+}
+
+/* Efecto hover para las etiquetas de tecnología */
+.tech-tag:hover {
+    background: var(--hover-tint);
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+}
+
+/* Project Description */
+.project-description {
+    width: 100%;
+    height: 170px;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-xs);
+    margin-bottom: 0;
+}
+
+.description-content {
+    flex: 1;
+    font-size: clamp(13px, 2vw, 14px);
+    font-weight: 400;
+    color: var(--text-primary);
+    line-height: 1.5;
+    padding-right: clamp(
+        12px,
+        3vw,
+        18px
+    ); /* Reducido para dar más espacio al scroll indicator */
+}
+
+.description-content p {
+    margin-bottom: var(--space-sm);
+}
+
+.scroll-indicator {
+    width: 6px;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.scroll-track {
+    width: 6px;
+    height: 100%;
+    border-radius: 3px;
+    background: rgba(208, 208, 208, 0.15);
+    position: relative;
+    cursor: pointer;
+    transition: background var(--transition-medium);
+}
+
+.scroll-track:hover {
+    background: rgba(208, 208, 208, 0.25);
+}
+
+.scroll-thumb {
+    width: 6px;
+    min-height: 20px;
+    border-radius: 3px;
+    background: rgba(208, 208, 208, 0.6);
+    position: absolute;
+    top: 0;
+    cursor: default;
+    transition: background var(--transition-fast),
+        width var(--transition-medium);
+    will-change: transform;
+}
+
+.scroll-thumb:hover {
+    background: rgba(208, 208, 208, 0.8);
+    cursor: default;
+}
+
+.scroll-thumb:active {
+    cursor: default;
+    background: var(--text-primary);
+}
+
+/* Optimización para dispositivos de bajo rendimiento */
+.low-end-device .scroll-thumb {
+    transition: none;
+    will-change: auto;
+}
+
+/* Project Link */
+.project-link {
+    width: 100%;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 25px;
+    font-weight: 900; /* Black en lugar de Bold (700) para "Code on GitHub" */
+    color: var(--text-primary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition-medium), width var(--transition-smooth),
+        height var(--transition-smooth), gap var(--transition-smooth);
+    margin-bottom: 0; /* usar solo el gap del grid del contenedor */
+    border: none;
+    font-size: 14px;
+    position: relative; /* Required for pseudo-element positioning */
+    overflow: hidden; /* Ensure gradient doesn't spill outside */
+    /* Botón GitHub completamente negro */
+    background: #000000 !important;
+}
+
+/* Enhanced white gradient removed for solid black GitHub button */
+.project-link.glass-pill::before {
+    display: none; /* Gradiente deshabilitado para botón negro sólido */
+}
+
+/* Hover gradient also disabled for solid black */
+.project-link.glass-pill:hover::before {
+    display: none; /* Sin gradiente en hover para botón negro sólido */
+}
+
+/* Ensure text and icons appear above gradient */
+.project-link.glass-pill > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Estado activo mejorado para botón negro */
+.project-link:active {
+    background: #0d0d0d !important; /* Más oscuro al hacer click */
+    transform: translateY(-1px) scale(0.98);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all var(--transition-fast);
+}
+
+.project-link:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
+}
+
+/* Project Buttons Container - Solo para Keeptive */
+.project-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    grid-area: link;
+}
+
+.project-buttons .project-link {
+    margin-bottom: 0;
+}
+
+/* Estilo específico para el botón de descarga - Negro como solicitado */
+.download-btn.glass-pill {
+    background: #000000 !important; /* Fondo negro */
+    color: #d0d0d0 !important; /* Texto e iconos en D0D0D0 */
+    border: none !important; /* Sin stroke/borde */
+}
+
+.download-btn.glass-pill:hover {
+    background: #1a1a1a !important; /* Negro ligeramente más claro en hover */
+    color: #ffffff !important; /* Texto más claro en hover */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 0 4px 10px rgba(0, 0, 0, 0.4) !important;
+    transform: translateY(-2px);
+}
+
+/* Project Image */
+.project-image {
+    grid-area: image;
+    position: relative;
+    width: 100%;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    aspect-ratio: 16 / 9;
+    min-height: clamp(200px, 40vw, 280px);
+    max-height: clamp(320px, 48vh, 540px);
+    transition: max-height var(--transition-medium),
+        min-height var(--transition-medium),
+        border-radius var(--transition-medium);
+}
+
+.project-screenshot {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 30px;
+}
+
+.project-controls {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Grid area mapping */
+.project-header {
+    grid-area: header;
+}
+.project-meta {
+    grid-area: meta;
+}
+.tech-stack {
+    grid-area: tech;
+}
+.project-description {
+    grid-area: desc;
+}
+.project-link {
+    grid-area: link;
+}
+
+.progress-indicators {
+    width: clamp(80px, 12vw, 120px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.progress-dots {
+    display: flex;
+    gap: 6px;
+}
+
+.dot {
+    width: 7.5px;
+    height: 7.5px;
+    border-radius: 50%;
+    background: rgba(208, 208, 208, 0.5);
+    backdrop-filter: var(--blur-filter);
+}
+
+.dot.active {
+    background: var(--text-primary);
+}
+
+.progress-bar {
+    width: clamp(80px, 12vw, 120px);
+    height: 2px;
+    border-radius: 1px;
+    background: rgba(208, 208, 208, 0.5);
+    overflow: hidden;
+}
+
+.progress-fill {
+    width: 20%;
+    height: 100%;
+    background: var(--text-primary);
+    border-radius: 1px;
+}
+
+.next-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 30px;
+    background: none;
+    border: none;
+    color: rgba(208, 208, 208, 0.6);
+    cursor: pointer;
+    backdrop-filter: var(--blur-filter);
+}
+
+/* Responsive Design */
+/* Breakpoint adicional para tablets pequeñas */
+@media (min-width: 480px) and (max-width: 767px) {
+    .portfolio-container {
+        max-width: clamp(440px, 92vw, 560px);
+        padding: clamp(50px, 7vw, 70px) clamp(20px, 4vw, 32px);
+        transition: max-width var(--transition-smooth),
+            padding var(--transition-smooth);
+    }
+
+    .social-lines {
+        justify-content: center;
+        transition: justify-content var(--transition-medium);
+    }
+
+    .contact-buttons {
+        gap: clamp(var(--space-lg), 5vw, var(--space-2xl));
+        transition: gap var(--transition-smooth);
+    }
+}
+
+/* Breakpoint adicional para transición suave a desktop */
+@media (min-width: 900px) and (max-width: 1199px) {
+    .portfolio-container {
+        max-width: clamp(640px, 84vw, 760px);
+        transition: max-width var(--transition-smooth);
+    }
+
+    .certificates-section {
+        grid-template-columns: 1fr;
+        gap: clamp(
+            15px,
+            2.5vw,
+            18px
+        ); /* Reducido para mantener consistencia con móvil */
+        transition: grid-template-columns var(--transition-smooth),
+            gap var(--transition-smooth);
+    }
+}
+
+@media (min-width: 768px) {
+    .portfolio-container {
+        max-width: clamp(560px, 86vw, 640px);
+        padding: clamp(70px, 8vw, 80px) clamp(24px, 5vw, 40px);
+        transition: max-width var(--transition-smooth),
+            padding var(--transition-smooth);
+    }
+
+    /* La sección Personal ya es grid base con 1 columna por defecto */
+    .profile-info {
+        align-items: flex-start;
+        transition: align-items var(--transition-smooth);
+    }
+    .profile-name {
+        text-align: left;
+        transition: text-align var(--transition-smooth);
+    }
+    .profile-description {
+        text-align: left;
+        transition: text-align var(--transition-smooth);
+    }
+
+    /* Proyectos siguen en una columna en tablet */
+    .projects-section {
+        grid-template-columns: 1fr;
+        gap: var(--projects-gap); /* Maintain increased project spacing */
+    }
+}
+
+@media (min-width: 1024px) {
+    .portfolio-container {
+        max-width: clamp(760px, 86vw, 880px);
+        padding: clamp(80px, 8vw, 100px) clamp(32px, 5vw, 60px);
+        transition: max-width var(--transition-smooth),
+            padding var(--transition-smooth);
+    }
+
+    .certificates-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 18px; /* Reducido de 28px a 18px para consistencia */
+        transition: grid-template-columns var(--transition-smooth),
+            gap var(--transition-smooth);
+    }
+
+    /* Proyectos siguen en una columna en desktop intermedio */
+    .projects-section {
+        grid-template-columns: 1fr;
+        gap: var(--projects-gap); /* Maintain increased project spacing */
+    }
+
+    /* Asegurar adaptación perfecta del título en desktop intermedio */
+    .project-title.glass-tag {
+        width: fit-content; /* Mantener adaptación al contenido */
+        max-width: 100%; /* Evitar overflow */
+    }
+}
+
+@media (min-width: 1200px) {
+    .portfolio-container {
+        max-width: clamp(
+            980px,
+            90vw,
+            1200px
+        ); /* Aumentado significativamente para proyectos más grandes */
+        padding: clamp(90px, 8vw, 110px) clamp(32px, 5vw, 60px);
+        transition: max-width var(--transition-smooth),
+            padding var(--transition-smooth);
+    }
+
+    /* Disposición en 2 columnas en la sección Personal con alineación cruzada */
+    .profile-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* izquierda: info, derecha: acciones */
+        align-items: start;
+        gap: var(--space-2xl); /* mantiene ritmo vertical/horizontal */
+        /* Control específico del ancho de la sección personal - tamaño original fijo */
+        max-width: clamp(
+            760px,
+            82vw,
+            860px
+        ); /* Tamaño máximo original desde el primer breakpoint de 2 columnas */
+        margin: 0 auto; /* Centrar la sección personal */
+        transition: grid-template-columns var(--transition-smooth),
+            gap var(--transition-smooth), align-items var(--transition-smooth);
+    }
+
+    /* Permite que los hijos participen directamente en la grilla del padre */
+    .profile-info {
+        display: contents;
+        transition: display var(--transition-smooth);
+    }
+
+    /* Mapa de colocación por filas */
+    .profile-picture {
+        grid-column: 1;
+        grid-row: 1; /* fila superior izquierda */
+    }
+
+    .profile-name {
+        grid-column: 1;
+        grid-row: 2; /* alinea con contact-buttons */
+    }
+
+    .profile-description {
+        grid-column: 1;
+        grid-row: 3; /* alinea con social-media */
+    }
+
+    .contact-buttons {
+        grid-column: 2;
+        grid-row: 2; /* misma fila que el nombre */
+        align-self: start;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .social-media {
+        grid-column: 2;
+        grid-row: 3; /* misma fila que la descripción */
+        align-self: start;
+        width: 100%;
+    }
+
+    /* Certificados al pie ocupando ambas columnas, con distribución interna alineada al layout padre */
+    .certificates-section {
+        grid-column: 1 / -1; /* abarcar ambas columnas del layout principal */
+        grid-row: 4;
+        /* 2 columnas internas que respetan exactamente el gap de 30px del grid padre */
+        grid-template-columns: calc((100% - var(--space-2xl)) / 2) calc(
+                (100% - var(--space-2xl)) / 2
+            );
+        column-gap: var(
+            --space-2xl
+        ); /* igual que el gap de columnas del layout padre */
+        row-gap: 18px; /* Reducido de 24px a 18px para consistencia */
+    }
+
+    /* Proyectos en dos columnas cuando la sección personal también se divide */
+    .projects-section {
+        grid-template-columns: 1fr 1fr;
+        gap: clamp(
+            35px,
+            5vw,
+            45px
+        ); /* Reducido ligeramente para dar más espacio a cada proyecto */
+        transition: grid-template-columns var(--transition-smooth),
+            gap var(--transition-smooth);
+    }
+
+    /* Asegurar que cada proyecto item mantenga su estructura interna correcta */
+    .project-item {
+        min-width: 0; /* previene overflow */
+        width: 100%;
+        transition: all var(--transition-medium);
+    }
+
+    /* Para pantallas muy anchas, permitir 3 columnas si hay espacio suficiente */
+    @media (min-width: 1400px) {
+        .projects-section {
+            grid-template-columns: repeat(
+                auto-fit,
+                minmax(480px, 1fr)
+            ); /* Aumentado de 420px a 480px para proyectos más grandes */
+            gap: clamp(
+                40px,
+                4vw,
+                100px
+            ); /* Gap optimizado para pantallas ultra-anchas */
+            max-width: 1600px; /* Aumentado para dar más espacio a los proyectos */
+            margin: 0 auto;
+        }
+
+        .portfolio-container {
+            max-width: clamp(
+                1200px,
+                92vw,
+                1600px
+            ); /* Aumentado considerablemente */
+        }
+
+        /* Control específico del ancho de la sección personal para ultra-wide */
+        .profile-section {
+            max-width: clamp(
+                760px,
+                82vw,
+                860px
+            ); /* Mantiene el mismo tamaño máximo original */
+        }
+
+        /* Asegurar adaptación perfecta del título en desktop grande */
+        .project-title.glass-tag {
+            width: fit-content; /* Mantener adaptación al contenido */
+            max-width: 100%; /* Evitar overflow */
+        }
+    }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.glass-card,
+.certificate-item,
+.filter-container {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.certificate-item:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.certificate-item:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+/* Staggered animation for multiple projects */
+.project-item:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.project-item:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.project-item:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+/* Interactive states */
+button:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
+}
+
+.glass-bubble:active,
+.glass-button:active,
+.filter-btn:active,
+.project-link:active {
+    transform: scale(0.95);
+}
+
+/* Loading states */
+.profile-img {
+    transition: opacity var(--transition-medium);
+}
+
+.profile-img:not([src]),
+.profile-img[src=""] {
+    opacity: 0;
+    background: rgba(208, 208, 208, 0.1);
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --transition-fast: 50ms ease;
+        --transition-medium: 100ms ease;
+        --transition-slow: 150ms ease;
+        --transition-smooth: 100ms ease;
+    }
+
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+
+    /* Mantener transiciones básicas para responsividad */
+    *,
+    *::before,
+    *::after {
+        transition: all 100ms ease;
+    }
+
+    /* Eliminar transiciones complejas */
+    .carousel-progress-fill {
+        transition: width linear !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    .menu-button,
+    .next-btn,
+    .filter-container {
+        display: none;
+    }
+
+    .portfolio-container {
+        padding: var(--space-lg);
+        max-width: none;
+    }
+
+    .glass-card,
+    .glass-bubble,
+    .glass-container {
+        background: rgba(208, 208, 208, 0.1);
+        backdrop-filter: none;
+    }
+}
+
+/* Override final para altura consistente de barra de progreso en todos los contextos */
+.project-item .carousel-controls .carousel-progress,
+.project-item .project-media .carousel-progress {
+    height: 3px !important;
+    min-height: 3px !important;
+    max-height: 3px !important;
+}
+
+.project-item .carousel-controls .carousel-progress-fill,
+.project-item .project-media .carousel-progress-fill {
+    height: 100% !important;
+    min-height: 3px !important;
+    max-height: 3px !important;
+}
+
+/* Cursor management - optimized */
+* {
+    cursor: default !important;
+}
+
+/* Interactive elements cursor */
+button,
+input[type="button"],
+input[type="submit"],
+[role="button"],
+.contact-btn,
+.social-btn,
+.filter-btn,
+.project-link,
+.certificate-item,
+.carousel-btn,
+.carousel-dot,
+.carousel-fullscreen-btn,
+.carousel-fullscreen-close,
+.carousel-fullscreen-prev,
+.carousel-fullscreen-next,
+.menu-button,
+.external-link,
+.download-btn,
+[tabindex]:not([tabindex="-1"]) {
+    cursor: pointer !important;
+}
