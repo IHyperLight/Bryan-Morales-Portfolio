@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Type Test</title>
+</head>
+<body>
+    <h1>Device Type Detection Test</h1>
+    <p>Check the top-left corner for device type indicator.</p>
+    
+    <script>
+        // Simulate hardwareCapabilities for testing
+        const hardwareCapabilities = (() => {
+            let capabilities = {
+                hasGPU: true,
+                hasBackdropFilter: true,
+                hasTransform3D: true,
+                hardwareConcurrency: navigator.hardwareConcurrency || 1,
+                isLowEndDevice: false,
+                performanceLevel: "high",
+            };
+
+            const testGPUSupport = () => {
+                try {
+                    const getDeviceMemory = () => navigator.deviceMemory || 
+                        (navigator.storage && navigator.storage.estimate ? 2 : 1);
+                    
+                    const getConnectionSpeed = () => {
+                        if ('connection' in navigator) {
+                            const conn = navigator.connection;
+                            return {
+                                effectiveType: conn.effectiveType || 'unknown',
+                                downlink: conn.downlink || 0,
+                                saveData: conn.saveData || false
+                            };
+                        }
+                        return { effectiveType: 'unknown', downlink: 0, saveData: false };
+                    };
+
+                    const deviceMemory = getDeviceMemory();
+                    const connection = getConnectionSpeed();
+                    
+                    const ultraLowEndFactors = [
+                        capabilities.hardwareConcurrency < 2,
+                        deviceMemory < 1.5,
+                        /Android.*[2-4]\.|iPhone.*OS [4-8]_/.test(navigator.userAgent),
+                        connection.effectiveType === 'slow-2g',
+                        screen.width <= 320 && deviceMemory < 2,
+                        navigator.maxTouchPoints > 0 && deviceMemory < 1
+                    ];
+
+                    const lowEndFactors = [
+                        capabilities.hardwareConcurrency < 4,
+                        deviceMemory < 3,
+                        /Android.*4\.|iPhone.*OS [5-9]_|Windows Phone/.test(navigator.userAgent),
+                        connection.effectiveType === '2g',
+                        connection.saveData === true,
+                        screen.width <= 480 && deviceMemory < 2,
+                        navigator.maxTouchPoints > 0 && deviceMemory < 3
+                    ];
+
+                    const ultraLowScore = ultraLowEndFactors.filter(Boolean).length;
+                    const lowScore = lowEndFactors.filter(Boolean).length;
+                    
+                    if (ultraLowScore >= 2) {
+                        capabilities.performanceLevel = "ultra-low";
+                        capabilities.isLowEndDevice = true;
+                    } else if (lowScore >= 3) {
+                        capabilities.performanceLevel = "low";
+                        capabilities.isLowEndDevice = true;
+                    } else if (lowScore >= 1 || ultraLowScore >= 1) {
+                        capabilities.performanceLevel = "low-medium";
+                        capabilities.isLowEndDevice = true;
+                    } else if (
+                        capabilities.hardwareConcurrency >= 12 &&
+                        deviceMemory >= 16 &&
+                        connection.downlink > 10
+                    ) {
+                        capabilities.performanceLevel = "ultra-high";
+                    } else if (
+                        capabilities.hardwareConcurrency >= 8 &&
+                        deviceMemory >= 8
+                    ) {
+                        capabilities.performanceLevel = "high";
+                    } else {
+                        capabilities.performanceLevel = "medium";
+                    }
+                } catch (e) {
+                    capabilities.performanceLevel = "low";
+                }
+            };
+
+            return {
+                init() {
+                    testGPUSupport();
+                    return capabilities;
+                },
+                getCapabilities: () => capabilities,
+            };
+        })();
+
+        // Initialize and show indicator
+        const capabilities = hardwareCapabilities.init();
+        
+        // Create device type indicator
+        const createDeviceIndicator = () => {
+            const deviceType = capabilities.performanceLevel || 'unknown';
+
+            const indicator = document.createElement('div');
+            indicator.id = 'device-type-indicator';
+            indicator.textContent = deviceType;
+            indicator.style.cssText = `
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                background: rgba(0, 0, 0, 0.8);
+                color: #00ff00;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-family: 'Courier New', monospace;
+                font-size: 12px;
+                font-weight: bold;
+                z-index: 10000;
+                pointer-events: none;
+                border: 1px solid #00ff00;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            `;
+
+            document.body.appendChild(indicator);
+
+            // Show device info in console too
+            console.log('Device Type:', deviceType);
+            console.log('Device Memory:', navigator.deviceMemory || 'unknown');
+            console.log('Hardware Concurrency:', navigator.hardwareConcurrency || 'unknown');
+            console.log('Connection:', navigator.connection ? navigator.connection.effectiveType : 'unknown');
+        };
+
+        // Create indicator when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', createDeviceIndicator);
+        } else {
+            createDeviceIndicator();
+        }
+    </script>
+</body>
+</html>

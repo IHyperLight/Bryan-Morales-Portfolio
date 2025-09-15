@@ -1858,6 +1858,56 @@ window.addEventListener("error", function (e) {
                 this.setupAggressiveCleanup();
                 console.log("🔧 Ultra-low end optimizations activated");
             }
+            
+            // Create temporary device type indicator
+            this.createDeviceIndicator();
+        },
+
+        createDeviceIndicator() {
+            // Get the performance level from hardwareCapabilities if available
+            let deviceType = 'unknown';
+            
+            if (typeof hardwareCapabilities !== 'undefined') {
+                try {
+                    const capabilities = hardwareCapabilities.getCapabilities();
+                    deviceType = capabilities.performanceLevel || 'unknown';
+                } catch (e) {
+                    deviceType = this.isUltraLowEnd ? 'ultra-low' : 'unknown';
+                }
+            } else {
+                deviceType = this.isUltraLowEnd ? 'ultra-low' : 'unknown';
+            }
+
+            // Create indicator element
+            const indicator = document.createElement('div');
+            indicator.id = 'device-type-indicator';
+            indicator.textContent = deviceType;
+            indicator.style.cssText = `
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                background: rgba(0, 0, 0, 0.8);
+                color: #00ff00;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-family: 'Courier New', monospace;
+                font-size: 12px;
+                font-weight: bold;
+                z-index: 10000;
+                pointer-events: none;
+                border: 1px solid #00ff00;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            `;
+
+            // Add to document
+            document.body.appendChild(indicator);
+
+            // Auto-remove after 30 seconds (temporary)
+            setTimeout(() => {
+                if (indicator.parentNode) {
+                    indicator.parentNode.removeChild(indicator);
+                }
+            }, 30000);
         },
 
         detectUltraLowEndDevice() {
