@@ -65,6 +65,24 @@ const willChangeManager = {
             }
         }
 
+        // Intelligent will-change management for medium devices
+        if (capabilities.performanceLevel === "medium") {
+            // Medium devices: Strategic will-change usage
+            if (property !== "transform" && property !== "opacity" && property !== "filter") {
+                return; // Only allow essential properties on medium devices
+            }
+            
+            // Limit concurrent will-change elements for medium devices (max 4)
+            if (this.activeElements.size && this.activeElements.size >= 4) {
+                return; // Max 4 elements with will-change on medium
+            }
+            
+            // Prioritize transform and opacity over filter
+            if (property === "filter" && this.activeElements.size >= 2) {
+                return; // Avoid filter will-change when already 2+ elements active
+            }
+        }
+
         // Only use will-change on capable devices to reduce memory pressure
         if (capabilities.performanceLevel !== "low" && capabilities.hasGPU) {
             element.style.willChange = property;
@@ -78,11 +96,13 @@ const willChangeManager = {
         const capabilities = hardwareCapabilities.getCapabilities();
 
         // Clear immediately on low-end devices to free memory faster
-        const clearDelay =
-            capabilities.performanceLevel &&
-            capabilities.performanceLevel.includes("low")
-                ? 0
-                : delay;
+        // Medium devices get moderate delay for balance between performance and UX
+        let clearDelay = delay;
+        if (capabilities.performanceLevel && capabilities.performanceLevel.includes("low")) {
+            clearDelay = 0; // Immediate for low-end
+        } else if (capabilities.performanceLevel === "medium") {
+            clearDelay = Math.min(delay, 50); // Max 50ms delay for medium devices
+        }
 
         const timerId = setTimeout(() => {
             if (element.style) {
@@ -99,6 +119,7 @@ const willChangeManager = {
         this.activeElements = new WeakSet();
 
         // Force clear all will-change properties on low-end devices
+        // Medium devices get selective cleanup - only clear non-essential properties
         const capabilities = hardwareCapabilities.getCapabilities();
         if (
             capabilities.performanceLevel &&
@@ -109,6 +130,20 @@ const willChangeManager = {
             );
             allElements.forEach((el) => {
                 if (el.style.willChange && el.style.willChange !== "auto") {
+                    el.style.willChange = "auto";
+                }
+            });
+        } else if (capabilities.performanceLevel === "medium") {
+            // Medium devices: Only clear non-essential will-change properties
+            const allElements = document.querySelectorAll(
+                '[style*="will-change"]'
+            );
+            allElements.forEach((el) => {
+                if (el.style.willChange && 
+                    el.style.willChange !== "auto" && 
+                    el.style.willChange !== "transform" && 
+                    el.style.willChange !== "opacity") {
+                    // Clear non-essential properties like filter, but keep transform/opacity
                     el.style.willChange = "auto";
                 }
             });
@@ -295,12 +330,25 @@ const hardwareCapabilities = (() => {
                 root.style.setProperty("--transition-smooth", "300ms");
                 root.style.setProperty("--raf-throttle", "22"); // 45fps
             }
+        } else if (capabilities.performanceLevel === "medium") {
+            // Medium devices: Balanced optimizations for optimal performance
+            root.classList.add("performance-medium");
+            // Slightly reduced transition durations for better responsiveness
+            root.style.setProperty("--transition-fast", "120ms");
+            root.style.setProperty("--transition-medium", "250ms");
+            root.style.setProperty("--transition-smooth", "350ms");
+            root.style.setProperty("--raf-throttle", "18"); // 55fps optimized
+            
+            // Enable selective optimizations for medium devices
+            root.style.setProperty("--enable-will-change", "selective");
+            root.style.setProperty("--enable-containment", "1");
+            root.style.setProperty("--backdrop-filter-quality", "medium");
         }
 
         // Set performance level class for all levels
         root.classList.add(`performance-${capabilities.performanceLevel}`);
 
-        // Memory pressure optimizations for ultra-low end devices
+        // Memory pressure optimizations
         if (capabilities.performanceLevel === "ultra-low") {
             // Disable intersection observers for non-critical elements
             root.style.setProperty("--enable-intersection-observers", "0");
@@ -309,6 +357,11 @@ const hardwareCapabilities = (() => {
         } else if (capabilities.performanceLevel.includes("low")) {
             // Reduce will-change usage
             root.style.setProperty("--enable-will-change", "limited");
+        } else if (capabilities.performanceLevel === "medium") {
+            // Medium devices: Intelligent resource management
+            root.style.setProperty("--enable-intersection-observers", "throttled");
+            root.style.setProperty("--intersection-threshold", "0.25");
+            root.style.setProperty("--intersection-margin", "50px");
         }
     };
 
@@ -343,40 +396,146 @@ const viewportManager = (() => {
 
     // Intersection Observer for carousel visibility
     const createCarouselObserver = () => {
+        const performanceLevel = hardwareCapabilities.getPerformanceLevel();
+        
+        // Get optimal settings based on device performance
+        const observerConfig = getCarouselObserverConfig(performanceLevel);
+        
         return new IntersectionObserver(
             (entries) => {
-                entries.forEach((entry) => {
-                    const projectContainer = entry.target;
-                    const carouselState = projectContainer._carouselState;
-
-                    if (!carouselState) return;
-
-                    // Queue update for throttled processing
-                    const update = () => {
-                        if (entry.isIntersecting) {
-                            // Carousel is visible - resume autoplay if not manually paused
-                            visibleCarousels.add(projectContainer);
-                            carouselState.setVisibility(true);
-                        } else {
-                            // Carousel is not visible - pause to save resources
-                            visibleCarousels.delete(projectContainer);
-                            carouselState.setVisibility(false);
-                        }
-                    };
-
-                    pendingUpdates.add(update);
-
-                    // Throttle updates for better performance
-                    if (!updateTimeout) {
-                        updateTimeout = setTimeout(processPendingUpdates, 50);
-                    }
-                });
+                // Use device-specific throttling for intersection callbacks
+                processCarouselIntersections(entries, performanceLevel);
             },
-            {
-                threshold: 0.15, // Trigger when 15% visible for better UX
-                rootMargin: "100px 0px", // Larger margin for smoother transitions
-            }
+            observerConfig
         );
+    };
+
+    const getCarouselObserverConfig = (performanceLevel) => {
+        switch(performanceLevel) {
+            case 'ultra-low':
+                return {
+                    threshold: 0.5, // Higher threshold to reduce callbacks
+                    rootMargin: "200px 0px", // Large margin for early loading
+                };
+            case 'low':
+                return {
+                    threshold: 0.3,
+                    rootMargin: "150px 0px",
+                };
+            case 'low-medium':
+                return {
+                    threshold: 0.2,
+                    rootMargin: "120px 0px",
+                };
+            case 'medium':
+                return {
+                    threshold: [0.1, 0.25, 0.5], // Multiple thresholds for balanced control
+                    rootMargin: "80px 20px", // Optimized margin for medium devices
+                };
+            case 'high':
+                return {
+                    threshold: [0.05, 0.15, 0.35, 0.65],
+                    rootMargin: "50px 0px",
+                };
+            case 'ultra-high':
+                return {
+                    threshold: [0.0, 0.1, 0.2, 0.3, 0.5, 0.7, 0.9],
+                    rootMargin: "25px 0px",
+                };
+            default:
+                return {
+                    threshold: 0.15,
+                    rootMargin: "100px 0px",
+                };
+        }
+    };
+
+    const processCarouselIntersections = (entries, performanceLevel) => {
+        if (performanceLevel === 'medium') {
+            // Medium devices: Intelligent throttling with RAF scheduling
+            entries.forEach((entry) => {
+                const projectContainer = entry.target;
+                const carouselState = projectContainer._carouselState;
+
+                if (!carouselState) return;
+
+                // Use RAF scheduler for smooth medium device performance
+                const update = () => {
+                    if (entry.isIntersecting) {
+                        // Apply medium-specific visibility optimizations
+                        applyMediumCarouselVisibility(projectContainer, carouselState, true);
+                    } else {
+                        applyMediumCarouselVisibility(projectContainer, carouselState, false);
+                    }
+                };
+
+                rafScheduler.schedule(update, 'carousel-intersection-medium');
+            });
+            return;
+        }
+
+        // Handle other performance levels
+        entries.forEach((entry) => {
+            const projectContainer = entry.target;
+            const carouselState = projectContainer._carouselState;
+
+            if (!carouselState) return;
+
+            const update = () => {
+                if (entry.isIntersecting) {
+                    visibleCarousels.add(projectContainer);
+                    carouselState.setVisibility(true);
+                } else {
+                    visibleCarousels.delete(projectContainer);
+                    carouselState.setVisibility(false);
+                }
+            };
+
+            pendingUpdates.add(update);
+
+            // Adaptive throttling based on performance level
+            const throttleDelay = getIntersectionThrottleDelay(performanceLevel);
+            if (!updateTimeout) {
+                updateTimeout = setTimeout(processPendingUpdates, throttleDelay);
+            }
+        });
+    };
+
+    const applyMediumCarouselVisibility = (projectContainer, carouselState, isVisible) => {
+        if (isVisible) {
+            // Medium device specific optimizations when carousel becomes visible
+            visibleCarousels.add(projectContainer);
+            carouselState.setVisibility(true);
+            
+            // Apply medium-specific will-change optimizations
+            willChangeManager.add(projectContainer.querySelector('.carousel-viewport'), 'transform');
+            
+            // Optimize carousel media for medium devices
+            const carouselImages = projectContainer.querySelectorAll('.carousel-slide img');
+            carouselImages.forEach(img => {
+                // Enhance image quality for medium devices
+                img.style.imageRendering = '-webkit-optimize-contrast';
+            });
+        } else {
+            // Clean up medium device optimizations when carousel not visible
+            visibleCarousels.delete(projectContainer);
+            carouselState.setVisibility(false);
+            
+            // Clear will-change with medium device timing
+            willChangeManager.clear(projectContainer.querySelector('.carousel-viewport'), 50);
+        }
+    };
+
+    const getIntersectionThrottleDelay = (performanceLevel) => {
+        switch(performanceLevel) {
+            case 'ultra-low': return 100; // 10fps
+            case 'low': return 67; // 15fps
+            case 'low-medium': return 50; // 20fps
+            case 'medium': return 33; // 30fps for medium devices
+            case 'high': return 16; // 60fps
+            case 'ultra-high': return 8; // 120fps
+            default: return 50;
+        }
     };
 
     const observeCarousel = (projectContainer) => {
@@ -417,19 +576,70 @@ const viewportManager = (() => {
     };
 })();
 
-// Performance utility: High-frequency RAF scheduler
+// Performance utility: High-frequency RAF scheduler with adaptive throttling
 const rafScheduler = (() => {
     const callbacks = new Set();
     let rafId = null;
+    let lastFrameTime = 0;
+    let frameCount = 0;
+    let throttleInterval = 16; // Default 60fps
 
-    const tick = () => {
-        for (const callback of callbacks) {
-            try {
-                callback();
-            } catch (e) {
-                console.warn("RAF callback error:", e);
+    // Set throttle interval based on device capabilities
+    const setThrottleBasedOnDevice = () => {
+        if (typeof hardwareCapabilities !== 'undefined') {
+            const capabilities = hardwareCapabilities.getCapabilities();
+            switch (capabilities.performanceLevel) {
+                case 'ultra-low':
+                    throttleInterval = 50; // 20fps
+                    break;
+                case 'low':
+                    throttleInterval = 33; // 30fps
+                    break;
+                case 'low-medium':
+                    throttleInterval = 22; // 45fps
+                    break;
+                case 'medium':
+                    throttleInterval = 18; // 55fps - optimized for medium devices
+                    break;
+                case 'high':
+                case 'ultra-high':
+                default:
+                    throttleInterval = 16; // 60fps
+                    break;
             }
         }
+    };
+
+    const tick = (currentTime) => {
+        // Adaptive throttling for medium and lower-end devices
+        if (currentTime - lastFrameTime >= throttleInterval) {
+            frameCount++;
+            
+            // Dynamic adjustment for medium devices based on performance
+            if (typeof hardwareCapabilities !== 'undefined') {
+                const capabilities = hardwareCapabilities.getCapabilities();
+                if (capabilities.performanceLevel === 'medium') {
+                    // Adjust throttle based on callback load
+                    if (callbacks.size > 3) {
+                        throttleInterval = 20; // Reduce to 50fps when busy
+                    } else if (callbacks.size <= 1) {
+                        throttleInterval = 16; // Back to 60fps when light
+                    } else {
+                        throttleInterval = 18; // Maintain 55fps for moderate load
+                    }
+                }
+            }
+
+            for (const callback of callbacks) {
+                try {
+                    callback(currentTime, frameCount);
+                } catch (e) {
+                    console.warn("RAF callback error:", e);
+                }
+            }
+            lastFrameTime = currentTime;
+        }
+        
         if (callbacks.size > 0) {
             rafId = requestAnimationFrame(tick);
         } else {
@@ -440,11 +650,23 @@ const rafScheduler = (() => {
     return {
         add(callback) {
             callbacks.add(callback);
-            if (!rafId) rafId = requestAnimationFrame(tick);
+            if (!rafId) {
+                setThrottleBasedOnDevice();
+                rafId = requestAnimationFrame(tick);
+            }
         },
         remove(callback) {
             callbacks.delete(callback);
         },
+        // Method to manually adjust throttle for medium devices during runtime
+        adjustForMediumDevice(isHeavyLoad = false) {
+            if (typeof hardwareCapabilities !== 'undefined') {
+                const capabilities = hardwareCapabilities.getCapabilities();
+                if (capabilities.performanceLevel === 'medium') {
+                    throttleInterval = isHeavyLoad ? 20 : 18; // 50fps vs 55fps
+                }
+            }
+        }
     };
 })();
 
@@ -2043,3 +2265,400 @@ window.addEventListener("error", function (e) {
         { once: true }
     );
 })();
+
+// ========================================================================
+// MEDIUM DEVICE MEMORY MANAGEMENT - ULTRA-METICULOUS
+// ========================================================================
+
+const mediumDeviceOptimizer = (() => {
+    let isMediumDevice = false;
+    let cleanupInterval = null;
+    let memoryObserver = null;
+    let lastCleanup = 0;
+    let memoryPressureLevel = 0;
+
+    return {
+        init() {
+            const performanceLevel = hardwareCapabilities.getPerformanceLevel();
+            this.isMediumDevice = performanceLevel === 'medium';
+            
+            if (this.isMediumDevice) {
+                this.setupMediumOptimizations();
+                this.setupIntelligentCleanup();
+                this.setupMemoryPressureMonitoring();
+            }
+        },
+
+        setupMediumOptimizations() {
+            try {
+                // Apply medium-specific CSS properties
+                const root = document.documentElement;
+                root.style.setProperty('--medium-transition-duration', '120ms');
+                root.style.setProperty('--medium-animation-timing', 'ease-out');
+                root.style.setProperty('--medium-blur-quality', 'blur(6px)');
+                
+                // Enable strategic CSS containment for medium devices
+                this.enableStrategicContainment();
+                
+                // Setup intelligent resource management
+                this.setupResourceManagement();
+                
+            } catch (e) {
+                console.warn('Medium device optimization setup failed:', e);
+            }
+        },
+
+        enableStrategicContainment() {
+            // Apply containment to key performance areas
+            const containmentTargets = [
+                '.glass-card',
+                '.project-item',
+                '.carousel-viewport',
+                '.profile-section'
+            ];
+
+            containmentTargets.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(el => {
+                    el.style.contain = 'layout style';
+                });
+            });
+        },
+
+        setupResourceManagement() {
+            // Intelligent image loading for medium devices
+            const images = document.querySelectorAll('img[loading="lazy"]');
+            images.forEach(img => {
+                img.addEventListener('load', () => {
+                    // Optimize loaded images for medium devices
+                    img.style.imageRendering = '-webkit-optimize-contrast';
+                }, { once: true });
+            });
+
+            // Monitor will-change usage
+            this.monitorWillChangeUsage();
+        },
+
+        monitorWillChangeUsage() {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach(mutation => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        const target = mutation.target;
+                        if (target.style.willChange && target.style.willChange !== 'auto') {
+                            // Track will-change usage for cleanup
+                            willChangeManager.track(target);
+                        }
+                    }
+                });
+            });
+
+            observer.observe(document.body, {
+                attributes: true,
+                subtree: true,
+                attributeFilter: ['style']
+            });
+
+            this.memoryObserver = observer;
+        },
+
+        setupIntelligentCleanup() {
+            // Moderate cleanup interval for medium devices (30 seconds)
+            this.cleanupInterval = setInterval(() => {
+                this.performIntelligentCleanup();
+            }, 30000);
+
+            // Cleanup on visibility change with medium device timing
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    setTimeout(() => {
+                        this.performIntelligentCleanup();
+                    }, 100); // Slight delay for medium devices
+                }
+            }, { passive: true });
+
+            // Cleanup on memory pressure
+            if ('memory' in performance) {
+                this.setupMemoryPressureCleanup();
+            }
+        },
+
+        setupMemoryPressureMonitoring() {
+            if ('memory' in performance) {
+                // Monitor memory usage every 10 seconds for medium devices
+                setInterval(() => {
+                    this.checkMemoryPressure();
+                }, 10000);
+            }
+        },
+
+        checkMemoryPressure() {
+            try {
+                const memInfo = performance.memory;
+                const usedMemory = memInfo.usedJSHeapSize;
+                const totalMemory = memInfo.totalJSHeapSize;
+                const memoryUsageRatio = usedMemory / totalMemory;
+
+                // Update pressure level for medium devices
+                if (memoryUsageRatio > 0.85) {
+                    this.memoryPressureLevel = 3; // High pressure
+                } else if (memoryUsageRatio > 0.7) {
+                    this.memoryPressureLevel = 2; // Medium pressure
+                } else if (memoryUsageRatio > 0.5) {
+                    this.memoryPressureLevel = 1; // Low pressure
+                } else {
+                    this.memoryPressureLevel = 0; // No pressure
+                }
+
+                // Trigger cleanup if memory pressure is high
+                if (this.memoryPressureLevel >= 2) {
+                    this.performPressureBasedCleanup();
+                }
+            } catch (e) {
+                // Memory API not available
+                this.memoryPressureLevel = 0;
+            }
+        },
+
+        setupMemoryPressureCleanup() {
+            // Additional cleanup when memory pressure is detected
+            setInterval(() => {
+                if ('memory' in performance) {
+                    const memInfo = performance.memory;
+                    const memoryRatio = memInfo.usedJSHeapSize / memInfo.totalJSHeapSize;
+                    
+                    if (memoryRatio > 0.75) {
+                        this.performMemoryPressureCleanup();
+                    }
+                }
+            }, 15000); // Check every 15 seconds for medium devices
+        },
+
+        performIntelligentCleanup() {
+            try {
+                const now = Date.now();
+                
+                // Skip if cleaned up recently (minimum 5 seconds for medium devices)
+                if (now - this.lastCleanup < 5000) return;
+
+                // Intelligent will-change cleanup for medium devices
+                this.cleanupWillChangeIntelligently();
+
+                // Cleanup RAF callbacks with medium device strategy
+                this.cleanupRAFCallbacks();
+
+                // Clear unused event listeners
+                this.cleanupEventListeners();
+
+                // Medium device memory optimization
+                this.optimizeMemoryForMediumDevices();
+
+                this.lastCleanup = now;
+            } catch (e) {
+                console.warn('Medium device cleanup error:', e);
+            }
+        },
+
+        cleanupWillChangeIntelligently() {
+            if (typeof willChangeManager !== 'undefined') {
+                // For medium devices, keep 4 most recent will-change properties
+                const elements = document.querySelectorAll('[style*="will-change"]');
+                if (elements.length > 4) {
+                    // Remove will-change from older elements
+                    Array.from(elements).slice(0, -4).forEach(el => {
+                        if (el.style.willChange && el.style.willChange !== 'auto') {
+                            willChangeManager.clear(el, 0); // Immediate cleanup
+                        }
+                    });
+                }
+            }
+        },
+
+        cleanupRAFCallbacks() {
+            if (typeof rafScheduler !== 'undefined' && rafScheduler.pendingCallbacks) {
+                // For medium devices, keep only essential RAF callbacks
+                const callbacks = rafScheduler.pendingCallbacks;
+                if (callbacks.size > 8) {
+                    // Cancel older non-essential callbacks
+                    let count = 0;
+                    for (let [id, callback] of callbacks) {
+                        if (count++ > 6) {
+                            if (!callback.priority || callback.priority < 2) {
+                                cancelAnimationFrame(id);
+                                callbacks.delete(id);
+                            }
+                        }
+                    }
+                }
+            }
+        },
+
+        cleanupEventListeners() {
+            // Clean up temporary event listeners for medium devices
+            const tempListeners = document.querySelectorAll('[data-temp-listener]');
+            tempListeners.forEach(el => {
+                if (el.dataset.tempListener === 'true') {
+                    // Remove temp attribute to trigger cleanup
+                    el.removeAttribute('data-temp-listener');
+                }
+            });
+        },
+
+        optimizeMemoryForMediumDevices() {
+            // Optimize carousel memory usage
+            this.optimizeCarouselMemory();
+            
+            // Clean up unused DOM references
+            this.cleanupDOMReferences();
+            
+            // Optimize CSS custom properties
+            this.optimizeCSSCustomProperties();
+        },
+
+        optimizeCarouselMemory() {
+            // For medium devices, unload off-screen carousel images
+            const carousels = document.querySelectorAll('.carousel-viewport');
+            carousels.forEach(carousel => {
+                const slides = carousel.querySelectorAll('.carousel-slide');
+                slides.forEach((slide, index) => {
+                    const img = slide.querySelector('img');
+                    if (img && !this.isSlideVisible(slide)) {
+                        // For medium devices, reduce image quality when not visible
+                        if (img.dataset.originalSrc) {
+                            img.style.imageRendering = 'auto';
+                        }
+                    }
+                });
+            });
+        },
+
+        isSlideVisible(slide) {
+            const rect = slide.getBoundingClientRect();
+            return rect.top < window.innerHeight && rect.bottom > 0;
+        },
+
+        cleanupDOMReferences() {
+            // Clean up any cached DOM references that might be leaking
+            if (window.domCache) {
+                const cacheKeys = Object.keys(window.domCache);
+                if (cacheKeys.length > 20) {
+                    // For medium devices, keep only the 15 most recent cache entries
+                    cacheKeys.slice(0, -15).forEach(key => {
+                        delete window.domCache[key];
+                    });
+                }
+            }
+        },
+
+        optimizeCSSCustomProperties() {
+            // For medium devices, clean up unused CSS custom properties
+            const root = document.documentElement;
+            const computedStyle = getComputedStyle(root);
+            
+            // Remove temporary CSS properties that may have accumulated
+            const tempProperties = [
+                '--temp-transform',
+                '--temp-opacity',
+                '--temp-filter'
+            ];
+            
+            tempProperties.forEach(prop => {
+                if (computedStyle.getPropertyValue(prop)) {
+                    root.style.removeProperty(prop);
+                }
+            });
+        },
+
+        performPressureBasedCleanup() {
+            // Aggressive cleanup when memory pressure is detected
+            this.performIntelligentCleanup();
+            
+            // Additional cleanup for medium devices under pressure
+            if (this.memoryPressureLevel >= 3) {
+                this.performEmergencyCleanup();
+            }
+        },
+
+        performMemoryPressureCleanup() {
+            try {
+                // Emergency cleanup for medium devices
+                this.cleanupWillChangeIntelligently();
+                
+                // Clear all non-essential RAF callbacks immediately
+                if (typeof rafScheduler !== 'undefined') {
+                    rafScheduler.clearAll();
+                }
+
+                // Force cleanup of carousel observers
+                if (typeof carouselObservers !== 'undefined') {
+                    carouselObservers.forEach((observer, container) => {
+                        if (!this.isElementVisible(container)) {
+                            observer.disconnect();
+                            carouselObservers.delete(container);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('Memory pressure cleanup failed:', e);
+            }
+        },
+
+        performEmergencyCleanup() {
+            try {
+                // Emergency cleanup for critical memory pressure
+                willChangeManager.clearAll();
+                
+                // Disable non-essential animations temporarily
+                const root = document.documentElement;
+                root.style.setProperty('--emergency-mode', '1');
+                
+                // Re-enable after 5 seconds
+                setTimeout(() => {
+                    root.style.removeProperty('--emergency-mode');
+                }, 5000);
+                
+            } catch (e) {
+                console.warn('Emergency cleanup failed:', e);
+            }
+        },
+
+        isElementVisible(element) {
+            const rect = element.getBoundingClientRect();
+            return rect.top < window.innerHeight && rect.bottom > 0;
+        },
+
+        destroy() {
+            if (this.cleanupInterval) {
+                clearInterval(this.cleanupInterval);
+                this.cleanupInterval = null;
+            }
+            
+            if (this.memoryObserver) {
+                this.memoryObserver.disconnect();
+                this.memoryObserver = null;
+            }
+        }
+    };
+})();
+
+// Initialize medium device optimizer when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        mediumDeviceOptimizer.init();
+    });
+} else {
+    mediumDeviceOptimizer.init();
+}
+
+// Enhanced cleanup on page unload for medium devices
+window.addEventListener('beforeunload', () => {
+    try {
+        mediumDeviceOptimizer.destroy();
+        
+        // Final cleanup for medium devices
+        if (mediumDeviceOptimizer.isMediumDevice) {
+            mediumDeviceOptimizer.performIntelligentCleanup();
+        }
+    } catch (e) {
+        // Silent cleanup on unload
+    }
+}, { once: true });
