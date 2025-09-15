@@ -36,16 +36,36 @@ const performanceCache = {
 
 // Utility for optimized will-change management
 const willChangeManager = {
+    activeElements: new WeakSet(),
+
     set(element, property = "transform") {
-        if (element) element.style.willChange = property;
-    },
-    clear(element, delay = 100) {
         if (!element) return;
+
+        const capabilities = hardwareCapabilities.getCapabilities();
+
+        // Only use will-change on capable devices to reduce memory pressure
+        if (capabilities.performanceLevel !== "low" && capabilities.hasGPU) {
+            element.style.willChange = property;
+            this.activeElements.add(element);
+        }
+    },
+
+    clear(element, delay = 100) {
+        if (!element || !this.activeElements.has(element)) return;
+
         const timerId = setTimeout(() => {
-            element.style.willChange = "auto";
+            if (element.style) {
+                element.style.willChange = "auto";
+                this.activeElements.delete(element);
+            }
             performanceCache.timers.delete(timerId);
         }, delay);
         performanceCache.timers.add(timerId);
+    },
+
+    clearAll() {
+        // Cleanup function for page unload
+        this.activeElements = new WeakSet();
     },
 };
 
@@ -79,15 +99,18 @@ const hardwareCapabilities = (() => {
                 navigator.deviceMemory < 4 || // If available
                 /Android.*4\.|iPhone.*OS [5-9]_/.test(navigator.userAgent);
 
-            // Determine performance level
+            // Determine performance level with more granular detection
             if (capabilities.isLowEndDevice || !capabilities.hasTransform3D) {
                 capabilities.performanceLevel = "low";
                 capabilities.hasGPU = false;
             } else if (
                 capabilities.hardwareConcurrency < 8 ||
-                !capabilities.hasBackdropFilter
+                !capabilities.hasBackdropFilter ||
+                navigator.deviceMemory < 8 // More conservative memory threshold
             ) {
                 capabilities.performanceLevel = "medium";
+            } else {
+                capabilities.performanceLevel = "high";
             }
         } catch (e) {
             capabilities.hasGPU = false;
@@ -803,9 +826,15 @@ function initializeSingleCarousel(projectContainer) {
     exposeCarouselState(projectContainer, carouselState);
 }
 
-// Event delegation system
+// Event delegation system - Enhanced for better performance
 const eventDelegator = (() => {
     const delegateMap = new Map();
+    const passiveEvents = new Set([
+        "scroll",
+        "wheel",
+        "touchstart",
+        "touchmove",
+    ]);
 
     function addDelegatedListener(
         container,
@@ -815,20 +844,47 @@ const eventDelegator = (() => {
         options = {}
     ) {
         const key = `${event}-${selector}`;
-        if (!delegateMap.has(key)) {
-            const delegatedHandler = (e) => {
-                const target = e.target.closest(selector);
-                if (target && container.contains(target)) {
-                    handler.call(target, e);
-                }
-            };
 
-            container.addEventListener(event, delegatedHandler, options);
-            delegateMap.set(key, { container, handler: delegatedHandler });
-        }
+        if (delegateMap.has(key)) return; // Prevent duplicate listeners
+
+        // Auto-detect if event should be passive for better performance
+        const finalOptions = {
+            passive: passiveEvents.has(event),
+            capture: false,
+            ...options,
+        };
+
+        const delegatedHandler = (e) => {
+            const target = e.target.closest(selector);
+            if (target && container.contains(target)) {
+                handler.call(target, e);
+            }
+        };
+
+        container.addEventListener(event, delegatedHandler, finalOptions);
+        delegateMap.set(key, {
+            container,
+            event,
+            handler: delegatedHandler,
+            options: finalOptions,
+        });
     }
 
-    return { addDelegatedListener };
+    function removeAllListeners() {
+        for (const [
+            key,
+            { container, event, handler, options },
+        ] of delegateMap) {
+            try {
+                container.removeEventListener(event, handler, options);
+            } catch (e) {
+                // Silent cleanup
+            }
+        }
+        delegateMap.clear();
+    }
+
+    return { addDelegatedListener, removeAllListeners };
 })();
 
 // Contact buttons functionality
@@ -1113,6 +1169,12 @@ window.addEventListener(
 
         // Clean up all managed resources
         performanceManager.cleanup();
+
+        // Clean up event delegator
+        eventDelegator.removeAllListeners();
+
+        // Clean up will-change properties
+        willChangeManager.clearAll();
 
         // Clear caches
         performanceCache.rafIds.clear();

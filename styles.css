@@ -228,7 +228,7 @@ img[src$=".WEBP"] {
 }
 
 .performance-medium *[class*="glass-"] {
-    backdrop-filter: blur(3px) saturate(120%) brightness(115%) !important;
+    backdrop-filter: blur(5px) saturate(115%) brightness(120%) !important;
 }
 
 .performance-high *[class*="glass-"] {
@@ -352,10 +352,12 @@ img[src$=".WEBP"] {
     transition: padding var(--transition-smooth),
         border-radius var(--transition-smooth),
         transform var(--transition-medium), box-shadow var(--transition-medium);
-    /* Performance optimizations with fallbacks */
+    /* Enhanced performance optimizations with smart containment */
     will-change: transform;
     transform: var(--gpu-layer);
-    contain: layout;
+    contain: layout style paint;
+    content-visibility: auto;
+    contain-intrinsic-size: 0 400px;
     backface-visibility: hidden;
 }
 
@@ -364,7 +366,8 @@ img[src$=".WEBP"] {
 .performance-low .glass-card {
     will-change: auto;
     transform: none;
-    contain: none;
+    contain: layout style;
+    content-visibility: auto;
 }
 
 .glass-bubble {
@@ -411,10 +414,12 @@ img[src$=".WEBP"] {
     justify-content: center;
     transition: all var(--transition-medium), width var(--transition-smooth),
         height var(--transition-smooth);
-    /* Performance optimizations with fallbacks */
+    /* Enhanced performance optimizations with smart containment */
     will-change: transform;
     transform: var(--gpu-layer);
-    contain: layout style;
+    contain: layout style paint;
+    content-visibility: auto;
+    contain-intrinsic-size: 60px 60px;
     backface-visibility: hidden;
 }
 
@@ -423,7 +428,8 @@ img[src$=".WEBP"] {
 .performance-low .glass-button {
     will-change: auto;
     transform: none;
-    contain: none;
+    contain: layout style;
+    content-visibility: auto;
 }
 
 .glass-button:hover {
@@ -1216,10 +1222,12 @@ img[src$=".WEBP"] {
     opacity: 0; /* crossfade por opacidad */
     transition: opacity 380ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
     pointer-events: none;
-    /* Performance optimizations with fallbacks */
+    /* Enhanced performance optimizations with smart containment */
     will-change: opacity;
     transform: var(--gpu-layer);
-    contain: var(--contain-content);
+    contain: layout style paint;
+    content-visibility: auto;
+    contain-intrinsic-size: 100% 300px;
     backface-visibility: hidden;
 }
 
@@ -1228,7 +1236,8 @@ img[src$=".WEBP"] {
 .performance-low .carousel-slide {
     will-change: auto;
     transform: none;
-    contain: none;
+    contain: layout style;
+    content-visibility: auto;
 }
 .carousel-slide img {
     display: block;

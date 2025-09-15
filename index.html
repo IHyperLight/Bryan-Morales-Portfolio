@@ -73,7 +73,7 @@
                 object-fit: cover;
             }
         </style>
-        <!-- Performance optimizations - Preload critical resources -->
+        <!-- Performance optimizations - Enhanced resource loading -->
         <link rel="preload" href="styles.css" as="style" />
         <link rel="modulepreload" href="script.js" />
         <link
@@ -82,10 +82,41 @@
             as="image"
             type="image/webp"
         />
+        <!-- Preload critical carousel images for immediate projects -->
+        <link
+            rel="preload"
+            href="assets/keeptive/keeptive-1.webp"
+            as="image"
+            type="image/webp"
+        />
+        <link
+            rel="preload"
+            href="assets/genetic-algorithm/genetic-algorithm-1.webp"
+            as="image"
+            type="image/webp"
+        />
+        <!-- Preload critical icons for UI elements -->
+        <link
+            rel="preload"
+            href="assets/icons/menu.svg"
+            as="image"
+            type="image/svg+xml"
+        />
+        <link
+            rel="preload"
+            href="assets/icons/all.svg"
+            as="image"
+            type="image/svg+xml"
+        />
 
         <link rel="stylesheet" href="styles.css" />
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+        <!-- Additional DNS prefetch for external services -->
+        <link rel="dns-prefetch" href="//linkedin.com" />
+        <link rel="dns-prefetch" href="//github.com" />
+        <link rel="dns-prefetch" href="//discord.com" />
+        <link rel="dns-prefetch" href="//credly.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -103,6 +134,7 @@
                 playsinline
                 preload="metadata"
                 id="bg-video"
+                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
             >
                 <source src="assets/back-o.mp4" type="video/mp4" />
             </video>
