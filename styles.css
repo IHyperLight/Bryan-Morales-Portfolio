@@ -216,49 +216,6 @@ img[src$=".WEBP"] {
     display: none !important;
 }
 
-/* Enhanced low-end mobile optimizations */
-.low-end-device.mobile-device * {
-    /* Disable all animations and transitions on low-end mobile devices */
-    animation: none !important;
-    transition: none !important;
-    transform: none !important;
-}
-
-.low-end-device.mobile-device *[class*="glass-"] {
-    /* Remove all glass effects on low-end mobile devices */
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: var(--glass-fallback-bg) !important;
-    box-shadow: none !important;
-}
-
-.low-end-device.mobile-device .carousel-slide {
-    /* Simplified carousel transitions */
-    opacity: 1 !important;
-    display: none;
-}
-
-.low-end-device.mobile-device .carousel-slide.is-active {
-    display: block !important;
-}
-
-.low-end-device.mobile-device .profile-img,
-.low-end-device.mobile-device .carousel-slide img {
-    /* Remove image filters on low-end devices */
-    filter: none !important;
-    image-rendering: auto;
-}
-
-.low-end-device.mobile-device .background-video {
-    /* Hide background video on low-end mobile devices */
-    display: none !important;
-}
-
-.low-end-device.mobile-device body {
-    /* Solid background fallback */
-    background: #000 !important;
-}
-
 /* Performance level optimizations */
 .performance-low * {
     will-change: auto !important;
@@ -276,81 +233,6 @@ img[src$=".WEBP"] {
 
 .performance-high *[class*="glass-"] {
     backdrop-filter: var(--blur-filter);
-}
-
-/* Mobile Device Optimizations */
-.mobile-device {
-    /* Optimize scrolling for mobile */
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: auto; /* Disable smooth scroll on mobile for better performance */
-}
-
-.mobile-device * {
-    /* Reduce animation complexity on mobile */
-    animation-duration: 0.2s !important;
-    transition-duration: 0.2s !important;
-}
-
-.mobile-device *[class*="glass-"] {
-    /* Reduce backdrop-filter intensity on mobile */
-    backdrop-filter: blur(4px) saturate(110%) brightness(115%) !important;
-}
-
-/* Touch Device Optimizations */
-.touch-device {
-    /* Prevent text selection on touch devices */
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-.touch-device *[class*="btn"],
-.touch-device *[class*="button"] {
-    /* Larger touch targets for mobile */
-    min-height: 44px;
-    min-width: 44px;
-}
-
-/* Low Power Mode Optimizations */
-.low-power-mode * {
-    /* Disable all animations in low power mode */
-    animation: none !important;
-    transition: none !important;
-}
-
-.low-power-mode *[class*="glass-"] {
-    /* Remove backdrop filter in low power mode */
-    backdrop-filter: none !important;
-    background: var(--glass-fallback-bg) !important;
-}
-
-/* Connection-based optimizations */
-.connection-slow-2g *,
-.connection-2g * {
-    /* Reduce visual complexity for slow connections */
-    animation-duration: 0.1s !important;
-    transition-duration: 0.1s !important;
-}
-
-.connection-slow-2g *[class*="glass-"],
-.connection-2g *[class*="glass-"] {
-    backdrop-filter: none !important;
-    background: var(--glass-fallback-bg) !important;
-}
-
-/* iOS-specific optimizations */
-.mobile-ios {
-    /* Optimize for iOS devices */
-    -webkit-overflow-scrolling: touch;
-    -webkit-transform: translateZ(0); /* Force hardware acceleration */
-    transform: translateZ(0); /* Standard property */
-}
-
-/* Android-specific optimizations */
-.mobile-android {
-    /* Optimize for Android devices */
-    overscroll-behavior: contain;
 }
 
 /* Optimized drop-shadows for better performance */
@@ -846,38 +728,6 @@ img[src$=".WEBP"] {
 
 /* Mobile responsive optimization - consolidated */
 @media (max-width: 640px) {
-    /* Enhanced mobile carousel optimizations */
-    .mobile-device .carousel-slide {
-        /* Optimize image rendering on mobile */
-        image-rendering: -webkit-optimize-contrast;
-        image-rendering: crisp-edges;
-    }
-    
-    .mobile-device .carousel-controls {
-        /* Larger touch targets for mobile controls */
-        padding: 12px 0;
-    }
-    
-    .mobile-device .carousel-btn {
-        min-width: 48px;
-        min-height: 48px;
-    }
-    
-    .mobile-device .carousel-dot {
-        min-width: 12px;
-        min-height: 12px;
-    }
-    
-    /* Reduce complexity on small screens */
-    .mobile-device .project-description {
-        /* Disable custom scrollbar on mobile */
-        overflow: auto;
-    }
-    
-    .mobile-device .scroll-indicator {
-        display: none; /* Hide custom scroll indicator on mobile */
-    }
-
     .social-media {
         height: auto;
         min-height: 90px;

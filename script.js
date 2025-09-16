@@ -78,57 +78,11 @@ const hardwareCapabilities = (() => {
         hardwareConcurrency: navigator.hardwareConcurrency || 1,
         isLowEndDevice: false,
         performanceLevel: "high", // 'high', 'medium', 'low'
-        // Mobile-specific detection
-        isMobile: false,
-        isTouch: false,
-        deviceMemory: navigator.deviceMemory || 4,
-        connectionType: 'unknown',
-        batteryLevel: 1,
-        screenDensity: window.devicePixelRatio || 1,
-        isLowPowerMode: false,
-        mobileType: 'unknown' // 'ios', 'android', 'other'
     };
 
     // Test GPU acceleration capabilities
     const testGPUSupport = () => {
         try {
-            // Advanced mobile detection
-            const userAgent = navigator.userAgent.toLowerCase();
-            capabilities.isMobile = /mobile|android|iphone|ipad|phone|tablet/.test(userAgent) || 
-                                   window.innerWidth <= 768 || 
-                                   'ontouchstart' in window ||
-                                   navigator.maxTouchPoints > 0;
-            
-            // Touch capability detection
-            capabilities.isTouch = 'ontouchstart' in window || 
-                                 navigator.maxTouchPoints > 0 || 
-                                 window.DocumentTouch && document instanceof window.DocumentTouch;
-            
-            // Mobile platform detection
-            if (/iphone|ipad|ipod/.test(userAgent)) {
-                capabilities.mobileType = 'ios';
-            } else if (/android/.test(userAgent)) {
-                capabilities.mobileType = 'android';
-            } else if (capabilities.isMobile) {
-                capabilities.mobileType = 'other';
-            }
-            
-            // Connection detection for mobile optimization
-            if (navigator.connection) {
-                capabilities.connectionType = navigator.connection.effectiveType || 'unknown';
-                capabilities.isLowPowerMode = navigator.connection.saveData || false;
-            }
-            
-            // Battery API for mobile optimization
-            if (navigator.getBattery) {
-                navigator.getBattery().then(battery => {
-                    capabilities.batteryLevel = battery.level;
-                    capabilities.isLowPowerMode = capabilities.isLowPowerMode || battery.level < 0.2;
-                }).catch(() => {
-                    // Silent fail for battery API
-                });
-            }
-
             // Test for 3D transform support
             const testEl = document.createElement("div");
             testEl.style.transform = "translate3d(0,0,0)";
@@ -139,44 +93,29 @@ const hardwareCapabilities = (() => {
                 CSS.supports("backdrop-filter", "blur(1px)") ||
                 CSS.supports("-webkit-backdrop-filter", "blur(1px)");
 
-            // Enhanced mobile device detection for low-end classification
-            const isOldMobile = /Android [2-4]\.|iPhone.*OS [5-9]_|iPad.*OS [5-9]_/.test(navigator.userAgent);
-            const isLowMemoryDevice = capabilities.deviceMemory < 2;
-            const isSlowConnection = capabilities.connectionType === 'slow-2g' || capabilities.connectionType === '2g';
-            
-            // Detect low-end devices with mobile-specific criteria
+            // Detect low-end devices
             capabilities.isLowEndDevice =
                 capabilities.hardwareConcurrency < 4 ||
-                isLowMemoryDevice ||
-                isOldMobile ||
-                (capabilities.isMobile && (isSlowConnection || capabilities.isLowPowerMode));
+                navigator.deviceMemory < 4 || // If available
+                /Android.*4\.|iPhone.*OS [5-9]_/.test(navigator.userAgent);
 
-            // Determine performance level with mobile-specific adjustments
+            // Determine performance level with more granular detection
             if (capabilities.isLowEndDevice || !capabilities.hasTransform3D) {
                 capabilities.performanceLevel = "low";
                 capabilities.hasGPU = false;
             } else if (
                 capabilities.hardwareConcurrency < 8 ||
                 !capabilities.hasBackdropFilter ||
-                capabilities.deviceMemory < 8 || // More conservative memory threshold
-                (capabilities.isMobile && capabilities.deviceMemory < 4) // Even more conservative for mobile
+                navigator.deviceMemory < 8 // More conservative memory threshold
             ) {
                 capabilities.performanceLevel = "medium";
             } else {
                 capabilities.performanceLevel = "high";
             }
-            
-            // Additional mobile performance downgrade
-            if (capabilities.isMobile && capabilities.performanceLevel === "high") {
-                // Most mobile devices should be medium at most
-                capabilities.performanceLevel = "medium";
-            }
-            
         } catch (e) {
             capabilities.hasGPU = false;
             capabilities.hasTransform3D = false;
             capabilities.performanceLevel = "low";
-            capabilities.isMobile = /mobile/i.test(navigator.userAgent);
         }
 
         return capabilities;
@@ -200,31 +139,6 @@ const hardwareCapabilities = (() => {
 
         if (capabilities.isLowEndDevice) {
             root.classList.add("low-end-device");
-        }
-
-        // Mobile-specific optimizations
-        if (capabilities.isMobile) {
-            root.classList.add("mobile-device");
-            
-            // Add mobile type specific classes
-            if (capabilities.mobileType !== 'unknown') {
-                root.classList.add(`mobile-${capabilities.mobileType}`);
-            }
-            
-            // Touch-specific optimizations
-            if (capabilities.isTouch) {
-                root.classList.add("touch-device");
-            }
-            
-            // Low power mode optimizations
-            if (capabilities.isLowPowerMode) {
-                root.classList.add("low-power-mode");
-            }
-            
-            // Connection-based optimizations
-            if (capabilities.connectionType && capabilities.connectionType !== 'unknown') {
-                root.classList.add(`connection-${capabilities.connectionType}`);
-            }
         }
 
         // Set performance level class
@@ -260,16 +174,8 @@ const viewportManager = (() => {
         pendingUpdates.clear();
     };
 
-    // Mobile-optimized Intersection Observer for carousel visibility
+    // Intersection Observer for carousel visibility
     const createCarouselObserver = () => {
-        const capabilities = hardwareCapabilities.getCapabilities();
-        
-        // Mobile-specific optimizations
-        const observerOptions = {
-            threshold: capabilities.isMobile ? 0.25 : 0.15, // More conservative threshold for mobile
-            rootMargin: capabilities.isMobile ? "50px 0px" : "100px 0px", // Smaller margin for mobile to save battery
-        };
-        
         return new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
@@ -278,9 +184,7 @@ const viewportManager = (() => {
 
                     if (!carouselState) return;
 
-                    // Queue update for throttled processing - longer delay for mobile
-                    const updateDelay = capabilities.isMobile ? 100 : 50; // Slower updates for mobile to save battery
-                    
+                    // Queue update for throttled processing
                     const update = () => {
                         if (entry.isIntersecting) {
                             // Carousel is visible - resume autoplay if not manually paused
@@ -297,11 +201,14 @@ const viewportManager = (() => {
 
                     // Throttle updates for better performance
                     if (!updateTimeout) {
-                        updateTimeout = setTimeout(processPendingUpdates, updateDelay);
+                        updateTimeout = setTimeout(processPendingUpdates, 50);
                     }
                 });
             },
-            observerOptions
+            {
+                threshold: 0.15, // Trigger when 15% visible for better UX
+                rootMargin: "100px 0px", // Larger margin for smoother transitions
+            }
         );
     };
 
@@ -340,83 +247,6 @@ const viewportManager = (() => {
         unobserveCarousel,
         isVisible: (projectContainer) => visibleCarousels.has(projectContainer),
         cleanup,
-    };
-})();
-
-// Mobile-specific Image Lazy Loading Manager
-const mobileImageManager = (() => {
-    const imageObserver = new Map();
-    const loadedImages = new WeakSet();
-    
-    const createImageObserver = () => {
-        const capabilities = hardwareCapabilities.getCapabilities();
-        
-        // More aggressive lazy loading for mobile devices
-        const observerOptions = {
-            threshold: 0,
-            rootMargin: capabilities.isMobile ? "100px 0px" : "200px 0px", // Smaller preload distance on mobile
-        };
-        
-        return new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    
-                    // Skip if already loaded
-                    if (loadedImages.has(img)) return;
-                    
-                    // For mobile, add a small delay to prevent loading all images at once
-                    const loadDelay = capabilities.isMobile ? 50 : 0;
-                    
-                    setTimeout(() => {
-                        if (img.dataset.src && !loadedImages.has(img)) {
-                            const originalSrc = img.dataset.src;
-                            
-                            // Create a new image to preload
-                            const newImg = new Image();
-                            newImg.onload = () => {
-                                img.src = originalSrc;
-                                img.removeAttribute('data-src');
-                                loadedImages.add(img);
-                                // Unobserve after loading
-                                if (imageObserver.has(img)) {
-                                    imageObserver.get(img).unobserve(img);
-                                    imageObserver.delete(img);
-                                }
-                            };
-                            newImg.onerror = () => {
-                                // Fallback: load anyway
-                                img.src = originalSrc;
-                                img.removeAttribute('data-src');
-                                loadedImages.add(img);
-                            };
-                            newImg.src = originalSrc;
-                        }
-                    }, loadDelay);
-                }
-            });
-        }, observerOptions);
-    };
-    
-    const observeImage = (img) => {
-        if (!img.dataset.src || loadedImages.has(img)) return;
-        
-        const observer = createImageObserver();
-        imageObserver.set(img, observer);
-        observer.observe(img);
-    };
-    
-    const cleanup = () => {
-        for (const [img, observer] of imageObserver) {
-            observer.unobserve(img);
-            observer.disconnect();
-        }
-        imageObserver.clear();
-    };
-    
-    return {
-        observeImage,
-        cleanup
     };
 })();
 
@@ -514,53 +344,13 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeProjectCarousel();
     perfMonitor.measure("critical-init", "critical-init-start");
 
-    // Background video optimization - Enhanced mobile optimization
+    // Background video optimization - Removed mobile restriction
     const bgVideo = document.getElementById("bg-video");
     if (bgVideo) {
+        // Apply performance optimizations based on hardware capabilities
         const capabilities = hardwareCapabilities.getCapabilities();
-        
-        // Enhanced mobile video optimization
-        if (capabilities.isMobile) {
-            // Check if device should show video based on multiple factors
-            const shouldShowVideo = !capabilities.isLowEndDevice && 
-                                   !capabilities.isLowPowerMode &&
-                                   capabilities.connectionType !== 'slow-2g' &&
-                                   capabilities.connectionType !== '2g' &&
-                                   capabilities.batteryLevel > 0.3; // Don't show video if battery is low
-            
-            if (!shouldShowVideo) {
-                // Hide video and use solid background
-                bgVideo.style.display = 'none';
-                document.body.style.background = '#000';
-            } else {
-                // Mobile-optimized video settings
-                bgVideo.preload = 'none'; // Don't preload on mobile
-                bgVideo.muted = true;
-                bgVideo.playsInline = true;
-                
-                // Only start video when user interacts (save bandwidth)
-                const startVideoOnInteraction = () => {
-                    if (bgVideo.paused) {
-                        bgVideo.preload = 'metadata';
-                        bgVideo.play().catch(() => {
-                            // Fallback to background color if video fails
-                            bgVideo.style.display = 'none';
-                            document.body.style.background = '#000';
-                        });
-                    }
-                    // Remove listener after first interaction
-                    document.removeEventListener('touchstart', startVideoOnInteraction, { once: true });
-                    document.removeEventListener('click', startVideoOnInteraction, { once: true });
-                };
-                
-                document.addEventListener('touchstart', startVideoOnInteraction, { once: true, passive: true });
-                document.addEventListener('click', startVideoOnInteraction, { once: true, passive: true });
-            }
-        } else {
-            // Desktop behavior - apply performance optimizations based on hardware capabilities
-            if (capabilities.performanceLevel === "low") {
-                bgVideo.style.filter = "brightness(0.6)"; // Simpler filter for low-end devices
-            }
+        if (capabilities.performanceLevel === "low") {
+            bgVideo.style.filter = "brightness(0.6)"; // Simpler filter for low-end devices
         }
     }
 
@@ -975,77 +765,8 @@ function initializeSingleCarousel(projectContainer) {
         }
     };
 
-    // Mobile-optimized touch events
-    const capabilities = hardwareCapabilities.getCapabilities();
-    if (capabilities.isMobile && capabilities.isTouch) {
-        // Use touch events for mobile
-        viewport.addEventListener("touchstart", onEnter, { passive: true });
-        viewport.addEventListener("touchend", onLeave, { passive: true });
-        
-        // Add mobile-specific touch handling for carousel navigation
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let isScrolling = false;
-        
-        const handleTouchStart = (e) => {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-            isScrolling = false;
-        };
-        
-        const handleTouchMove = (e) => {
-            if (!touchStartX || !touchStartY) return;
-            
-            const touchX = e.touches[0].clientX;
-            const touchY = e.touches[0].clientY;
-            const diffX = touchStartX - touchX;
-            const diffY = touchStartY - touchY;
-            
-            // Determine if user is scrolling vertically
-            if (Math.abs(diffY) > Math.abs(diffX)) {
-                isScrolling = true;
-                return;
-            }
-            
-            // Prevent horizontal scroll if swiping on carousel
-            if (Math.abs(diffX) > 10 && !isScrolling) {
-                e.preventDefault();
-            }
-        };
-        
-        const handleTouchEnd = (e) => {
-            if (!touchStartX || isScrolling) return;
-            
-            const touchEndX = e.changedTouches[0].clientX;
-            const diffX = touchStartX - touchEndX;
-            const threshold = 50; // Minimum swipe distance
-            
-            if (Math.abs(diffX) > threshold) {
-                if (diffX > 0) {
-                    // Swipe left - next slide
-                    next();
-                    animatePress(nextBtn);
-                } else {
-                    // Swipe right - previous slide
-                    prev();
-                    animatePress(prevBtn);
-                }
-            }
-            
-            // Reset values
-            touchStartX = 0;
-            touchStartY = 0;
-            isScrolling = false;
-        };
-        
-        viewport.addEventListener("touchstart", handleTouchStart, { passive: true });
-        viewport.addEventListener("touchmove", handleTouchMove, { passive: false });
-        viewport.addEventListener("touchend", handleTouchEnd, { passive: true });
-    } else {
-        // Desktop pointer events
-        viewport.addEventListener("pointerenter", onEnter);
-        viewport.addEventListener("pointerleave", onLeave);
-    }
+    viewport.addEventListener("pointerenter", onEnter);
+    viewport.addEventListener("pointerleave", onLeave);
 
     // Adjust progress bar width to match indicators
     const adjustProgressWidth = () => {
@@ -1108,8 +829,12 @@ function initializeSingleCarousel(projectContainer) {
 // Event delegation system - Enhanced for better performance
 const eventDelegator = (() => {
     const delegateMap = new Map();
-    const passiveEvents = new Set(['scroll', 'wheel', 'touchstart', 'touchmove', 'touchend']);
-    const nonPassiveEvents = new Set(['touchstart', 'touchend', 'click']);
+    const passiveEvents = new Set([
+        "scroll",
+        "wheel",
+        "touchstart",
+        "touchmove",
+    ]);
 
     function addDelegatedListener(
         container,
@@ -1122,36 +847,16 @@ const eventDelegator = (() => {
 
         if (delegateMap.has(key)) return; // Prevent duplicate listeners
 
-        // Mobile-specific event optimization
-        const capabilities = hardwareCapabilities.getCapabilities();
-        let finalOptions = { ...options };
-        
-        if (capabilities.isMobile) {
-            // Auto-detect if event should be passive for better mobile performance
-            if (passiveEvents.has(event) && !nonPassiveEvents.has(event)) {
-                finalOptions.passive = true;
-            }
-            
-            // Use capture for touch events on mobile for better responsiveness
-            if (event.startsWith('touch')) {
-                finalOptions.capture = options.capture !== false;
-            }
-        } else {
-            // Desktop behavior
-            finalOptions.passive = passiveEvents.has(event);
-            finalOptions.capture = false;
-        }
+        // Auto-detect if event should be passive for better performance
+        const finalOptions = {
+            passive: passiveEvents.has(event),
+            capture: false,
+            ...options,
+        };
 
         const delegatedHandler = (e) => {
             const target = e.target.closest(selector);
             if (target && container.contains(target)) {
-                // Mobile-specific touch optimization
-                if (capabilities.isMobile && capabilities.isTouch && e.type.startsWith('touch')) {
-                    // Prevent ghost clicks on mobile
-                    if (e.type === 'touchend') {
-                        e.preventDefault();
-                    }
-                }
                 handler.call(target, e);
             }
         };
@@ -1445,68 +1150,7 @@ const performanceManager = {
 
         // Clean up viewport manager
         viewportManager.cleanup();
-        
-        // Clean up mobile image manager
-        mobileImageManager.cleanup();
     },
-
-    // Mobile-specific memory management
-    mobileMemoryOptimization() {
-        const capabilities = hardwareCapabilities.getCapabilities();
-        
-        if (capabilities.isMobile) {
-            // More aggressive cleanup on mobile
-            const aggressiveCleanup = () => {
-                // Force garbage collection if available (Chrome DevTools)
-                if (window.gc) {
-                    window.gc();
-                }
-                
-                // Clear unnecessary caches
-                performanceCache.rafIds.clear();
-                
-                // Clean up mobile image manager if low on memory
-                if (capabilities.isLowEndDevice || capabilities.deviceMemory < 2) {
-                    mobileImageManager.cleanup();
-                }
-            };
-            
-            // Run aggressive cleanup periodically on mobile
-            const cleanupInterval = setInterval(aggressiveCleanup, 30000); // Every 30 seconds
-            this.addTimer(cleanupInterval);
-            
-            // Clean up on visibility change (when app goes to background)
-            const handleVisibilityChange = () => {
-                if (document.hidden) {
-                    aggressiveCleanup();
-                    // Pause all carousels when app goes to background
-                    performanceCache.projectItems?.forEach(item => {
-                        const carouselState = item._carouselState;
-                        if (carouselState) {
-                            carouselState.pauseAutoplay();
-                        }
-                    });
-                }
-            };
-            
-            this.addListener(document, 'visibilitychange', handleVisibilityChange, { passive: true });
-            
-            // Clean up on memory pressure (if supported)
-            if ('memory' in performance) {
-                const checkMemoryPressure = () => {
-                    const memInfo = performance.memory;
-                    const memoryUsageRatio = memInfo.usedJSHeapSize / memInfo.totalJSHeapSize;
-                    
-                    if (memoryUsageRatio > 0.8) { // 80% memory usage
-                        aggressiveCleanup();
-                    }
-                };
-                
-                const memoryCheckInterval = setInterval(checkMemoryPressure, 10000); // Every 10 seconds
-                this.addTimer(memoryCheckInterval);
-            }
-        }
-    }
 };
 
 // Memory cleanup on page unload
@@ -2028,11 +1672,3 @@ window.addEventListener("error", function (e) {
         return true;
     }
 });
-
-// Initialize performance manager cleanup on page unload
-window.addEventListener('beforeunload', () => {
-    performanceManager.cleanup();
-});
-
-// Initialize mobile memory optimization
-performanceManager.mobileMemoryOptimization();
