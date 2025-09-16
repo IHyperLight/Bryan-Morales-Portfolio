@@ -56,8 +56,8 @@
                 gap: clamp(20px, 4vw, 24px);
                 padding: clamp(20px, 4vw, 24px);
                 backdrop-filter: blur(12px);
-                background: rgba(255, 255, 255, 0.1);
-                border: 1px solid rgba(255, 255, 255, 0.2);
+                background: rgba(255, 255, 255, 0.18);
+                border: 1px solid rgba(255, 255, 255, 0.3);
                 border-radius: 16px;
             }
             /* Mobile optimization override for critical CSS */
@@ -65,11 +65,11 @@
                 backdrop-filter: none !important;
                 background: linear-gradient(
                     135deg,
-                    rgba(255, 255, 255, 0.15) 0%,
-                    rgba(255, 255, 255, 0.08) 25%,
-                    rgba(255, 255, 255, 0.05) 50%,
-                    rgba(255, 255, 255, 0.08) 75%,
-                    rgba(255, 255, 255, 0.12) 100%
+                    rgba(255, 255, 255, 0.25) 0%,
+                    rgba(255, 255, 255, 0.18) 25%,
+                    rgba(255, 255, 255, 0.15) 50%,
+                    rgba(255, 255, 255, 0.18) 75%,
+                    rgba(255, 255, 255, 0.22) 100%
                 ) !important;
                 border: 1px solid rgba(255, 255, 255, 0.3) !important;
                 box-shadow: 
@@ -99,7 +99,7 @@
             as="image"
             type="image/webp"
         />
-        <!-- Preload mobile background image for fast switching -->
+        <!-- Preload mobile background image for instant loading -->
         <link
             rel="preload"
             href="assets/frame.webp"

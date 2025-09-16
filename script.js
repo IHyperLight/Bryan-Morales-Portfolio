@@ -172,44 +172,10 @@ const hardwareCapabilities = (() => {
         if (capabilities.isMobileDevice) {
             // Apply mobile-specific optimizations (no blur effects)
             root.classList.add("mobile-optimized");
-            
-            // Execute mobile border cleanup after DOM is fully loaded
-            if (document.readyState === 'complete') {
-                removeMobileBorders();
-            } else {
-                window.addEventListener('load', removeMobileBorders);
-            }
         }
 
         // Set performance level class
         root.classList.add(`performance-${capabilities.performanceLevel}`);
-    };
-
-    // Remove all inline border styles on mobile for ultra-clean design
-    const removeMobileBorders = () => {
-        if (!capabilities.isMobileDevice) return;
-        
-        try {
-            const elementsWithBorders = document.querySelectorAll('[style*="border"]');
-            elementsWithBorders.forEach(element => {
-                // Check if it's inside profile-section or project-item
-                const isInMainContainer = element.closest('.profile-section') || element.closest('.project-item');
-                if (isInMainContainer) {
-                    // Remove border-related inline styles
-                    const style = element.style;
-                    ['border', 'borderTop', 'borderRight', 'borderBottom', 'borderLeft', 
-                     'borderWidth', 'borderStyle', 'borderColor'].forEach(prop => {
-                        if (style[prop]) {
-                            style[prop] = 'none';
-                        }
-                    });
-                }
-            });
-            
-            console.log('🧹 Mobile border cleanup completed');
-        } catch (error) {
-            console.warn('Border cleanup warning:', error);
-        }
     };
 
     return {
@@ -412,7 +378,7 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeProjectCarousel();
     perfMonitor.measure("critical-init", "critical-init-start");
 
-    // Background video optimization - Enhanced mobile handling with dynamic background switching
+    // Background video optimization - Enhanced mobile handling with image fallback
     const bgVideo = document.getElementById("bg-video");
     const bgContainer = document.querySelector(".background-video");
     
@@ -420,13 +386,29 @@ document.addEventListener("DOMContentLoaded", function () {
         const capabilities = hardwareCapabilities.getCapabilities();
         
         if (capabilities.isMobileDevice) {
-            // Replace video with optimized static image for mobile devices
-            switchToMobileBackground(bgContainer, bgVideo);
-        } else {
-            // Apply performance optimizations for video on desktop
-            if (capabilities.performanceLevel === "low") {
-                bgVideo.style.filter = "brightness(0.6)"; // Simpler filter for low-end devices
-            }
+            // Replace video with optimized background image for mobile
+            bgContainer.innerHTML = `
+                <div 
+                    class="background-image-mobile"
+                    style="
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100vw;
+                        height: 100vh;
+                        background-image: url('assets/frame.webp');
+                        background-size: cover;
+                        background-position: center;
+                        background-repeat: no-repeat;
+                        filter: brightness(0.6);
+                        will-change: auto;
+                        contain: layout;
+                    "
+                    aria-hidden="true">
+                </div>
+            `;
+        } else if (capabilities.performanceLevel === "low") {
+            bgVideo.style.filter = "brightness(0.6)"; // Simpler filter for low-end devices
         }
     }
 
@@ -435,11 +417,7 @@ document.addEventListener("DOMContentLoaded", function () {
         window.addEventListener('orientationchange', () => {
             // Reapply optimizations after orientation change
             setTimeout(() => {
-                const bgContainer = document.querySelector(".background-video");
-                const bgVideo = document.getElementById("bg-video");
-                if (bgContainer && bgVideo && !bgContainer.querySelector('.mobile-background-image')) {
-                    switchToMobileBackground(bgContainer, bgVideo);
-                }
+                hardwareCapabilities.getCapabilities();
             }, 100);
         }, { passive: true });
     }
@@ -460,64 +438,6 @@ document.addEventListener("DOMContentLoaded", function () {
         perfMonitor.measure("total-init", "dom-ready");
     });
 });
-
-// Mobile background switching utility - High performance image replacement
-function switchToMobileBackground(container, video) {
-    // Create optimized background image element
-    const mobileBackground = document.createElement('div');
-    mobileBackground.className = 'mobile-background-image';
-    mobileBackground.style.cssText = `
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        min-width: 100%;
-        min-height: 100%;
-        background-image: url('assets/frame.webp');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        filter: brightness(0.6);
-        contain: layout;
-        z-index: 0;
-        opacity: 0;
-        transition: opacity 300ms ease-in-out;
-    `;
-
-    // Preload image for smooth transition
-    const img = new Image();
-    img.onload = () => {
-        // Hide video with smooth transition
-        if (video) {
-            video.style.transition = 'opacity 300ms ease-in-out';
-            video.style.opacity = '0';
-            
-            setTimeout(() => {
-                video.style.display = 'none';
-                video.pause(); // Stop video to save resources
-                video.src = ''; // Clear video source to free memory
-                
-                // Show background image with smooth transition
-                mobileBackground.style.opacity = '1';
-            }, 300);
-        } else {
-            mobileBackground.style.opacity = '1';
-        }
-    };
-    
-    img.onerror = () => {
-        // Fallback: keep video but apply mobile optimizations
-        console.warn('Mobile background image failed to load, keeping video');
-        if (video) {
-            video.style.filter = 'brightness(0.6)';
-        }
-    };
-
-    // Insert background before video and start loading
-    container.insertBefore(mobileBackground, video);
-    img.src = 'assets/frame.webp';
-}
 
 // Utility functions
 function debounce(func, delay) {
