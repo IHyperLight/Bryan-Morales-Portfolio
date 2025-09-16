@@ -206,99 +206,151 @@ img[src$=".WEBP"] {
     border-color: var(--glass-fallback-border) !important;
 }
 
-/* Low-end device optimizations - Enhanced for ultra-low devices */
-.ultra-low-end .carousel-progress-fill,
-.ultra-low-end .filter-selector,
+/* Low-end device optimizations */
 .low-end-device .carousel-progress-fill,
 .low-end-device .filter-selector {
     transition: none !important;
 }
 
-.ultra-low-end *[class*="glass-"]:hover::after,
 .low-end-device *[class*="glass-"]:hover::after {
     display: none !important;
 }
 
-/* Ultra-low end: Disable all animations and transitions */
-.ultra-low-end * {
+/* Enhanced low-end mobile optimizations */
+.low-end-device.mobile-device * {
+    /* Disable all animations and transitions on low-end mobile devices */
     animation: none !important;
     transition: none !important;
+    transform: none !important;
 }
 
-/* Moderate low-end: Extremely fast transitions */
-.moderate-low-end * {
-    transition-duration: 50ms !important;
-    animation-duration: 50ms !important;
+.low-end-device.mobile-device *[class*="glass-"] {
+    /* Remove all glass effects on low-end mobile devices */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: var(--glass-fallback-bg) !important;
+    box-shadow: none !important;
 }
 
-/* Performance level optimizations - Enhanced for ultra-low end devices */
-.performance-ultra-low *,
-.performance-low *,
-.performance-low-medium * {
+.low-end-device.mobile-device .carousel-slide {
+    /* Simplified carousel transitions */
+    opacity: 1 !important;
+    display: none;
+}
+
+.low-end-device.mobile-device .carousel-slide.is-active {
+    display: block !important;
+}
+
+.low-end-device.mobile-device .profile-img,
+.low-end-device.mobile-device .carousel-slide img {
+    /* Remove image filters on low-end devices */
+    filter: none !important;
+    image-rendering: auto;
+}
+
+.low-end-device.mobile-device .background-video {
+    /* Hide background video on low-end mobile devices */
+    display: none !important;
+}
+
+.low-end-device.mobile-device body {
+    /* Solid background fallback */
+    background: #000 !important;
+}
+
+/* Performance level optimizations */
+.performance-low * {
     will-change: auto !important;
     transform: var(--cpu-transform2d) !important;
 }
 
-.performance-ultra-low .carousel-slide,
-.performance-ultra-low .project-media,
 .performance-low .carousel-slide,
-.performance-low .project-media,
-.performance-low-medium .carousel-slide,
-.performance-low-medium .project-media {
+.performance-low .project-media {
     transform: none !important;
 }
 
-/* Ultra-low end device optimizations - Disable all non-essential effects */
-.performance-ultra-low *[class*="glass-"] {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: var(--glass-fallback-bg) !important;
-    border-color: var(--glass-fallback-border) !important;
-    transition: none !important;
-    animation: none !important;
+.performance-medium *[class*="glass-"] {
+    backdrop-filter: blur(5px) saturate(115%) brightness(120%) !important;
 }
 
-.performance-ultra-low .carousel-progress-fill,
-.performance-ultra-low .filter-selector,
-.performance-ultra-low *[class*="glass-"]:hover::after {
-    display: none !important;
-}
-
-/* Low-end device optimizations - Simplified effects */
-.performance-low *[class*="glass-"] {
-    backdrop-filter: blur(1px) saturate(105%) brightness(105%) !important;
-    transition-duration: 50ms !important;
-}
-
-.performance-low-medium *[class*="glass-"] {
-    backdrop-filter: blur(3px) saturate(110%) brightness(110%) !important;
-    transition-duration: 100ms !important;
-}
-
-.performance-high *[class*="glass-"],
-.performance-ultra-high *[class*="glass-"] {
+.performance-high *[class*="glass-"] {
     backdrop-filter: var(--blur-filter);
 }
 
-/* Ultra-low end: Remove all shadows and complex visual effects */
-.ultra-low-end *,
-.moderate-low-end * {
-    box-shadow: none !important;
-    filter: none !important;
-    text-shadow: none !important;
+/* Mobile Device Optimizations */
+.mobile-device {
+    /* Optimize scrolling for mobile */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: auto; /* Disable smooth scroll on mobile for better performance */
 }
 
-/* Ultra-low end: Disable hover effects to save CPU */
-.ultra-low-end *:hover {
-    transform: none !important;
-    background: inherit !important;
-    opacity: inherit !important;
+.mobile-device * {
+    /* Reduce animation complexity on mobile */
+    animation-duration: 0.2s !important;
+    transition-duration: 0.2s !important;
 }
 
-/* Moderate low-end: Simplified hover effects */
-.moderate-low-end *:hover {
-    transform: none !important;
-    transition-duration: 50ms !important;
+.mobile-device *[class*="glass-"] {
+    /* Reduce backdrop-filter intensity on mobile */
+    backdrop-filter: blur(4px) saturate(110%) brightness(115%) !important;
+}
+
+/* Touch Device Optimizations */
+.touch-device {
+    /* Prevent text selection on touch devices */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.touch-device *[class*="btn"],
+.touch-device *[class*="button"] {
+    /* Larger touch targets for mobile */
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* Low Power Mode Optimizations */
+.low-power-mode * {
+    /* Disable all animations in low power mode */
+    animation: none !important;
+    transition: none !important;
+}
+
+.low-power-mode *[class*="glass-"] {
+    /* Remove backdrop filter in low power mode */
+    backdrop-filter: none !important;
+    background: var(--glass-fallback-bg) !important;
+}
+
+/* Connection-based optimizations */
+.connection-slow-2g *,
+.connection-2g * {
+    /* Reduce visual complexity for slow connections */
+    animation-duration: 0.1s !important;
+    transition-duration: 0.1s !important;
+}
+
+.connection-slow-2g *[class*="glass-"],
+.connection-2g *[class*="glass-"] {
+    backdrop-filter: none !important;
+    background: var(--glass-fallback-bg) !important;
+}
+
+/* iOS-specific optimizations */
+.mobile-ios {
+    /* Optimize for iOS devices */
+    -webkit-overflow-scrolling: touch;
+    -webkit-transform: translateZ(0); /* Force hardware acceleration */
+    transform: translateZ(0); /* Standard property */
+}
+
+/* Android-specific optimizations */
+.mobile-android {
+    /* Optimize for Android devices */
+    overscroll-behavior: contain;
 }
 
 /* Optimized drop-shadows for better performance */
@@ -794,6 +846,38 @@ img[src$=".WEBP"] {
 
 /* Mobile responsive optimization - consolidated */
 @media (max-width: 640px) {
+    /* Enhanced mobile carousel optimizations */
+    .mobile-device .carousel-slide {
+        /* Optimize image rendering on mobile */
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+    
+    .mobile-device .carousel-controls {
+        /* Larger touch targets for mobile controls */
+        padding: 12px 0;
+    }
+    
+    .mobile-device .carousel-btn {
+        min-width: 48px;
+        min-height: 48px;
+    }
+    
+    .mobile-device .carousel-dot {
+        min-width: 12px;
+        min-height: 12px;
+    }
+    
+    /* Reduce complexity on small screens */
+    .mobile-device .project-description {
+        /* Disable custom scrollbar on mobile */
+        overflow: auto;
+    }
+    
+    .mobile-device .scroll-indicator {
+        display: none; /* Hide custom scroll indicator on mobile */
+    }
+
     .social-media {
         height: auto;
         min-height: 90px;
@@ -1297,31 +1381,13 @@ img[src$=".WEBP"] {
     backface-visibility: hidden;
 }
 
-/* CPU fallback for carousel-slide - Enhanced for ultra-low end */
+/* CPU fallback for carousel-slide */
 .cpu-optimized .carousel-slide,
-.performance-low .carousel-slide,
-.performance-ultra-low .carousel-slide,
-.performance-low-medium .carousel-slide {
+.performance-low .carousel-slide {
     will-change: auto;
     transform: none;
     contain: layout style;
     content-visibility: auto;
-}
-
-/* Ultra-low end: Disable carousel opacity transitions */
-.performance-ultra-low .carousel-slide {
-    transition: none !important;
-    opacity: 1;
-}
-
-.performance-ultra-low .carousel-slide:not(.is-active) {
-    display: none; /* Hide instead of opacity fade for better performance */
-}
-
-/* Low-end: Faster carousel transitions */
-.performance-low .carousel-slide,
-.performance-low-medium .carousel-slide {
-    transition: opacity 200ms ease !important;
 }
 .carousel-slide img {
     display: block;
@@ -2594,223 +2660,4 @@ input[type="submit"],
 .download-btn,
 [tabindex]:not([tabindex="-1"]) {
     cursor: pointer !important;
-}
-
-/* ========================================================================
-   ULTRA-LOW END DEVICE PERFORMANCE OPTIMIZATIONS
-   ======================================================================== */
-
-/* Ultra-Low End Device Optimizations - Maximum Performance Priority */
-.performance-ultra-low {
-    /* Disable all non-essential visual effects */
-    --transition-fast: none !important;
-    --transition-medium: none !important;
-    --transition-smooth: none !important;
-    --blur-filter: none !important;
-    --drop-shadow: none !important;
-
-    /* Simplify backgrounds */
-    --glass-bg: rgba(208, 208, 208, 0.05) !important;
-    --glass-border: rgba(208, 208, 208, 0.3) !important;
-}
-
-.performance-ultra-low * {
-    /* Force disable all transitions and animations */
-    transition: none !important;
-    animation: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    box-shadow: none !important;
-    filter: none !important;
-
-    /* Disable 3D transforms to reduce GPU usage */
-    transform-style: flat !important;
-    will-change: auto !important;
-}
-
-.performance-ultra-low .carousel-item {
-    /* Use simple opacity transitions instead of complex transforms */
-    display: none;
-}
-
-.performance-ultra-low .carousel-item.is-active {
-    display: block;
-}
-
-.performance-ultra-low .glass-card {
-    /* Simplified appearance for glass cards */
-    background: rgba(208, 208, 208, 0.05) !important;
-    border: 1px solid rgba(208, 208, 208, 0.2) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-}
-
-.performance-ultra-low .project-media,
-.performance-ultra-low .carousel-viewport {
-    /* Disable complex visual effects on media */
-    border-radius: 8px !important;
-    overflow: hidden;
-}
-
-/* Low End Device Optimizations - Reduced Performance */
-.performance-low {
-    /* Minimal transitions only */
-    --transition-fast: 50ms ease !important;
-    --transition-medium: 100ms ease !important;
-    --transition-smooth: 150ms ease !important;
-
-    /* Reduced visual effects */
-    --blur-filter: blur(3px) !important;
-    --drop-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
-}
-
-.performance-low .carousel-item {
-    /* Simple fade transitions for carousels */
-    transition: opacity 200ms ease !important;
-}
-
-.performance-low .glass-card {
-    /* Reduced backdrop blur */
-    backdrop-filter: blur(2px) !important;
-    -webkit-backdrop-filter: blur(2px) !important;
-}
-
-/* Low-Medium End Device Optimizations - Moderate Performance */
-.performance-low-medium {
-    /* Moderate transitions */
-    --transition-fast: 100ms ease !important;
-    --transition-medium: 200ms ease !important;
-    --transition-smooth: 300ms ease !important;
-
-    /* Moderate visual effects */
-    --blur-filter: blur(5px) saturate(110%) !important;
-    --drop-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
-}
-
-.performance-low-medium .glass-card {
-    /* Moderate backdrop blur */
-    backdrop-filter: blur(4px) saturate(110%) !important;
-    -webkit-backdrop-filter: blur(4px) saturate(110%) !important;
-}
-
-/* ========================================================================
-   PERFORMANCE-AWARE COMPONENT OPTIMIZATIONS
-   ======================================================================== */
-
-/* Disable complex hover effects on low-end devices */
-.performance-ultra-low .social-btn:hover,
-.performance-ultra-low .contact-btn:hover,
-.performance-ultra-low .filter-btn:hover,
-.performance-low .social-btn:hover,
-.performance-low .contact-btn:hover,
-.performance-low .filter-btn:hover {
-    transform: none !important;
-    filter: none !important;
-}
-
-/* Simplify filter selector on ultra-low end */
-.performance-ultra-low .filter-selector {
-    transition: none !important;
-    background: rgba(208, 208, 208, 0.2) !important;
-}
-
-/* Reduce carousel complexity on ultra-low end */
-.performance-ultra-low .carousel-controls {
-    backdrop-filter: none !important;
-    background: rgba(0, 0, 0, 0.5) !important;
-}
-
-.performance-ultra-low .carousel-btn {
-    backdrop-filter: none !important;
-    background: rgba(208, 208, 208, 0.1) !important;
-    border: 1px solid rgba(208, 208, 208, 0.3) !important;
-}
-
-/* Memory-efficient scrollbar styling for low-end devices */
-.performance-ultra-low .scroll-thumb,
-.performance-low .scroll-thumb {
-    transition: none !important;
-}
-
-/* Disable parallax and complex animations on low-end devices */
-.performance-ultra-low .background-video,
-.performance-low .background-video {
-    opacity: 0.3 !important;
-    filter: brightness(0.5) !important;
-}
-
-/* Reduce complexity of certificate items on ultra-low end */
-.performance-ultra-low .certificate-item {
-    transition: none !important;
-}
-
-.performance-ultra-low .certificate-item:hover {
-    transform: none !important;
-    filter: none !important;
-}
-
-/* ========================================================================
-   ULTRA-LOW END RESPONSIVE OPTIMIZATIONS
-   ======================================================================== */
-
-/* Further reduce complexity on small screens with ultra-low end devices */
-@media (max-width: 480px) and (max-device-pixel-ratio: 1.5) {
-    .performance-ultra-low .project-description {
-        /* Disable custom scrollbar on ultra-small ultra-low end devices */
-        scrollbar-width: thin;
-    }
-
-    .performance-ultra-low .scroll-area {
-        /* Use native scrolling */
-        overflow-y: auto !important;
-    }
-
-    .performance-ultra-low .carousel-fullscreen-viewport {
-        /* Disable zoom functionality to save memory */
-        touch-action: manipulation !important;
-    }
-}
-
-/* ========================================================================
-   CPU-OPTIMIZED FALLBACKS FOR NO-GPU DEVICES
-   ======================================================================== */
-
-.cpu-optimized.performance-ultra-low .project-item,
-.cpu-optimized.performance-ultra-low .glass-card,
-.cpu-optimized.performance-ultra-low .certificate-item {
-    /* Force 2D rendering context */
-    transform: translateZ(0) !important;
-    -webkit-transform: translateZ(0) !important;
-    backface-visibility: hidden !important;
-    -webkit-backface-visibility: hidden !important;
-}
-
-/* Ensure no 3D transforms are used on ultra-low end CPU-only devices */
-.cpu-optimized.performance-ultra-low * {
-    transform-style: flat !important;
-    perspective: none !important;
-    transform-origin: 50% 50% 0 !important;
-}
-
-/* ========================================================================
-   MEMORY OPTIMIZATION HELPERS
-   ======================================================================== */
-
-/* Contain layout and paint for better memory management */
-.performance-ultra-low .project-item,
-.performance-ultra-low .glass-card,
-.performance-ultra-low .carousel-viewport {
-    contain: layout style paint !important;
-}
-
-/* Restrict content size to help with memory */
-.performance-ultra-low .project-description .description-content {
-    max-height: 200px !important;
-    overflow: hidden !important;
-}
-
-.performance-ultra-low .carousel-slide img {
-    /* Reduce image quality slightly to save memory */
-    image-rendering: auto !important;
-    -ms-interpolation-mode: nearest-neighbor !important;
 }

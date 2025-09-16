@@ -43,28 +43,6 @@ const willChangeManager = {
 
         const capabilities = hardwareCapabilities.getCapabilities();
 
-        // Ultra-conservative approach for ultra-low end devices
-        if (capabilities.performanceLevel === "ultra-low") {
-            // Never use will-change on ultra-low end to save memory
-            return;
-        }
-
-        // Conservative approach for low-end devices
-        if (
-            capabilities.performanceLevel &&
-            capabilities.performanceLevel.includes("low")
-        ) {
-            // Only use will-change for critical animations and for short durations
-            if (property !== "transform" && property !== "opacity") {
-                return; // Skip non-essential properties
-            }
-
-            // Limit concurrent will-change elements
-            if (this.activeElements.size && this.activeElements.size >= 2) {
-                return; // Max 2 elements with will-change on low-end
-            }
-        }
-
         // Only use will-change on capable devices to reduce memory pressure
         if (capabilities.performanceLevel !== "low" && capabilities.hasGPU) {
             element.style.willChange = property;
@@ -75,44 +53,19 @@ const willChangeManager = {
     clear(element, delay = 100) {
         if (!element || !this.activeElements.has(element)) return;
 
-        const capabilities = hardwareCapabilities.getCapabilities();
-
-        // Clear immediately on low-end devices to free memory faster
-        const clearDelay =
-            capabilities.performanceLevel &&
-            capabilities.performanceLevel.includes("low")
-                ? 0
-                : delay;
-
         const timerId = setTimeout(() => {
             if (element.style) {
                 element.style.willChange = "auto";
                 this.activeElements.delete(element);
             }
             performanceCache.timers.delete(timerId);
-        }, clearDelay);
+        }, delay);
         performanceCache.timers.add(timerId);
     },
 
     clearAll() {
-        // Enhanced cleanup function for low-end devices
+        // Cleanup function for page unload
         this.activeElements = new WeakSet();
-
-        // Force clear all will-change properties on low-end devices
-        const capabilities = hardwareCapabilities.getCapabilities();
-        if (
-            capabilities.performanceLevel &&
-            capabilities.performanceLevel.includes("low")
-        ) {
-            const allElements = document.querySelectorAll(
-                '[style*="will-change"]'
-            );
-            allElements.forEach((el) => {
-                if (el.style.willChange && el.style.willChange !== "auto") {
-                    el.style.willChange = "auto";
-                }
-            });
-        }
     },
 };
 
@@ -124,12 +77,58 @@ const hardwareCapabilities = (() => {
         hasTransform3D: true,
         hardwareConcurrency: navigator.hardwareConcurrency || 1,
         isLowEndDevice: false,
-        performanceLevel: "high", // 'ultra-high', 'high', 'low-medium', 'low', 'ultra-low'
+        performanceLevel: "high", // 'high', 'medium', 'low'
+        // Mobile-specific detection
+        isMobile: false,
+        isTouch: false,
+        deviceMemory: navigator.deviceMemory || 4,
+        connectionType: 'unknown',
+        batteryLevel: 1,
+        screenDensity: window.devicePixelRatio || 1,
+        isLowPowerMode: false,
+        mobileType: 'unknown' // 'ios', 'android', 'other'
     };
 
     // Test GPU acceleration capabilities
     const testGPUSupport = () => {
         try {
+            // Advanced mobile detection
+            const userAgent = navigator.userAgent.toLowerCase();
+            capabilities.isMobile = /mobile|android|iphone|ipad|phone|tablet/.test(userAgent) || 
+                                   window.innerWidth <= 768 || 
+                                   'ontouchstart' in window ||
+                                   navigator.maxTouchPoints > 0;
+            
+            // Touch capability detection
+            capabilities.isTouch = 'ontouchstart' in window || 
+                                 navigator.maxTouchPoints > 0 || 
+                                 window.DocumentTouch && document instanceof window.DocumentTouch;
+            
+            // Mobile platform detection
+            if (/iphone|ipad|ipod/.test(userAgent)) {
+                capabilities.mobileType = 'ios';
+            } else if (/android/.test(userAgent)) {
+                capabilities.mobileType = 'android';
+            } else if (capabilities.isMobile) {
+                capabilities.mobileType = 'other';
+            }
+            
+            // Connection detection for mobile optimization
+            if (navigator.connection) {
+                capabilities.connectionType = navigator.connection.effectiveType || 'unknown';
+                capabilities.isLowPowerMode = navigator.connection.saveData || false;
+            }
+            
+            // Battery API for mobile optimization
+            if (navigator.getBattery) {
+                navigator.getBattery().then(battery => {
+                    capabilities.batteryLevel = battery.level;
+                    capabilities.isLowPowerMode = capabilities.isLowPowerMode || battery.level < 0.2;
+                }).catch(() => {
+                    // Silent fail for battery API
+                });
+            }
+
             // Test for 3D transform support
             const testEl = document.createElement("div");
             testEl.style.transform = "translate3d(0,0,0)";
@@ -140,111 +139,44 @@ const hardwareCapabilities = (() => {
                 CSS.supports("backdrop-filter", "blur(1px)") ||
                 CSS.supports("-webkit-backdrop-filter", "blur(1px)");
 
-            // Enhanced multi-factor low-end device detection
-            const getDeviceMemory = () =>
-                navigator.deviceMemory ||
-                (navigator.storage && navigator.storage.estimate ? 2 : 1);
+            // Enhanced mobile device detection for low-end classification
+            const isOldMobile = /Android [2-4]\.|iPhone.*OS [5-9]_|iPad.*OS [5-9]_/.test(navigator.userAgent);
+            const isLowMemoryDevice = capabilities.deviceMemory < 2;
+            const isSlowConnection = capabilities.connectionType === 'slow-2g' || capabilities.connectionType === '2g';
+            
+            // Detect low-end devices with mobile-specific criteria
+            capabilities.isLowEndDevice =
+                capabilities.hardwareConcurrency < 4 ||
+                isLowMemoryDevice ||
+                isOldMobile ||
+                (capabilities.isMobile && (isSlowConnection || capabilities.isLowPowerMode));
 
-            const getConnectionSpeed = () => {
-                if ("connection" in navigator) {
-                    const conn = navigator.connection;
-                    return {
-                        effectiveType: conn.effectiveType || "unknown",
-                        downlink: conn.downlink || 0,
-                        saveData: conn.saveData || false,
-                    };
-                }
-                return {
-                    effectiveType: "unknown",
-                    downlink: 0,
-                    saveData: false,
-                };
-            };
-
-            const deviceMemory = getDeviceMemory();
-            const connection = getConnectionSpeed();
-
-            // Multi-factor ultra-low-end device detection with granular scoring
-            const ultraLowEndFactors = [
-                capabilities.hardwareConcurrency < 2,
-                deviceMemory < 1.5,
-                /Android.*[2-4]\.|iPhone.*OS [4-8]_/.test(navigator.userAgent),
-                connection.effectiveType === "slow-2g",
-                screen.width <= 320 && deviceMemory < 2,
-                navigator.maxTouchPoints > 0 && deviceMemory < 1,
-            ];
-
-            const lowEndFactors = [
-                capabilities.hardwareConcurrency < 4,
-                deviceMemory < 3,
-                /Android.*4\.|iPhone.*OS [5-9]_|Windows Phone/.test(
-                    navigator.userAgent
-                ),
-                connection.effectiveType === "2g",
-                connection.saveData === true,
-                screen.width <= 480 && deviceMemory < 2,
-                navigator.maxTouchPoints > 0 && deviceMemory < 3,
-            ];
-
-            const ultraLowScore = ultraLowEndFactors.filter(Boolean).length;
-            const lowScore = lowEndFactors.filter(Boolean).length;
-
-            // Granular performance level classification
-            if (ultraLowScore >= 2) {
-                capabilities.isLowEndDevice = true;
-                capabilities.performanceLevel = "ultra-low";
-                capabilities.hasGPU = false;
-                capabilities.lowEndSeverity = "ultra";
-            } else if (lowScore >= 3) {
-                capabilities.isLowEndDevice = true;
+            // Determine performance level with mobile-specific adjustments
+            if (capabilities.isLowEndDevice || !capabilities.hasTransform3D) {
                 capabilities.performanceLevel = "low";
                 capabilities.hasGPU = false;
-                capabilities.lowEndSeverity = "severe";
-            } else if (lowScore >= 1 || ultraLowScore >= 1) {
-                capabilities.isLowEndDevice = true;
-                capabilities.performanceLevel = "low-medium";
-                capabilities.hasGPU = capabilities.hasTransform3D;
-                capabilities.lowEndSeverity = "moderate";
+            } else if (
+                capabilities.hardwareConcurrency < 8 ||
+                !capabilities.hasBackdropFilter ||
+                capabilities.deviceMemory < 8 || // More conservative memory threshold
+                (capabilities.isMobile && capabilities.deviceMemory < 4) // Even more conservative for mobile
+            ) {
+                capabilities.performanceLevel = "medium";
             } else {
-                capabilities.isLowEndDevice = false;
-                capabilities.lowEndSeverity = "none";
-
-                // High-end classification - Simplified without medium level
-                if (
-                    capabilities.hardwareConcurrency >= 12 &&
-                    deviceMemory >= 16 &&
-                    connection.downlink > 10
-                ) {
-                    capabilities.performanceLevel = "ultra-high";
-                } else if (
-                    capabilities.hardwareConcurrency >= 8 &&
-                    capabilities.hasBackdropFilter &&
-                    deviceMemory >= 8
-                ) {
-                    capabilities.performanceLevel = "high";
-                } else {
-                    // Previously medium devices are now classified as low for more aggressive optimization
-                    capabilities.performanceLevel = "low";
-                    capabilities.isLowEndDevice = true;
-                    capabilities.lowEndSeverity = "mild";
-                    capabilities.hasGPU = capabilities.hasTransform3D;
-                }
+                capabilities.performanceLevel = "high";
             }
-
-            // Store additional metrics for fine-tuning
-            capabilities.deviceMetrics = {
-                memory: deviceMemory,
-                cores: capabilities.hardwareConcurrency,
-                connection: connection.effectiveType,
-                saveData: connection.saveData,
-                downlink: connection.downlink,
-                ultraLowScore,
-                lowScore,
-            };
+            
+            // Additional mobile performance downgrade
+            if (capabilities.isMobile && capabilities.performanceLevel === "high") {
+                // Most mobile devices should be medium at most
+                capabilities.performanceLevel = "medium";
+            }
+            
         } catch (e) {
             capabilities.hasGPU = false;
             capabilities.hasTransform3D = false;
             capabilities.performanceLevel = "low";
+            capabilities.isMobile = /mobile/i.test(navigator.userAgent);
         }
 
         return capabilities;
@@ -254,66 +186,49 @@ const hardwareCapabilities = (() => {
     const applyOptimizations = () => {
         const root = document.documentElement;
 
-        // GPU and transform optimizations
-        if (
-            !capabilities.hasGPU ||
-            capabilities.performanceLevel.includes("low")
-        ) {
+        if (!capabilities.hasGPU || capabilities.performanceLevel === "low") {
             // Apply CPU-optimized styles
             root.style.setProperty("--gpu-layer", "scale(1)");
             root.style.setProperty("--gpu-transform3d", "translate(0, 0)");
             root.classList.add("cpu-optimized");
         }
 
-        // Backdrop filter optimizations
         if (!capabilities.hasBackdropFilter) {
+            // Apply backdrop-filter fallbacks
             root.classList.add("no-backdrop-filter");
         }
 
-        // Ultra-granular low-end device classifications
         if (capabilities.isLowEndDevice) {
             root.classList.add("low-end-device");
+        }
 
-            // Apply severity-specific optimizations
-            if (capabilities.performanceLevel === "ultra-low") {
-                root.classList.add("performance-ultra-low");
-                // Disable all non-essential visual effects
-                root.style.setProperty("--transition-fast", "none");
-                root.style.setProperty("--transition-medium", "none");
-                root.style.setProperty("--transition-smooth", "none");
-                // Reduce animation complexity
-                root.style.setProperty("--enable-animations", "0");
-                root.style.setProperty("--raf-throttle", "50"); // 20fps
-            } else if (capabilities.performanceLevel === "low") {
-                root.classList.add("performance-low");
-                // Reduce transition durations significantly
-                root.style.setProperty("--transition-fast", "50ms");
-                root.style.setProperty("--transition-medium", "100ms");
-                root.style.setProperty("--transition-smooth", "150ms");
-                root.style.setProperty("--raf-throttle", "33"); // 30fps
-            } else if (capabilities.performanceLevel === "low-medium") {
-                root.classList.add("performance-low-medium");
-                // Moderate reductions
-                root.style.setProperty("--transition-fast", "100ms");
-                root.style.setProperty("--transition-medium", "200ms");
-                root.style.setProperty("--transition-smooth", "300ms");
-                root.style.setProperty("--raf-throttle", "22"); // 45fps
+        // Mobile-specific optimizations
+        if (capabilities.isMobile) {
+            root.classList.add("mobile-device");
+            
+            // Add mobile type specific classes
+            if (capabilities.mobileType !== 'unknown') {
+                root.classList.add(`mobile-${capabilities.mobileType}`);
+            }
+            
+            // Touch-specific optimizations
+            if (capabilities.isTouch) {
+                root.classList.add("touch-device");
+            }
+            
+            // Low power mode optimizations
+            if (capabilities.isLowPowerMode) {
+                root.classList.add("low-power-mode");
+            }
+            
+            // Connection-based optimizations
+            if (capabilities.connectionType && capabilities.connectionType !== 'unknown') {
+                root.classList.add(`connection-${capabilities.connectionType}`);
             }
         }
 
-        // Set performance level class for all levels
+        // Set performance level class
         root.classList.add(`performance-${capabilities.performanceLevel}`);
-
-        // Memory pressure optimizations for ultra-low end devices
-        if (capabilities.performanceLevel === "ultra-low") {
-            // Disable intersection observers for non-critical elements
-            root.style.setProperty("--enable-intersection-observers", "0");
-            // Disable will-change usage entirely
-            root.style.setProperty("--enable-will-change", "0");
-        } else if (capabilities.performanceLevel.includes("low")) {
-            // Reduce will-change usage
-            root.style.setProperty("--enable-will-change", "limited");
-        }
     };
 
     return {
@@ -345,8 +260,16 @@ const viewportManager = (() => {
         pendingUpdates.clear();
     };
 
-    // Intersection Observer for carousel visibility
+    // Mobile-optimized Intersection Observer for carousel visibility
     const createCarouselObserver = () => {
+        const capabilities = hardwareCapabilities.getCapabilities();
+        
+        // Mobile-specific optimizations
+        const observerOptions = {
+            threshold: capabilities.isMobile ? 0.25 : 0.15, // More conservative threshold for mobile
+            rootMargin: capabilities.isMobile ? "50px 0px" : "100px 0px", // Smaller margin for mobile to save battery
+        };
+        
         return new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
@@ -355,7 +278,9 @@ const viewportManager = (() => {
 
                     if (!carouselState) return;
 
-                    // Queue update for throttled processing
+                    // Queue update for throttled processing - longer delay for mobile
+                    const updateDelay = capabilities.isMobile ? 100 : 50; // Slower updates for mobile to save battery
+                    
                     const update = () => {
                         if (entry.isIntersecting) {
                             // Carousel is visible - resume autoplay if not manually paused
@@ -372,14 +297,11 @@ const viewportManager = (() => {
 
                     // Throttle updates for better performance
                     if (!updateTimeout) {
-                        updateTimeout = setTimeout(processPendingUpdates, 50);
+                        updateTimeout = setTimeout(processPendingUpdates, updateDelay);
                     }
                 });
             },
-            {
-                threshold: 0.15, // Trigger when 15% visible for better UX
-                rootMargin: "100px 0px", // Larger margin for smoother transitions
-            }
+            observerOptions
         );
     };
 
@@ -418,6 +340,83 @@ const viewportManager = (() => {
         unobserveCarousel,
         isVisible: (projectContainer) => visibleCarousels.has(projectContainer),
         cleanup,
+    };
+})();
+
+// Mobile-specific Image Lazy Loading Manager
+const mobileImageManager = (() => {
+    const imageObserver = new Map();
+    const loadedImages = new WeakSet();
+    
+    const createImageObserver = () => {
+        const capabilities = hardwareCapabilities.getCapabilities();
+        
+        // More aggressive lazy loading for mobile devices
+        const observerOptions = {
+            threshold: 0,
+            rootMargin: capabilities.isMobile ? "100px 0px" : "200px 0px", // Smaller preload distance on mobile
+        };
+        
+        return new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    
+                    // Skip if already loaded
+                    if (loadedImages.has(img)) return;
+                    
+                    // For mobile, add a small delay to prevent loading all images at once
+                    const loadDelay = capabilities.isMobile ? 50 : 0;
+                    
+                    setTimeout(() => {
+                        if (img.dataset.src && !loadedImages.has(img)) {
+                            const originalSrc = img.dataset.src;
+                            
+                            // Create a new image to preload
+                            const newImg = new Image();
+                            newImg.onload = () => {
+                                img.src = originalSrc;
+                                img.removeAttribute('data-src');
+                                loadedImages.add(img);
+                                // Unobserve after loading
+                                if (imageObserver.has(img)) {
+                                    imageObserver.get(img).unobserve(img);
+                                    imageObserver.delete(img);
+                                }
+                            };
+                            newImg.onerror = () => {
+                                // Fallback: load anyway
+                                img.src = originalSrc;
+                                img.removeAttribute('data-src');
+                                loadedImages.add(img);
+                            };
+                            newImg.src = originalSrc;
+                        }
+                    }, loadDelay);
+                }
+            });
+        }, observerOptions);
+    };
+    
+    const observeImage = (img) => {
+        if (!img.dataset.src || loadedImages.has(img)) return;
+        
+        const observer = createImageObserver();
+        imageObserver.set(img, observer);
+        observer.observe(img);
+    };
+    
+    const cleanup = () => {
+        for (const [img, observer] of imageObserver) {
+            observer.unobserve(img);
+            observer.disconnect();
+        }
+        imageObserver.clear();
+    };
+    
+    return {
+        observeImage,
+        cleanup
     };
 })();
 
@@ -515,13 +514,53 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeProjectCarousel();
     perfMonitor.measure("critical-init", "critical-init-start");
 
-    // Background video optimization - Removed mobile restriction
+    // Background video optimization - Enhanced mobile optimization
     const bgVideo = document.getElementById("bg-video");
     if (bgVideo) {
-        // Apply performance optimizations based on hardware capabilities
         const capabilities = hardwareCapabilities.getCapabilities();
-        if (capabilities.performanceLevel === "low") {
-            bgVideo.style.filter = "brightness(0.6)"; // Simpler filter for low-end devices
+        
+        // Enhanced mobile video optimization
+        if (capabilities.isMobile) {
+            // Check if device should show video based on multiple factors
+            const shouldShowVideo = !capabilities.isLowEndDevice && 
+                                   !capabilities.isLowPowerMode &&
+                                   capabilities.connectionType !== 'slow-2g' &&
+                                   capabilities.connectionType !== '2g' &&
+                                   capabilities.batteryLevel > 0.3; // Don't show video if battery is low
+            
+            if (!shouldShowVideo) {
+                // Hide video and use solid background
+                bgVideo.style.display = 'none';
+                document.body.style.background = '#000';
+            } else {
+                // Mobile-optimized video settings
+                bgVideo.preload = 'none'; // Don't preload on mobile
+                bgVideo.muted = true;
+                bgVideo.playsInline = true;
+                
+                // Only start video when user interacts (save bandwidth)
+                const startVideoOnInteraction = () => {
+                    if (bgVideo.paused) {
+                        bgVideo.preload = 'metadata';
+                        bgVideo.play().catch(() => {
+                            // Fallback to background color if video fails
+                            bgVideo.style.display = 'none';
+                            document.body.style.background = '#000';
+                        });
+                    }
+                    // Remove listener after first interaction
+                    document.removeEventListener('touchstart', startVideoOnInteraction, { once: true });
+                    document.removeEventListener('click', startVideoOnInteraction, { once: true });
+                };
+                
+                document.addEventListener('touchstart', startVideoOnInteraction, { once: true, passive: true });
+                document.addEventListener('click', startVideoOnInteraction, { once: true, passive: true });
+            }
+        } else {
+            // Desktop behavior - apply performance optimizations based on hardware capabilities
+            if (capabilities.performanceLevel === "low") {
+                bgVideo.style.filter = "brightness(0.6)"; // Simpler filter for low-end devices
+            }
         }
     }
 
@@ -936,8 +975,77 @@ function initializeSingleCarousel(projectContainer) {
         }
     };
 
-    viewport.addEventListener("pointerenter", onEnter);
-    viewport.addEventListener("pointerleave", onLeave);
+    // Mobile-optimized touch events
+    const capabilities = hardwareCapabilities.getCapabilities();
+    if (capabilities.isMobile && capabilities.isTouch) {
+        // Use touch events for mobile
+        viewport.addEventListener("touchstart", onEnter, { passive: true });
+        viewport.addEventListener("touchend", onLeave, { passive: true });
+        
+        // Add mobile-specific touch handling for carousel navigation
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let isScrolling = false;
+        
+        const handleTouchStart = (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            isScrolling = false;
+        };
+        
+        const handleTouchMove = (e) => {
+            if (!touchStartX || !touchStartY) return;
+            
+            const touchX = e.touches[0].clientX;
+            const touchY = e.touches[0].clientY;
+            const diffX = touchStartX - touchX;
+            const diffY = touchStartY - touchY;
+            
+            // Determine if user is scrolling vertically
+            if (Math.abs(diffY) > Math.abs(diffX)) {
+                isScrolling = true;
+                return;
+            }
+            
+            // Prevent horizontal scroll if swiping on carousel
+            if (Math.abs(diffX) > 10 && !isScrolling) {
+                e.preventDefault();
+            }
+        };
+        
+        const handleTouchEnd = (e) => {
+            if (!touchStartX || isScrolling) return;
+            
+            const touchEndX = e.changedTouches[0].clientX;
+            const diffX = touchStartX - touchEndX;
+            const threshold = 50; // Minimum swipe distance
+            
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) {
+                    // Swipe left - next slide
+                    next();
+                    animatePress(nextBtn);
+                } else {
+                    // Swipe right - previous slide
+                    prev();
+                    animatePress(prevBtn);
+                }
+            }
+            
+            // Reset values
+            touchStartX = 0;
+            touchStartY = 0;
+            isScrolling = false;
+        };
+        
+        viewport.addEventListener("touchstart", handleTouchStart, { passive: true });
+        viewport.addEventListener("touchmove", handleTouchMove, { passive: false });
+        viewport.addEventListener("touchend", handleTouchEnd, { passive: true });
+    } else {
+        // Desktop pointer events
+        viewport.addEventListener("pointerenter", onEnter);
+        viewport.addEventListener("pointerleave", onLeave);
+    }
 
     // Adjust progress bar width to match indicators
     const adjustProgressWidth = () => {
@@ -1000,12 +1108,8 @@ function initializeSingleCarousel(projectContainer) {
 // Event delegation system - Enhanced for better performance
 const eventDelegator = (() => {
     const delegateMap = new Map();
-    const passiveEvents = new Set([
-        "scroll",
-        "wheel",
-        "touchstart",
-        "touchmove",
-    ]);
+    const passiveEvents = new Set(['scroll', 'wheel', 'touchstart', 'touchmove', 'touchend']);
+    const nonPassiveEvents = new Set(['touchstart', 'touchend', 'click']);
 
     function addDelegatedListener(
         container,
@@ -1018,16 +1122,36 @@ const eventDelegator = (() => {
 
         if (delegateMap.has(key)) return; // Prevent duplicate listeners
 
-        // Auto-detect if event should be passive for better performance
-        const finalOptions = {
-            passive: passiveEvents.has(event),
-            capture: false,
-            ...options,
-        };
+        // Mobile-specific event optimization
+        const capabilities = hardwareCapabilities.getCapabilities();
+        let finalOptions = { ...options };
+        
+        if (capabilities.isMobile) {
+            // Auto-detect if event should be passive for better mobile performance
+            if (passiveEvents.has(event) && !nonPassiveEvents.has(event)) {
+                finalOptions.passive = true;
+            }
+            
+            // Use capture for touch events on mobile for better responsiveness
+            if (event.startsWith('touch')) {
+                finalOptions.capture = options.capture !== false;
+            }
+        } else {
+            // Desktop behavior
+            finalOptions.passive = passiveEvents.has(event);
+            finalOptions.capture = false;
+        }
 
         const delegatedHandler = (e) => {
             const target = e.target.closest(selector);
             if (target && container.contains(target)) {
+                // Mobile-specific touch optimization
+                if (capabilities.isMobile && capabilities.isTouch && e.type.startsWith('touch')) {
+                    // Prevent ghost clicks on mobile
+                    if (e.type === 'touchend') {
+                        e.preventDefault();
+                    }
+                }
                 handler.call(target, e);
             }
         };
@@ -1321,7 +1445,68 @@ const performanceManager = {
 
         // Clean up viewport manager
         viewportManager.cleanup();
+        
+        // Clean up mobile image manager
+        mobileImageManager.cleanup();
     },
+
+    // Mobile-specific memory management
+    mobileMemoryOptimization() {
+        const capabilities = hardwareCapabilities.getCapabilities();
+        
+        if (capabilities.isMobile) {
+            // More aggressive cleanup on mobile
+            const aggressiveCleanup = () => {
+                // Force garbage collection if available (Chrome DevTools)
+                if (window.gc) {
+                    window.gc();
+                }
+                
+                // Clear unnecessary caches
+                performanceCache.rafIds.clear();
+                
+                // Clean up mobile image manager if low on memory
+                if (capabilities.isLowEndDevice || capabilities.deviceMemory < 2) {
+                    mobileImageManager.cleanup();
+                }
+            };
+            
+            // Run aggressive cleanup periodically on mobile
+            const cleanupInterval = setInterval(aggressiveCleanup, 30000); // Every 30 seconds
+            this.addTimer(cleanupInterval);
+            
+            // Clean up on visibility change (when app goes to background)
+            const handleVisibilityChange = () => {
+                if (document.hidden) {
+                    aggressiveCleanup();
+                    // Pause all carousels when app goes to background
+                    performanceCache.projectItems?.forEach(item => {
+                        const carouselState = item._carouselState;
+                        if (carouselState) {
+                            carouselState.pauseAutoplay();
+                        }
+                    });
+                }
+            };
+            
+            this.addListener(document, 'visibilitychange', handleVisibilityChange, { passive: true });
+            
+            // Clean up on memory pressure (if supported)
+            if ('memory' in performance) {
+                const checkMemoryPressure = () => {
+                    const memInfo = performance.memory;
+                    const memoryUsageRatio = memInfo.usedJSHeapSize / memInfo.totalJSHeapSize;
+                    
+                    if (memoryUsageRatio > 0.8) { // 80% memory usage
+                        aggressiveCleanup();
+                    }
+                };
+                
+                const memoryCheckInterval = setInterval(checkMemoryPressure, 10000); // Every 10 seconds
+                this.addTimer(memoryCheckInterval);
+            }
+        }
+    }
 };
 
 // Memory cleanup on page unload
@@ -1844,206 +2029,10 @@ window.addEventListener("error", function (e) {
     }
 });
 
-// Ultra-Low End Device Memory Management System
-(() => {
-    "use strict";
+// Initialize performance manager cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    performanceManager.cleanup();
+});
 
-    // Enhanced memory cleanup system for ultra-low end devices
-    const ultraLowEndOptimizer = {
-        cleanupInterval: null,
-        isUltraLowEnd: false,
-        lastCleanup: Date.now(),
-
-        init() {
-            // Check if we're on an ultra-low end device
-            this.detectUltraLowEndDevice();
-
-            if (this.isUltraLowEnd) {
-                this.setupAggressiveCleanup();
-                console.log("🔧 Ultra-low end optimizations activated");
-            }
-            
-            // Create temporary device type indicator
-            this.createDeviceIndicator();
-        },
-
-        createDeviceIndicator() {
-            // Get the performance level from hardwareCapabilities if available
-            let deviceType = 'unknown';
-            
-            if (typeof hardwareCapabilities !== 'undefined') {
-                try {
-                    const capabilities = hardwareCapabilities.getCapabilities();
-                    deviceType = capabilities.performanceLevel || 'unknown';
-                } catch (e) {
-                    deviceType = this.isUltraLowEnd ? 'ultra-low' : 'unknown';
-                }
-            } else {
-                deviceType = this.isUltraLowEnd ? 'ultra-low' : 'unknown';
-            }
-
-            // Create indicator element
-            const indicator = document.createElement('div');
-            indicator.id = 'device-type-indicator';
-            indicator.textContent = deviceType;
-            indicator.style.cssText = `
-                position: fixed;
-                top: 10px;
-                left: 10px;
-                background: rgba(0, 0, 0, 0.8);
-                color: #00ff00;
-                padding: 4px 8px;
-                border-radius: 4px;
-                font-family: 'Courier New', monospace;
-                font-size: 12px;
-                font-weight: bold;
-                z-index: 10000;
-                pointer-events: none;
-                border: 1px solid #00ff00;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            `;
-
-            // Add to document
-            document.body.appendChild(indicator);
-
-            // Auto-remove after 30 seconds (temporary)
-            setTimeout(() => {
-                if (indicator.parentNode) {
-                    indicator.parentNode.removeChild(indicator);
-                }
-            }, 30000);
-        },
-
-        detectUltraLowEndDevice() {
-            try {
-                const factors = [
-                    (navigator.hardwareConcurrency || 1) < 2,
-                    (navigator.deviceMemory || 4) < 2,
-                    /Android.*[2-4]\.|iPhone.*OS [4-8]_/.test(
-                        navigator.userAgent
-                    ),
-                    navigator.connection &&
-                        navigator.connection.effectiveType === "slow-2g",
-                    screen.width <= 480 && (navigator.deviceMemory || 4) < 2,
-                ];
-
-                const score = factors.filter(Boolean).length;
-                this.isUltraLowEnd = score >= 2;
-            } catch (e) {
-                this.isUltraLowEnd = false;
-            }
-        },
-
-        setupAggressiveCleanup() {
-            // Cleanup every 15 seconds for ultra-low end devices
-            this.cleanupInterval = setInterval(() => {
-                this.performAggressiveCleanup();
-            }, 15000);
-
-            // Additional cleanup on visibility change
-            document.addEventListener(
-                "visibilitychange",
-                () => {
-                    if (document.hidden) {
-                        this.performAggressiveCleanup();
-                    }
-                },
-                { passive: true }
-            );
-        },
-
-        performAggressiveCleanup() {
-            try {
-                // Clear will-change properties aggressively
-                if (typeof willChangeManager !== "undefined") {
-                    const elements = document.querySelectorAll(
-                        '[style*="will-change"]'
-                    );
-                    elements.forEach((el) => {
-                        if (
-                            el.style.willChange &&
-                            el.style.willChange !== "auto"
-                        ) {
-                            el.style.willChange = "auto";
-                        }
-                    });
-                }
-
-                // Clear unused RAF callbacks
-                if (
-                    typeof performanceCache !== "undefined" &&
-                    performanceCache.rafIds
-                ) {
-                    if (performanceCache.rafIds.size > 1) {
-                        const idsArray = Array.from(performanceCache.rafIds);
-                        idsArray.slice(0, -1).forEach((id) => {
-                            cancelAnimationFrame(id);
-                            performanceCache.rafIds.delete(id);
-                        });
-                    }
-                }
-
-                // Clear old timers
-                if (
-                    typeof performanceCache !== "undefined" &&
-                    performanceCache.timers
-                ) {
-                    if (performanceCache.timers.size > 3) {
-                        const timersArray = Array.from(performanceCache.timers);
-                        timersArray.slice(0, -2).forEach((timer) => {
-                            clearTimeout(timer);
-                            performanceCache.timers.delete(timer);
-                        });
-                    }
-                }
-
-                // Suggest garbage collection if available
-                if (window.gc && typeof window.gc === "function") {
-                    try {
-                        window.gc();
-                    } catch (e) {
-                        // GC not available in this context
-                    }
-                }
-
-                this.lastCleanup = Date.now();
-            } catch (e) {
-                console.warn("Cleanup error:", e);
-            }
-        },
-
-        destroy() {
-            if (this.cleanupInterval) {
-                clearInterval(this.cleanupInterval);
-                this.cleanupInterval = null;
-            }
-        },
-    };
-
-    // Initialize when DOM is ready
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", () => {
-            ultraLowEndOptimizer.init();
-        });
-    } else {
-        ultraLowEndOptimizer.init();
-    }
-
-    // Enhanced cleanup on page unload
-    window.addEventListener(
-        "beforeunload",
-        () => {
-            try {
-                ultraLowEndOptimizer.destroy();
-
-                // Final aggressive cleanup
-                if (ultraLowEndOptimizer.isUltraLowEnd) {
-                    ultraLowEndOptimizer.performAggressiveCleanup();
-                }
-            } catch (e) {
-                // Silent cleanup on unload
-            }
-        },
-        { once: true }
-    );
-})();
+// Initialize mobile memory optimization
+performanceManager.mobileMemoryOptimization();
