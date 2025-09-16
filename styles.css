@@ -380,6 +380,220 @@ img[src$=".WEBP"] {
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15)) !important;
 }
 
+/* Mobile Remove Internal Strokes - Clean Flat Design */
+.mobile-optimized .profile-section .glass-container,
+.mobile-optimized .profile-section .glass-bubble,
+.mobile-optimized .profile-section .glass-pill,
+.mobile-optimized .profile-section .glass-tag,
+.mobile-optimized .project-item .glass-container,
+.mobile-optimized .project-item .glass-bubble,
+.mobile-optimized .project-item .glass-pill,
+.mobile-optimized .project-item .glass-tag,
+.mobile-optimized .project-item .glass-border {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Mobile Certificate Items - Remove borders for clean look */
+.mobile-optimized .profile-section .certificate-item.glass-pill {
+    border: none !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 
+        0 2px 6px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.mobile-optimized .profile-section .certificate-item.glass-pill:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 
+        0 3px 8px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Mobile Social Media Container - Remove borders */
+.mobile-optimized .profile-section .social-media.glass-container {
+    border: none !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Mobile Contact Buttons - Remove borders */
+.mobile-optimized .profile-section .contact-btn.glass-bubble {
+    border: none !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+.mobile-optimized .profile-section .contact-btn.glass-bubble:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 
+        0 3px 6px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Mobile Project Description Containers - Remove borders */
+.mobile-optimized .project-item .project-description.glass-container {
+    border: none !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Mobile Filter Container - Remove internal border styles */
+.mobile-optimized .filter-container.glass-border {
+    border: none !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.mobile-optimized .filter-container.glass-border::before {
+    display: none !important; /* Remove hairline border */
+}
+
+/* Mobile Internal Elements - Remove all borders for clean design */
+.mobile-optimized .profile-section *[style*="border"],
+.mobile-optimized .project-item *[style*="border"],
+.mobile-optimized .profile-section .glass-container > *,
+.mobile-optimized .project-item .glass-container > * {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Mobile Technology Tags - Flat design without borders */
+.mobile-optimized .project-item .tech-tag,
+.mobile-optimized .profile-section .skill-tag {
+    border: none !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 
+        0 1px 3px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Mobile Clean Section Dividers - Remove unnecessary visual noise */
+.mobile-optimized .section-divider,
+.mobile-optimized .project-separator {
+    border: none !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.1) 50%, 
+        transparent) !important;
+    box-shadow: none !important;
+}
+
+/* Mobile Tab Navigation - Clean flat design */
+.mobile-optimized .tab-button {
+    border: none !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    box-shadow: none !important;
+}
+
+.mobile-optimized .tab-button.active {
+    background: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Mobile Profile Information Containers - Ultra clean design */
+.mobile-optimized .profile-info,
+.mobile-optimized .personal-info,
+.mobile-optimized .contact-info {
+    border: none !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    box-shadow: 
+        0 1px 3px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Mobile Override - Force remove all borders from main glass elements */
+.mobile-optimized .glass-card,
+.mobile-optimized .glass-border,
+.mobile-optimized .glass-bubble,
+.mobile-optimized .glass-pill,
+.mobile-optimized .glass-tag,
+.mobile-optimized .glass-container {
+    border: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Mobile Override - Project and Profile sections specifically */
+.mobile-optimized .profile-section .glass-card,
+.mobile-optimized .project-item .glass-card,
+.mobile-optimized .profile-section .glass-border,
+.mobile-optimized .project-item .glass-border,
+.mobile-optimized .profile-section .glass-bubble,
+.mobile-optimized .project-item .glass-bubble,
+.mobile-optimized .profile-section .glass-pill,
+.mobile-optimized .project-item .glass-pill {
+    border: none !important;
+    box-shadow: 
+        0 1px 3px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Mobile Ultra Clean - Remove any remaining hairline borders */
+.mobile-optimized .profile-section *,
+.mobile-optimized .project-item * {
+    border-width: 0 !important;
+    border-style: none !important;
+}
+
+/* Exception - Keep essential interactive borders only */
+.mobile-optimized input,
+.mobile-optimized textarea,
+.mobile-optimized select {
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.mobile-optimized input:focus,
+.mobile-optimized textarea:focus,
+.mobile-optimized select:focus {
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Mobile Menu Button - Keep minimal visual structure */
+.mobile-optimized .menu-button {
+    border: none !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Mobile Navigation Items - Clean flat design */
+.mobile-optimized .nav-item,
+.mobile-optimized .mobile-nav .nav-item {
+    border: none !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    box-shadow: none !important;
+}
+
+.mobile-optimized .nav-item:hover,
+.mobile-optimized .mobile-nav .nav-item:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 
+        0 1px 3px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Ensure mobile background image is properly sized and positioned */
+.mobile-optimized .mobile-background-image {
+    object-fit: cover !important;
+    object-position: center center !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
 /* Optimized drop-shadows for better performance */
 .social-btn img,
 .contact-btn img,
@@ -434,9 +648,31 @@ img[src$=".WEBP"] {
     contain: layout;
 }
 
+/* Mobile background image optimization */
+.mobile-background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    min-width: 100%;
+    min-height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: brightness(0.6);
+    contain: layout;
+    image-rendering: crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    will-change: opacity;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .background-video {
         display: none;
+    }
+    .mobile-background-image {
+        transition: none !important;
     }
 }
 

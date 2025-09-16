@@ -99,6 +99,14 @@
             as="image"
             type="image/webp"
         />
+        <!-- Preload mobile background image for fast switching -->
+        <link
+            rel="preload"
+            href="assets/frame.webp"
+            as="image"
+            type="image/webp"
+            media="(max-width: 768px)"
+        />
         <!-- Preload critical carousel images for immediate projects -->
         <link
             rel="preload"
