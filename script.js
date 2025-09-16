@@ -77,12 +77,39 @@ const hardwareCapabilities = (() => {
         hasTransform3D: true,
         hardwareConcurrency: navigator.hardwareConcurrency || 1,
         isLowEndDevice: false,
+        isMobileDevice: false,
         performanceLevel: "high", // 'high', 'medium', 'low'
+    };
+
+    // Detect mobile devices
+    const detectMobileDevice = () => {
+        const userAgent = navigator.userAgent.toLowerCase();
+        const mobileKeywords = [
+            'mobile', 'android', 'iphone', 'ipad', 'ipod', 'blackberry', 
+            'windows phone', 'webos', 'opera mini', 'iemobile'
+        ];
+        
+        // Check user agent
+        const isMobileUserAgent = mobileKeywords.some(keyword => 
+            userAgent.includes(keyword)
+        );
+        
+        // Check screen size and touch capability
+        const isMobileScreen = window.innerWidth <= 768 || window.innerHeight <= 768;
+        const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        
+        // Check device orientation API
+        const hasOrientationAPI = 'orientation' in window;
+        
+        return isMobileUserAgent || (isMobileScreen && hasTouch) || hasOrientationAPI;
     };
 
     // Test GPU acceleration capabilities
     const testGPUSupport = () => {
         try {
+            // Detect mobile device first
+            capabilities.isMobileDevice = detectMobileDevice();
+            
             // Test for 3D transform support
             const testEl = document.createElement("div");
             testEl.style.transform = "translate3d(0,0,0)";
@@ -106,7 +133,8 @@ const hardwareCapabilities = (() => {
             } else if (
                 capabilities.hardwareConcurrency < 8 ||
                 !capabilities.hasBackdropFilter ||
-                navigator.deviceMemory < 8 // More conservative memory threshold
+                navigator.deviceMemory < 8 || // More conservative memory threshold
+                capabilities.isMobileDevice // Mobile devices get medium performance by default
             ) {
                 capabilities.performanceLevel = "medium";
             } else {
@@ -141,6 +169,11 @@ const hardwareCapabilities = (() => {
             root.classList.add("low-end-device");
         }
 
+        if (capabilities.isMobileDevice) {
+            // Apply mobile-specific optimizations (no blur effects)
+            root.classList.add("mobile-optimized");
+        }
+
         // Set performance level class
         root.classList.add(`performance-${capabilities.performanceLevel}`);
     };
@@ -154,6 +187,7 @@ const hardwareCapabilities = (() => {
         getCapabilities: () => capabilities,
         isGPUEnabled: () => capabilities.hasGPU,
         getPerformanceLevel: () => capabilities.performanceLevel,
+        isMobile: () => capabilities.isMobileDevice,
     };
 })();
 
@@ -344,14 +378,23 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeProjectCarousel();
     perfMonitor.measure("critical-init", "critical-init-start");
 
-    // Background video optimization - Removed mobile restriction
+    // Background video optimization - Enhanced mobile handling
     const bgVideo = document.getElementById("bg-video");
     if (bgVideo) {
-        // Apply performance optimizations based on hardware capabilities
         const capabilities = hardwareCapabilities.getCapabilities();
-        if (capabilities.performanceLevel === "low") {
-            bgVideo.style.filter = "brightness(0.6)"; // Simpler filter for low-end devices
+        if (capabilities.performanceLevel === "low" || capabilities.isMobileDevice) {
+            bgVideo.style.filter = "brightness(0.6)"; // Simpler filter for low-end and mobile devices
         }
+    }
+
+    // Mobile orientation change listener
+    if (capabilities.isMobileDevice && 'orientation' in window) {
+        window.addEventListener('orientationchange', () => {
+            // Reapply optimizations after orientation change
+            setTimeout(() => {
+                hardwareCapabilities.getCapabilities();
+            }, 100);
+        }, { passive: true });
     }
 
     // Schedule non-critical initializations during idle time
