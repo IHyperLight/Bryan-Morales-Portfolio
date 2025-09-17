@@ -77,20 +77,12 @@ const hardwareCapabilities = (() => {
         hasTransform3D: true,
         hardwareConcurrency: navigator.hardwareConcurrency || 1,
         isLowEndDevice: false,
-        isMobileDevice: false,
         performanceLevel: "high", // 'high', 'medium', 'low'
     };
 
     // Test GPU acceleration capabilities
     const testGPUSupport = () => {
         try {
-            // Detect mobile devices more accurately
-            capabilities.isMobileDevice = 
-                /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                navigator.maxTouchPoints > 0 ||
-                window.matchMedia("(pointer: coarse)").matches ||
-                window.innerWidth <= 768;
-
             // Test for 3D transform support
             const testEl = document.createElement("div");
             testEl.style.transform = "translate3d(0,0,0)";
@@ -107,13 +99,8 @@ const hardwareCapabilities = (() => {
                 navigator.deviceMemory < 4 || // If available
                 /Android.*4\.|iPhone.*OS [5-9]_/.test(navigator.userAgent);
 
-            // Determine performance level with mobile-specific optimizations
-            if (capabilities.isMobileDevice) {
-                // All mobile devices get aggressive optimizations
-                capabilities.performanceLevel = "mobile";
-                capabilities.hasGPU = false; // Disable GPU-intensive effects on mobile
-                capabilities.hasBackdropFilter = false; // Force disable backdrop-filter on mobile
-            } else if (capabilities.isLowEndDevice || !capabilities.hasTransform3D) {
+            // Determine performance level with more granular detection
+            if (capabilities.isLowEndDevice || !capabilities.hasTransform3D) {
                 capabilities.performanceLevel = "low";
                 capabilities.hasGPU = false;
             } else if (
@@ -145,25 +132,13 @@ const hardwareCapabilities = (() => {
             root.classList.add("cpu-optimized");
         }
 
-        if (!capabilities.hasBackdropFilter || capabilities.isMobileDevice) {
+        if (!capabilities.hasBackdropFilter) {
             // Apply backdrop-filter fallbacks
             root.classList.add("no-backdrop-filter");
         }
 
         if (capabilities.isLowEndDevice) {
             root.classList.add("low-end-device");
-        }
-
-        if (capabilities.isMobileDevice) {
-            // Apply aggressive mobile optimizations
-            root.classList.add("mobile-device");
-            root.classList.add("no-animations");
-            root.classList.add("no-video-bg");
-            
-            // Additional mobile optimizations for all blur and shadow effects
-            root.style.setProperty("--blur-filter", "none");
-            root.style.setProperty("--drop-shadow", "none");
-            root.style.setProperty("--image-shadow", "none");
         }
 
         // Set performance level class
@@ -369,18 +344,12 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeProjectCarousel();
     perfMonitor.measure("critical-init", "critical-init-start");
 
-    // Background video optimization - Disabled on mobile
+    // Background video optimization - Removed mobile restriction
     const bgVideo = document.getElementById("bg-video");
     if (bgVideo) {
+        // Apply performance optimizations based on hardware capabilities
         const capabilities = hardwareCapabilities.getCapabilities();
-        
-        if (capabilities.isMobileDevice) {
-            // Completely disable video on mobile devices
-            bgVideo.style.display = "none";
-            bgVideo.pause();
-            bgVideo.removeAttribute("src");
-            bgVideo.load(); // Force unload
-        } else if (capabilities.performanceLevel === "low") {
+        if (capabilities.performanceLevel === "low") {
             bgVideo.style.filter = "brightness(0.6)"; // Simpler filter for low-end devices
         }
     }
@@ -1019,13 +988,6 @@ function initializeMenuButton() {
 
 // Scroll effects
 function initializeScrollEffects() {
-    const capabilities = hardwareCapabilities.getCapabilities();
-    
-    // Skip scroll effects on mobile devices to improve performance
-    if (capabilities.isMobileDevice) {
-        return;
-    }
-
     const observerOptions = {
         threshold: 0.1,
         rootMargin: "0px 0px -50px 0px",

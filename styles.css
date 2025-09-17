@@ -1,15 +1,14 @@
 /* CSS Variables */
 :root {
-    /* Glass morphism effects */
+    /* Glass morphism effects - ALL EFFECTS REMOVED */
     --glass-bg: linear-gradient(
         90deg,
-        rgba(208, 208, 208, 0.02) 0%,
-        rgba(208, 208, 208, 0.05) 50%,
-        rgba(208, 208, 208, 0.11) 100%
+        rgba(208, 208, 208, 0.035) 0%,
+        rgba(208, 208, 208, 0.07) 50%,
+        rgba(208, 208, 208, 0.14) 100%
     );
     --glass-border: rgba(208, 208, 208, 0.5);
-    --blur-filter: blur(7px) saturate(130%) brightness(130%);
-    --drop-shadow: 0 0 100px rgba(0, 0, 0, 0.5);
+    /* ALL BLUR AND SHADOW EFFECTS REMOVED */
 
     /* Colors */
     --text-primary: rgb(208, 208, 208);
@@ -64,13 +63,11 @@
     --cert-external-w: 16px;
     --cert-row-gap: var(--space-lg);
 
-    /* Interactions */
+    /* Interactions - ALL SHADOW EFFECTS REMOVED */
     --hover-tint: rgba(208, 208, 208, 0.22);
-    --hover-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
     --focus-ring: rgba(208, 208, 208, 0.7);
 
-    /* Effects */
-    --image-shadow: 0 1px 4px rgba(0, 0, 0, 0.2), 0 3px 8px rgba(0, 0, 0, 0.06);
+    /* Effects - ALL SHADOW EFFECTS REMOVED */
 
     /* GPU Acceleration System - Progressive Enhancement */
     --gpu-layer: translateZ(0); /* Default GPU acceleration */
@@ -151,13 +148,11 @@ body {
         background var(--transition-medium);
 }
 
-/* Image effects */
+/* Image effects - ALL FILTER EFFECTS REMOVED */
 img[src$=".svg"],
 img[src$=".webp"],
 img[src$=".SVG"],
 img[src$=".WEBP"] {
-    filter: drop-shadow(var(--image-shadow))
-        drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
     /* Performance optimizations for images */
     image-rendering: -webkit-optimize-contrast;
     backface-visibility: hidden;
@@ -227,133 +222,9 @@ img[src$=".WEBP"] {
     transform: none !important;
 }
 
-.performance-medium *[class*="glass-"] {
-    backdrop-filter: blur(5px) saturate(115%) brightness(120%) !important;
-}
+/* ALL BACKDROP-FILTER EFFECTS REMOVED FROM PERFORMANCE CLASSES */
 
-.performance-high *[class*="glass-"] {
-    backdrop-filter: var(--blur-filter);
-}
-
-/* Mobile-specific aggressive optimizations */
-.performance-mobile *,
-.mobile-device * {
-    will-change: auto !important;
-    transform: none !important;
-    animation: none !important;
-    transition: none !important;
-}
-
-.performance-mobile *[class*="glass-"],
-.mobile-device *[class*="glass-"] {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: var(--glass-fallback-bg) !important;
-    border-color: var(--glass-fallback-border) !important;
-    box-shadow: none !important;
-    filter: none !important;
-}
-
-/* Optimized drop-shadows for better performance */
-.social-btn img,
-.contact-btn img,
-.filter-btn img,
-.project-icon img,
-.certificate-logo img,
-.menu-button img,
-.carousel-btn::before,
-.external-link img,
-.tech-tag,
-.project-link img {
-    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.22));
-}
-
-.profile-img,
-.carousel-slide img,
-.project-screenshot {
-    filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.22));
-}
-
-.social-btn[aria-label="Discord"] img {
-    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.11));
-}
-
-.social-btn[aria-label="LinkedIn"] img {
-    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.055));
-}
-
-/* Mobile optimizations - Remove all image filters and effects */
-.mobile-device img,
-.mobile-device .social-btn img,
-.mobile-device .contact-btn img,
-.mobile-device .filter-btn img,
-.mobile-device .project-icon img,
-.mobile-device .certificate-logo img,
-.mobile-device .menu-button img,
-.mobile-device .carousel-btn::before,
-.mobile-device .external-link img,
-.mobile-device .tech-tag,
-.mobile-device .project-link img,
-.mobile-device .profile-img,
-.mobile-device .carousel-slide img,
-.mobile-device .project-screenshot {
-    filter: none !important;
-    image-rendering: auto !important;
-    backface-visibility: visible !important;
-}
-
-/* Mobile optimizations - Remove ALL blur and shadow effects */
-.mobile-device *,
-.mobile-device *::before,
-.mobile-device *::after {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    filter: none !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-}
-
-/* Mobile optimizations - Specific overrides for elements with custom shadows/blur */
-.mobile-device .glass-card,
-.mobile-device .glass-bubble,
-.mobile-device .glass-button,
-.mobile-device .glass-pill,
-.mobile-device .glass-tag,
-.mobile-device .glass-container,
-.mobile-device .glass-border,
-.mobile-device .filter-selector,
-.mobile-device .carousel-btn,
-.mobile-device .carousel-fullscreen-modal,
-.mobile-device .carousel-fullscreen-content,
-.mobile-device .menu-button,
-.mobile-device .certificate-item,
-.mobile-device .project-link {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    filter: none !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-}
-
-/* Mobile optimizations - Remove effects from carousel and project elements */
-.mobile-device .carousel-slide,
-.mobile-device .carousel-track,
-.mobile-device .carousel-viewport,
-.mobile-device .carousel-dot,
-.mobile-device .carousel-progress,
-.mobile-device .carousel-progress-fill,
-.mobile-device .project-media,
-.mobile-device .project-item,
-.mobile-device .project-description,
-.mobile-device .tech-tag,
-.mobile-device .scroll-thumb,
-.mobile-device .scroll-track {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    filter: none !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-}
+/* ALL SHADOW AND FILTER EFFECTS COMPLETELY REMOVED */
 
 /* Background video */
 .background-video {
@@ -377,7 +248,7 @@ img[src$=".WEBP"] {
     min-height: 100%;
     object-fit: cover;
     transform: translate(-50%, -50%);
-    filter: brightness(0.6);
+    /* ALL FILTER EFFECTS REMOVED */
     contain: layout;
 }
 
@@ -385,29 +256,6 @@ img[src$=".WEBP"] {
     .background-video {
         display: none;
     }
-}
-
-/* Mobile optimizations - Disable video background completely */
-.mobile-device .background-video,
-.no-video-bg .background-video {
-    display: none !important;
-}
-
-/* Mobile optimizations - Remove filters from video element if somehow still visible */
-.mobile-device .background-video video,
-.mobile-device video {
-    filter: none !important;
-    box-shadow: none !important;
-}
-
-/* Mobile optimizations - CSS Custom Properties override for consistent control */
-.mobile-device {
-    --blur-filter: none !important;
-    --drop-shadow: none !important;
-    --image-shadow: none !important;
-    --text-shadow: none !important;
-    --glass-bg: rgba(255, 255, 255, 0.1) !important;
-    --glass-border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .portfolio-container {
@@ -447,26 +295,24 @@ img[src$=".WEBP"] {
 
 .menu-button:hover {
     transform: translateY(-2px) scale(1.1); /* Efecto de elevación y escala */
-    filter: drop-shadow(
-        0 4px 12px rgba(0, 0, 0, 0.3)
-    ); /* Sombra más prominente */
+    /* ALL FILTER EFFECTS REMOVED */
 }
 
 .menu-button::after {
     display: none;
 }
 
-/* Glass Effects with Progressive Enhancement */
+/* Glass Effects with Progressive Enhancement - ALL BACKDROP-FILTER REMOVED */
 .glass-card {
     padding: var(--card-padding);
     border-radius: var(--button-radius-xl);
     border: 0.1px solid var(--glass-border);
     background: var(--glass-bg);
-    backdrop-filter: var(--blur-filter);
-    box-shadow: var(--drop-shadow);
+    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
+    /* ALL BOX-SHADOW EFFECTS REMOVED */
     transition: padding var(--transition-smooth),
         border-radius var(--transition-smooth),
-        transform var(--transition-medium), box-shadow var(--transition-medium);
+        transform var(--transition-medium);
     /* Enhanced performance optimizations with smart containment */
     will-change: transform;
     transform: var(--gpu-layer);
@@ -489,7 +335,7 @@ img[src$=".WEBP"] {
     padding: var(--space-md) var(--space-lg);
     border-radius: var(--radius-pill);
     background: var(--glass-bg);
-    backdrop-filter: var(--blur-filter);
+    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
     border: none;
     color: var(--text-primary);
     cursor: pointer;
@@ -511,7 +357,7 @@ img[src$=".WEBP"] {
     padding: clamp(12px, 3.5vw, 18px) clamp(20px, 5vw, 26px);
     border-radius: var(--button-radius-lg);
     background: var(--glass-bg);
-    backdrop-filter: var(--blur-filter);
+    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
 }
 
 .glass-button {
@@ -520,7 +366,7 @@ img[src$=".WEBP"] {
     padding: var(--button-padding);
     border-radius: var(--button-radius-md);
     background: var(--glass-bg);
-    backdrop-filter: var(--blur-filter);
+    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
     border: none;
     color: var(--text-primary);
     cursor: pointer;
@@ -563,14 +409,14 @@ img[src$=".WEBP"] {
     border-radius: var(--button-radius-sm);
     border: 0.5px solid var(--glass-border);
     background: var(--glass-bg);
-    backdrop-filter: var(--blur-filter);
+    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
 }
 
 .glass-pill {
     padding: clamp(12px, 3.5vw, 16px) clamp(20px, 5vw, 26px);
     border-radius: var(--radius-full);
     background: var(--glass-bg);
-    backdrop-filter: var(--blur-filter);
+    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
 }
 
 .glass-tag {
@@ -578,12 +424,12 @@ img[src$=".WEBP"] {
     padding: 5px clamp(18px, 4.5vw, 24px);
     border-radius: var(--button-radius-sm);
     background: var(--glass-bg);
-    backdrop-filter: var(--blur-filter);
+    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
     display: flex;
     align-items: center;
 }
 
-/* Unified hover/focus effects for interactive elements */
+/* Unified hover/focus effects for interactive elements - ALL SHADOW EFFECTS REMOVED */
 .contact-btn.glass-bubble,
 .social-btn.glass-button,
 .certificate-item.glass-pill,
@@ -594,7 +440,7 @@ img[src$=".WEBP"] {
 .glass-tag {
     position: relative;
     transition: transform var(--transition-fast),
-        background var(--transition-fast), box-shadow var(--transition-medium),
+        background var(--transition-fast),
         width var(--transition-smooth), height var(--transition-smooth),
         padding var(--transition-smooth);
 }
@@ -626,7 +472,7 @@ img[src$=".WEBP"] {
 .project-icon.glass-button:hover,
 .glass-tag:hover {
     background: var(--hover-tint);
-    box-shadow: var(--hover-shadow);
+    /* ALL BOX-SHADOW EFFECTS REMOVED */
     transform: translateY(-2px);
 }
 
@@ -639,19 +485,16 @@ img[src$=".WEBP"] {
 .project-link.glass-pill:not(.download-btn):hover {
     background: #b8b8b8 !important; /* Ligeramente más oscuro en hover */
     color: #000000 !important; /* Mantener texto negro */
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+    /* ALL BOX-SHADOW EFFECTS REMOVED */
     transform: translateY(-2px);
 }
 
-/* Iconos del botón GitHub en negro */
-.project-link.glass-pill:not(.download-btn) img {
-    filter: brightness(0) saturate(100%) !important; /* Logo GitHub y icono externo en negro */
-}
+/* ALL FILTER EFFECTS REMOVED FROM GITHUB BUTTON ICONS */
 
-/* Hover más sutil para certificados */
+/* Hover más sutil para certificados - ALL SHADOW EFFECTS REMOVED */
 .certificate-item.glass-pill:hover {
     background: rgba(208, 208, 208, 0.12);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    /* ALL BOX-SHADOW EFFECTS REMOVED */
     transform: translateY(-1px);
 }
 
@@ -684,7 +527,7 @@ img[src$=".WEBP"] {
 .project-icon.glass-button:active,
 .glass-tag:active {
     transform: translateY(-1px) scale(0.98);
-    filter: brightness(1.05);
+    /* ALL FILTER EFFECTS REMOVED */
 }
 
 .contact-btn.glass-bubble:focus-visible,
@@ -718,7 +561,6 @@ img[src$=".WEBP"] {
     height: 125px;
     border-radius: var(--radius-xl);
     background: var(--glass-bg);
-    backdrop-filter: var(--blur-filter);
     position: relative;
     display: flex;
     align-items: center;
@@ -744,7 +586,7 @@ img[src$=".WEBP"] {
     height: 50px;
     border-radius: 50px;
     background: var(--glass-bg);
-    backdrop-filter: var(--blur-filter);
+    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -919,7 +761,7 @@ img[src$=".WEBP"] {
     height: 50px;
     border-radius: 100px;
     background: var(--glass-bg);
-    backdrop-filter: var(--blur-filter);
+    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1074,28 +916,23 @@ img[src$=".WEBP"] {
 
 /* Hover sutil solo sobre el icono: no usa fondo ni sombra para no competir con el selector */
 .filter-btn img {
-    transition: transform 160ms ease, filter 160ms ease;
+    transition: transform 160ms ease;
     transform-origin: center;
 }
 .filter-btn:hover img {
     transform: scale(1.06);
-    filter: brightness(1.12) saturate(110%);
 }
 
 /* Sin hover visual en el botón activo */
 .filter-btn.active img {
     transform: none !important;
-    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.22))
-        drop-shadow(0 2px 6px rgba(0, 0, 0, 0.12))
-        drop-shadow(0 1px 2px rgba(0, 0, 0, 0.28)) !important;
+    /* ALL FILTER DROP-SHADOW EFFECTS REMOVED */
 }
 
 /* Mientras el selector se mueve, desactiva cualquier hover para evitar solaparse con la animación */
 .filter-container.animating .filter-btn:hover img {
     transform: none !important;
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35))
-        drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))
-        drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45)) !important;
+    /* ALL FILTER DROP-SHADOW EFFECTS REMOVED */
 }
 .filter-container.animating .filter-btn img {
     transition: none; /* elimina fading/jitter durante el movimiento */
@@ -1125,23 +962,13 @@ img[src$=".WEBP"] {
     height: 50px; /* igual al botón */
     border-radius: var(--radius-md);
     background: var(--glass-bg);
-    backdrop-filter: var(--blur-filter);
     border: none; /* Sin stroke/border */
     transform: translate3d(0, -50%, 0);
     transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
     z-index: var(
         --z-base
     ); /* por debajo de los botones, por encima del fondo */
-    box-shadow: var(--drop-shadow);
     will-change: transform;
-}
-
-/* Mobile optimizations - Disable filter selector animations */
-.mobile-device .filter-selector,
-.no-animations .filter-selector {
-    transition: none !important;
-    will-change: auto !important;
-    transform: translate(0, -50%) !important;
 }
 
 /* Optimización para dispositivos de bajo rendimiento */
@@ -1149,7 +976,6 @@ img[src$=".WEBP"] {
     transform: var(--cpu-transform2d);
     transition: none;
     will-change: auto;
-    backdrop-filter: var(--glass-fallback-bg);
 }
 
 /* Reducir tamaño SOLO de los íconos All y Design */
@@ -1337,7 +1163,6 @@ img[src$=".WEBP"] {
     /* Performance optimizations */
     contain: layout;
 }
-/* Carousel slide transitions - Disabled on mobile */
 .carousel-slide {
     width: 100%;
     height: 100%;
@@ -1353,18 +1178,6 @@ img[src$=".WEBP"] {
     content-visibility: auto;
     contain-intrinsic-size: 100% 300px;
     backface-visibility: hidden;
-}
-
-/* Mobile optimizations - Instant transitions */
-.mobile-device .carousel-slide,
-.no-animations .carousel-slide {
-    transition: none !important;
-    opacity: 0;
-}
-
-.mobile-device .carousel-slide.is-active,
-.no-animations .carousel-slide.is-active {
-    opacity: 1 !important;
 }
 
 /* CPU fallback for carousel-slide */
@@ -1407,7 +1220,6 @@ img[src$=".WEBP"] {
     ); /* Ajustado proporcionalmente de 10px a 8px */
     border: none;
     background: var(--glass-bg);
-    backdrop-filter: var(--blur-filter);
     color: var(--text-primary);
     display: flex;
     align-items: center;
@@ -1493,19 +1305,17 @@ img[src$=".WEBP"] {
     transform: var(--gpu-layer);
     contain: layout style;
     backface-visibility: hidden;
-    /* Sombra distinguible para mejor visibilidad */
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4))
-        drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+    /* ALL FILTER DROP-SHADOW EFFECTS REMOVED */
 }
 
 .carousel-fullscreen-btn:hover {
     transform: scale(1.1); /* Solo escala al hacer hover */
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4)); /* Sombra en hover */
+    /* ALL FILTER DROP-SHADOW EFFECTS REMOVED */
 }
 
 .carousel-fullscreen-btn:active {
     transform: scale(0.95); /* Efecto de presión */
-    filter: brightness(1.1);
+    /* ALL FILTER BRIGHTNESS EFFECTS REMOVED */
 }
 
 .carousel-fullscreen-btn:focus-visible {
@@ -1566,7 +1376,6 @@ img[src$=".WEBP"] {
     max-height: 100%;
     object-fit: contain;
     border-radius: 10px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     cursor: default !important; /* Cursor normal en la imagen también */
 }
 
@@ -1580,7 +1389,6 @@ img[src$=".WEBP"] {
     border-radius: 8px; /* Ajustado proporcionalmente de 10px a 8px */
     border: none;
     background: var(--glass-bg);
-    backdrop-filter: var(--blur-filter);
     color: var(--text-primary);
     display: flex;
     align-items: center;
@@ -1636,7 +1444,6 @@ img[src$=".WEBP"] {
     border-radius: 8px; /* Ajustado proporcionalmente de 10px a 8px */
     border: none;
     background: var(--glass-bg);
-    backdrop-filter: var(--blur-filter);
     color: var(--text-primary);
     display: flex;
     align-items: center;
@@ -1662,7 +1469,6 @@ img[src$=".WEBP"] {
     transform: translateY(-50%);
     transition: none;
     will-change: auto;
-    backdrop-filter: var(--glass-fallback-bg);
 }
 
 .low-end-device .carousel-fullscreen-nav button:hover {
@@ -1974,7 +1780,6 @@ img[src$=".WEBP"] {
     padding: 0 10px;
     border-radius: 100px;
     background: var(--glass-bg);
-    backdrop-filter: var(--blur-filter);
     font-size: 14px;
     font-weight: 400;
     color: var(--text-primary);
@@ -1991,7 +1796,6 @@ img[src$=".WEBP"] {
 .tech-tag:hover {
     background: var(--hover-tint);
     transform: translateY(-2px);
-    box-shadow: var(--hover-shadow);
 }
 
 /* Project Description */
@@ -2115,7 +1919,6 @@ img[src$=".WEBP"] {
 .project-link:active {
     background: #0d0d0d !important; /* Más oscuro al hacer click */
     transform: translateY(-1px) scale(0.98);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     transition: all var(--transition-fast);
 }
 
@@ -2147,7 +1950,6 @@ img[src$=".WEBP"] {
 .download-btn.glass-pill:hover {
     background: #1a1a1a !important; /* Negro ligeramente más claro en hover */
     color: #ffffff !important; /* Texto más claro en hover */
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 0 4px 10px rgba(0, 0, 0, 0.4) !important;
     transform: translateY(-2px);
 }
 
@@ -2158,7 +1960,6 @@ img[src$=".WEBP"] {
     width: 100%;
     border-radius: 30px;
     overflow: hidden;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     aspect-ratio: 16 / 9;
     min-height: clamp(200px, 40vw, 280px);
     max-height: clamp(320px, 48vh, 540px);
@@ -2220,7 +2021,6 @@ img[src$=".WEBP"] {
     height: 7.5px;
     border-radius: 50%;
     background: rgba(208, 208, 208, 0.5);
-    backdrop-filter: var(--blur-filter);
 }
 
 .dot.active {
@@ -2253,7 +2053,6 @@ img[src$=".WEBP"] {
     border: none;
     color: rgba(208, 208, 208, 0.6);
     cursor: pointer;
-    backdrop-filter: var(--blur-filter);
 }
 
 /* Responsive Design */
@@ -2520,26 +2319,6 @@ img[src$=".WEBP"] {
     animation-delay: 0.2s;
 }
 
-/* Mobile optimizations - Disable all animations */
-.mobile-device .glass-card,
-.mobile-device .certificate-item,
-.mobile-device .filter-container,
-.no-animations .glass-card,
-.no-animations .certificate-item,
-.no-animations .filter-container {
-    animation: none !important;
-    animation-delay: 0s !important;
-    opacity: 1 !important;
-    transform: none !important;
-}
-
-.mobile-device .fade-in,
-.no-animations .fade-in {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-}
-
 /* Staggered animation for multiple projects */
 .project-item:nth-child(1) {
     animation-delay: 0.1s;
@@ -2621,7 +2400,7 @@ button:focus-visible {
     .glass-bubble,
     .glass-container {
         background: rgba(208, 208, 208, 0.1);
-        backdrop-filter: none;
+        /* BACKDROP-FILTER ALREADY REMOVED */
     }
 }
 
