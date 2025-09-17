@@ -87,52 +87,6 @@
     );
     --glass-fallback-border: rgba(208, 208, 208, 0.7);
 
-    /* Mobile Flat Glass Design - High Performance Gradients */
-    --mobile-glass-bg: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.15) 0%,
-        rgba(255, 255, 255, 0.08) 25%,
-        rgba(255, 255, 255, 0.05) 50%,
-        rgba(255, 255, 255, 0.08) 75%,
-        rgba(255, 255, 255, 0.12) 100%
-    );
-    --mobile-glass-border: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.4) 0%,
-        rgba(255, 255, 255, 0.2) 50%,
-        rgba(255, 255, 255, 0.3) 100%
-    );
-    --mobile-glass-shadow: 
-        0 4px 8px rgba(0, 0, 0, 0.15),
-        0 2px 4px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-
-    /* Mobile Button Specific Backgrounds */
-    --mobile-button-bg: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.18) 0%,
-        rgba(255, 255, 255, 0.12) 50%,
-        rgba(255, 255, 255, 0.15) 100%
-    );
-    --mobile-button-hover-bg: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.25) 0%,
-        rgba(255, 255, 255, 0.18) 50%,
-        rgba(255, 255, 255, 0.22) 100%
-    );
-
-    /* Mobile Solid Design - Zero Transparency, Zero Shadows */
-    --mobile-solid-bg: #0a0a0a; /* Solid dark background */
-    --mobile-solid-card: #1a1a1a; /* Solid card background */
-    --mobile-solid-container: #2a2a2a; /* Solid container background */
-    --mobile-solid-button: #333333; /* Solid button background */
-    --mobile-solid-button-hover: #404040; /* Solid button hover */
-    --mobile-solid-tag: #252525; /* Solid tag background */
-    --mobile-solid-border: #444444; /* Solid border color */
-    --mobile-solid-container-hover: #353535; /* Solid container hover */
-    --mobile-solid-override: #1a1a1a; /* Override for transparent elements */
-    --mobile-solid-accent: #555555;
-
     /* Smooth Transitions */
     --transition-ease-out: cubic-bezier(0.4, 0, 0.2, 1);
     --transition-fast: 200ms var(--transition-ease-out);
@@ -281,133 +235,21 @@ img[src$=".WEBP"] {
     backdrop-filter: var(--blur-filter);
 }
 
-/* Mobile Solid Design - No Blur, Transparency, or Shadows */
-.mobile-optimized *[class*="glass-"] {
+/* Mobile-specific aggressive optimizations */
+.performance-mobile *,
+.mobile-device * {
+    will-change: auto !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+}
+
+.performance-mobile *[class*="glass-"],
+.mobile-device *[class*="glass-"] {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-}
-
-/* Mobile Solid Background - Replace Video */
-.mobile-optimized .background-video {
-    background: var(--mobile-solid-bg) !important;
-}
-
-.mobile-optimized .background-video video {
-    display: none !important; /* Completely hide video on mobile */
-}
-
-/* Mobile Solid Cards - No Transparency */
-.mobile-optimized .glass-card {
-    background: var(--mobile-solid-card) !important;
-    border: 1px solid var(--mobile-solid-border) !important;
-    box-shadow: none !important;
-}
-
-/* Mobile Solid Buttons - No Transparency or Shadows */
-.mobile-optimized .glass-button,
-.mobile-optimized .glass-bubble {
-    background: var(--mobile-solid-button) !important;
-    border: 1px solid var(--mobile-solid-border) !important;
-    box-shadow: none !important;
-}
-
-.mobile-optimized .glass-button:hover,
-.mobile-optimized .glass-bubble:hover {
-    background: var(--mobile-solid-button-hover) !important;
-    box-shadow: none !important;
-}
-
-/* Mobile Solid Containers and Pills - No Transparency */
-.mobile-optimized .glass-container,
-.mobile-optimized .glass-pill {
-    background: var(--mobile-solid-container) !important;
-    border: 1px solid var(--mobile-solid-border) !important;
-    box-shadow: none !important;
-}
-
-/* Mobile Solid Tags and Borders - No Transparency */
-.mobile-optimized .glass-tag,
-.mobile-optimized .glass-border {
-    background: var(--mobile-solid-tag) !important;
-    border: 1px solid var(--mobile-solid-border) !important;
-    box-shadow: none !important;
-}
-
-/* Mobile Critical CSS Override for Inline Styles */
-.mobile-optimized .profile-section {
-    backdrop-filter: none !important;
-    background: var(--mobile-solid-card) !important;
-    border: 1px solid var(--mobile-solid-border) !important;
-    box-shadow: none !important;
-}
-
-/* Mobile Remove ALL Filters and Shadows */
-.mobile-optimized img,
-.mobile-optimized .carousel-slide img,
-.mobile-optimized .social-btn img,
-.mobile-optimized .contact-btn img,
-.mobile-optimized .filter-btn img,
-.mobile-optimized .menu-button img,
-.mobile-optimized .tech-tag,
-.mobile-optimized .project-link img,
-.mobile-optimized .profile-img,
-.mobile-optimized .project-screenshot {
-    filter: none !important; /* Remove ALL filters and shadows */
-    box-shadow: none !important;
-}
-
-/* Mobile Filter Selector - Solid Design */
-.mobile-optimized .filter-selector {
-    background: var(--mobile-solid-button) !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-}
-
-/* Mobile Certificate Items - Solid Design */
-.mobile-optimized .certificate-item.glass-pill {
-    background: var(--mobile-solid-container) !important;
-    border: 1px solid var(--mobile-solid-border) !important;
-    box-shadow: none !important;
-}
-
-.mobile-optimized .certificate-item.glass-pill:hover {
-    background: var(--mobile-solid-container-hover) !important;
-    box-shadow: none !important;
-}
-
-/* Mobile Disable ALL Visual Effects */
-.mobile-optimized *[class*="glass-"]:hover::after,
-.mobile-optimized *::before,
-.mobile-optimized *::after {
-    display: none !important; /* Remove ALL pseudo-element effects */
-}
-
-/* Mobile Remove ALL Transparency from ALL Elements */
-.mobile-optimized * {
-    background-color: var(--mobile-solid-override) !important;
-}
-
-.mobile-optimized *[style*="rgba"],
-.mobile-optimized *[style*="hsla"],
-.mobile-optimized *[style*="transparent"] {
-    background: var(--mobile-solid-override) !important;
-}
-
-/* Mobile Specific Element Overrides - No Transparency */
-.mobile-optimized .menu-button {
-    background: var(--mobile-solid-button) !important;
-    box-shadow: none !important;
-}
-
-.mobile-optimized .portfolio-container {
-    background: transparent !important; /* Only container can be transparent */
-}
-
-.mobile-optimized .social-btn,
-.mobile-optimized .contact-btn,
-.mobile-optimized .filter-btn {
-    background: var(--mobile-solid-button) !important;
-    box-shadow: none !important;
+    background: var(--glass-fallback-bg) !important;
+    border-color: var(--glass-fallback-border) !important;
 }
 
 /* Optimized drop-shadows for better performance */
@@ -436,6 +278,26 @@ img[src$=".WEBP"] {
 
 .social-btn[aria-label="LinkedIn"] img {
     filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.055));
+}
+
+/* Mobile optimizations - Remove all image filters and effects */
+.mobile-device img,
+.mobile-device .social-btn img,
+.mobile-device .contact-btn img,
+.mobile-device .filter-btn img,
+.mobile-device .project-icon img,
+.mobile-device .certificate-logo img,
+.mobile-device .menu-button img,
+.mobile-device .carousel-btn::before,
+.mobile-device .external-link img,
+.mobile-device .tech-tag,
+.mobile-device .project-link img,
+.mobile-device .profile-img,
+.mobile-device .carousel-slide img,
+.mobile-device .project-screenshot {
+    filter: none !important;
+    image-rendering: auto !important;
+    backface-visibility: visible !important;
 }
 
 /* Background video */
@@ -468,6 +330,12 @@ img[src$=".WEBP"] {
     .background-video {
         display: none;
     }
+}
+
+/* Mobile optimizations - Disable video background completely */
+.mobile-device .background-video,
+.no-video-bg .background-video {
+    display: none !important;
 }
 
 .portfolio-container {
@@ -1196,6 +1064,14 @@ img[src$=".WEBP"] {
     will-change: transform;
 }
 
+/* Mobile optimizations - Disable filter selector animations */
+.mobile-device .filter-selector,
+.no-animations .filter-selector {
+    transition: none !important;
+    will-change: auto !important;
+    transform: translate(0, -50%) !important;
+}
+
 /* Optimización para dispositivos de bajo rendimiento */
 .low-end-device .filter-selector {
     transform: var(--cpu-transform2d);
@@ -1389,6 +1265,7 @@ img[src$=".WEBP"] {
     /* Performance optimizations */
     contain: layout;
 }
+/* Carousel slide transitions - Disabled on mobile */
 .carousel-slide {
     width: 100%;
     height: 100%;
@@ -1404,6 +1281,18 @@ img[src$=".WEBP"] {
     content-visibility: auto;
     contain-intrinsic-size: 100% 300px;
     backface-visibility: hidden;
+}
+
+/* Mobile optimizations - Instant transitions */
+.mobile-device .carousel-slide,
+.no-animations .carousel-slide {
+    transition: none !important;
+    opacity: 0;
+}
+
+.mobile-device .carousel-slide.is-active,
+.no-animations .carousel-slide.is-active {
+    opacity: 1 !important;
 }
 
 /* CPU fallback for carousel-slide */
@@ -2557,6 +2446,26 @@ img[src$=".WEBP"] {
 
 .certificate-item:nth-child(3) {
     animation-delay: 0.2s;
+}
+
+/* Mobile optimizations - Disable all animations */
+.mobile-device .glass-card,
+.mobile-device .certificate-item,
+.mobile-device .filter-container,
+.no-animations .glass-card,
+.no-animations .certificate-item,
+.no-animations .filter-container {
+    animation: none !important;
+    animation-delay: 0s !important;
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+.mobile-device .fade-in,
+.no-animations .fade-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
 }
 
 /* Staggered animation for multiple projects */

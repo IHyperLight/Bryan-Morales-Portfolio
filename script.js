@@ -81,35 +81,16 @@ const hardwareCapabilities = (() => {
         performanceLevel: "high", // 'high', 'medium', 'low'
     };
 
-    // Detect mobile devices
-    const detectMobileDevice = () => {
-        const userAgent = navigator.userAgent.toLowerCase();
-        const mobileKeywords = [
-            'mobile', 'android', 'iphone', 'ipad', 'ipod', 'blackberry', 
-            'windows phone', 'webos', 'opera mini', 'iemobile'
-        ];
-        
-        // Check user agent
-        const isMobileUserAgent = mobileKeywords.some(keyword => 
-            userAgent.includes(keyword)
-        );
-        
-        // Check screen size and touch capability
-        const isMobileScreen = window.innerWidth <= 768 || window.innerHeight <= 768;
-        const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        
-        // Check device orientation API
-        const hasOrientationAPI = 'orientation' in window;
-        
-        return isMobileUserAgent || (isMobileScreen && hasTouch) || hasOrientationAPI;
-    };
-
     // Test GPU acceleration capabilities
     const testGPUSupport = () => {
         try {
-            // Detect mobile device first
-            capabilities.isMobileDevice = detectMobileDevice();
-            
+            // Detect mobile devices more accurately
+            capabilities.isMobileDevice = 
+                /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                navigator.maxTouchPoints > 0 ||
+                window.matchMedia("(pointer: coarse)").matches ||
+                window.innerWidth <= 768;
+
             // Test for 3D transform support
             const testEl = document.createElement("div");
             testEl.style.transform = "translate3d(0,0,0)";
@@ -126,15 +107,19 @@ const hardwareCapabilities = (() => {
                 navigator.deviceMemory < 4 || // If available
                 /Android.*4\.|iPhone.*OS [5-9]_/.test(navigator.userAgent);
 
-            // Determine performance level with more granular detection
-            if (capabilities.isLowEndDevice || !capabilities.hasTransform3D) {
+            // Determine performance level with mobile-specific optimizations
+            if (capabilities.isMobileDevice) {
+                // All mobile devices get aggressive optimizations
+                capabilities.performanceLevel = "mobile";
+                capabilities.hasGPU = false; // Disable GPU-intensive effects on mobile
+                capabilities.hasBackdropFilter = false; // Force disable backdrop-filter on mobile
+            } else if (capabilities.isLowEndDevice || !capabilities.hasTransform3D) {
                 capabilities.performanceLevel = "low";
                 capabilities.hasGPU = false;
             } else if (
                 capabilities.hardwareConcurrency < 8 ||
                 !capabilities.hasBackdropFilter ||
-                navigator.deviceMemory < 8 || // More conservative memory threshold
-                capabilities.isMobileDevice // Mobile devices get medium performance by default
+                navigator.deviceMemory < 8 // More conservative memory threshold
             ) {
                 capabilities.performanceLevel = "medium";
             } else {
@@ -160,7 +145,7 @@ const hardwareCapabilities = (() => {
             root.classList.add("cpu-optimized");
         }
 
-        if (!capabilities.hasBackdropFilter) {
+        if (!capabilities.hasBackdropFilter || capabilities.isMobileDevice) {
             // Apply backdrop-filter fallbacks
             root.classList.add("no-backdrop-filter");
         }
@@ -170,8 +155,10 @@ const hardwareCapabilities = (() => {
         }
 
         if (capabilities.isMobileDevice) {
-            // Apply mobile-specific optimizations (no blur effects)
-            root.classList.add("mobile-optimized");
+            // Apply aggressive mobile optimizations
+            root.classList.add("mobile-device");
+            root.classList.add("no-animations");
+            root.classList.add("no-video-bg");
         }
 
         // Set performance level class
@@ -187,7 +174,6 @@ const hardwareCapabilities = (() => {
         getCapabilities: () => capabilities,
         isGPUEnabled: () => capabilities.hasGPU,
         getPerformanceLevel: () => capabilities.performanceLevel,
-        isMobile: () => capabilities.isMobileDevice,
     };
 })();
 
@@ -378,28 +364,20 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeProjectCarousel();
     perfMonitor.measure("critical-init", "critical-init-start");
 
-    // Background video optimization - Enhanced mobile handling
+    // Background video optimization - Disabled on mobile
     const bgVideo = document.getElementById("bg-video");
     if (bgVideo) {
         const capabilities = hardwareCapabilities.getCapabilities();
+        
         if (capabilities.isMobileDevice) {
-            // Complete video removal on mobile - use solid dark background
+            // Completely disable video on mobile devices
             bgVideo.style.display = "none";
-            document.querySelector(".background-video").style.display = "none";
-            document.body.style.background = "#0a0a0a"; // Solid dark background for mobile
+            bgVideo.pause();
+            bgVideo.removeAttribute("src");
+            bgVideo.load(); // Force unload
         } else if (capabilities.performanceLevel === "low") {
             bgVideo.style.filter = "brightness(0.6)"; // Simpler filter for low-end devices
         }
-    }
-
-    // Mobile orientation change listener
-    if (capabilities.isMobileDevice && 'orientation' in window) {
-        window.addEventListener('orientationchange', () => {
-            // Reapply optimizations after orientation change
-            setTimeout(() => {
-                hardwareCapabilities.getCapabilities();
-            }, 100);
-        }, { passive: true });
     }
 
     // Schedule non-critical initializations during idle time
@@ -1036,6 +1014,13 @@ function initializeMenuButton() {
 
 // Scroll effects
 function initializeScrollEffects() {
+    const capabilities = hardwareCapabilities.getCapabilities();
+    
+    // Skip scroll effects on mobile devices to improve performance
+    if (capabilities.isMobileDevice) {
+        return;
+    }
+
     const observerOptions = {
         threshold: 0.1,
         rootMargin: "0px 0px -50px 0px",
