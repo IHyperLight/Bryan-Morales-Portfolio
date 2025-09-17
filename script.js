@@ -159,6 +159,11 @@ const hardwareCapabilities = (() => {
             root.classList.add("mobile-device");
             root.classList.add("no-animations");
             root.classList.add("no-video-bg");
+            
+            // Additional mobile optimizations for all blur and shadow effects
+            root.style.setProperty("--blur-filter", "none");
+            root.style.setProperty("--drop-shadow", "none");
+            root.style.setProperty("--image-shadow", "none");
         }
 
         // Set performance level class

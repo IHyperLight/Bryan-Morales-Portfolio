@@ -60,11 +60,20 @@
                 border: 1px solid rgba(255, 255, 255, 0.2);
                 border-radius: 16px;
             }
-            /* Mobile fallback - No backdrop filter */
+            /* Mobile fallback - No backdrop filter, blur or shadows */
             @media (max-width: 768px), (pointer: coarse) {
                 .profile-section {
                     backdrop-filter: none !important;
                     background: rgba(255, 255, 255, 0.15) !important;
+                    box-shadow: none !important;
+                    filter: none !important;
+                }
+                .background-video video {
+                    filter: none !important;
+                }
+                .profile-img {
+                    filter: none !important;
+                    box-shadow: none !important;
                 }
             }
             .profile-picture {

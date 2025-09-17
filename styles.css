@@ -250,6 +250,8 @@ img[src$=".WEBP"] {
     -webkit-backdrop-filter: none !important;
     background: var(--glass-fallback-bg) !important;
     border-color: var(--glass-fallback-border) !important;
+    box-shadow: none !important;
+    filter: none !important;
 }
 
 /* Optimized drop-shadows for better performance */
@@ -300,6 +302,59 @@ img[src$=".WEBP"] {
     backface-visibility: visible !important;
 }
 
+/* Mobile optimizations - Remove ALL blur and shadow effects */
+.mobile-device *,
+.mobile-device *::before,
+.mobile-device *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+/* Mobile optimizations - Specific overrides for elements with custom shadows/blur */
+.mobile-device .glass-card,
+.mobile-device .glass-bubble,
+.mobile-device .glass-button,
+.mobile-device .glass-pill,
+.mobile-device .glass-tag,
+.mobile-device .glass-container,
+.mobile-device .glass-border,
+.mobile-device .filter-selector,
+.mobile-device .carousel-btn,
+.mobile-device .carousel-fullscreen-modal,
+.mobile-device .carousel-fullscreen-content,
+.mobile-device .menu-button,
+.mobile-device .certificate-item,
+.mobile-device .project-link {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+/* Mobile optimizations - Remove effects from carousel and project elements */
+.mobile-device .carousel-slide,
+.mobile-device .carousel-track,
+.mobile-device .carousel-viewport,
+.mobile-device .carousel-dot,
+.mobile-device .carousel-progress,
+.mobile-device .carousel-progress-fill,
+.mobile-device .project-media,
+.mobile-device .project-item,
+.mobile-device .project-description,
+.mobile-device .tech-tag,
+.mobile-device .scroll-thumb,
+.mobile-device .scroll-track {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
 /* Background video */
 .background-video {
     position: fixed;
@@ -336,6 +391,23 @@ img[src$=".WEBP"] {
 .mobile-device .background-video,
 .no-video-bg .background-video {
     display: none !important;
+}
+
+/* Mobile optimizations - Remove filters from video element if somehow still visible */
+.mobile-device .background-video video,
+.mobile-device video {
+    filter: none !important;
+    box-shadow: none !important;
+}
+
+/* Mobile optimizations - CSS Custom Properties override for consistent control */
+.mobile-device {
+    --blur-filter: none !important;
+    --drop-shadow: none !important;
+    --image-shadow: none !important;
+    --text-shadow: none !important;
+    --glass-bg: rgba(255, 255, 255, 0.1) !important;
+    --glass-border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .portfolio-container {
