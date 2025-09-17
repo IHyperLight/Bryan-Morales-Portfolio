@@ -378,35 +378,15 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeProjectCarousel();
     perfMonitor.measure("critical-init", "critical-init-start");
 
-    // Background video optimization - Enhanced mobile handling with image fallback
+    // Background video optimization - Enhanced mobile handling
     const bgVideo = document.getElementById("bg-video");
-    const bgContainer = document.querySelector(".background-video");
-    
-    if (bgVideo && bgContainer) {
+    if (bgVideo) {
         const capabilities = hardwareCapabilities.getCapabilities();
-        
         if (capabilities.isMobileDevice) {
-            // Replace video with optimized background image for mobile
-            bgContainer.innerHTML = `
-                <div 
-                    class="background-image-mobile"
-                    style="
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100vw;
-                        height: 100vh;
-                        background-image: url('assets/frame.webp');
-                        background-size: cover;
-                        background-position: center;
-                        background-repeat: no-repeat;
-                        filter: brightness(0.6);
-                        will-change: auto;
-                        contain: layout;
-                    "
-                    aria-hidden="true">
-                </div>
-            `;
+            // Complete video removal on mobile - use solid dark background
+            bgVideo.style.display = "none";
+            document.querySelector(".background-video").style.display = "none";
+            document.body.style.background = "#0a0a0a"; // Solid dark background for mobile
         } else if (capabilities.performanceLevel === "low") {
             bgVideo.style.filter = "brightness(0.6)"; // Simpler filter for low-end devices
         }

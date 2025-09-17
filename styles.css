@@ -1,11 +1,11 @@
 /* CSS Variables */
 :root {
-    /* Glass morphism effects - Enhanced opacity for solid appearance */
+    /* Glass morphism effects */
     --glass-bg: linear-gradient(
         90deg,
-        rgba(208, 208, 208, 0.12) 0%,
-        rgba(208, 208, 208, 0.18) 50%,
-        rgba(208, 208, 208, 0.22) 100%
+        rgba(208, 208, 208, 0.02) 0%,
+        rgba(208, 208, 208, 0.05) 50%,
+        rgba(208, 208, 208, 0.11) 100%
     );
     --glass-border: rgba(208, 208, 208, 0.5);
     --blur-filter: blur(7px) saturate(130%) brightness(130%);
@@ -87,14 +87,14 @@
     );
     --glass-fallback-border: rgba(208, 208, 208, 0.7);
 
-    /* Mobile Flat Glass Design - High Performance Gradients with reduced transparency */
+    /* Mobile Flat Glass Design - High Performance Gradients */
     --mobile-glass-bg: linear-gradient(
         135deg,
-        rgba(255, 255, 255, 0.25) 0%,
-        rgba(255, 255, 255, 0.18) 25%,
-        rgba(255, 255, 255, 0.15) 50%,
-        rgba(255, 255, 255, 0.18) 75%,
-        rgba(255, 255, 255, 0.22) 100%
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0.08) 25%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.08) 75%,
+        rgba(255, 255, 255, 0.12) 100%
     );
     --mobile-glass-border: linear-gradient(
         135deg,
@@ -107,19 +107,31 @@
         0 2px 4px rgba(0, 0, 0, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
 
-    /* Mobile Button Specific Backgrounds with reduced transparency */
+    /* Mobile Button Specific Backgrounds */
     --mobile-button-bg: linear-gradient(
         135deg,
-        rgba(255, 255, 255, 0.28) 0%,
-        rgba(255, 255, 255, 0.22) 50%,
-        rgba(255, 255, 255, 0.25) 100%
+        rgba(255, 255, 255, 0.18) 0%,
+        rgba(255, 255, 255, 0.12) 50%,
+        rgba(255, 255, 255, 0.15) 100%
     );
     --mobile-button-hover-bg: linear-gradient(
         135deg,
-        rgba(255, 255, 255, 0.35) 0%,
-        rgba(255, 255, 255, 0.28) 50%,
-        rgba(255, 255, 255, 0.32) 100%
+        rgba(255, 255, 255, 0.25) 0%,
+        rgba(255, 255, 255, 0.18) 50%,
+        rgba(255, 255, 255, 0.22) 100%
     );
+
+    /* Mobile Solid Design - Zero Transparency, Zero Shadows */
+    --mobile-solid-bg: #0a0a0a; /* Solid dark background */
+    --mobile-solid-card: #1a1a1a; /* Solid card background */
+    --mobile-solid-container: #2a2a2a; /* Solid container background */
+    --mobile-solid-button: #333333; /* Solid button background */
+    --mobile-solid-button-hover: #404040; /* Solid button hover */
+    --mobile-solid-tag: #252525; /* Solid tag background */
+    --mobile-solid-border: #444444; /* Solid border color */
+    --mobile-solid-container-hover: #353535; /* Solid container hover */
+    --mobile-solid-override: #1a1a1a; /* Override for transparent elements */
+    --mobile-solid-accent: #555555;
 
     /* Smooth Transitions */
     --transition-ease-out: cubic-bezier(0.4, 0, 0.2, 1);
@@ -269,134 +281,133 @@ img[src$=".WEBP"] {
     backdrop-filter: var(--blur-filter);
 }
 
-/* Mobile Optimized Flat Glass Design - No Blur Effects */
+/* Mobile Solid Design - No Blur, Transparency, or Shadows */
 .mobile-optimized *[class*="glass-"] {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
 }
 
-/* Remove internal borders within profile-section and project-item containers */
-.profile-section .glass-bubble,
-.profile-section .glass-container,
-.profile-section .glass-pill,
-.profile-section .glass-tag,
-.project-item .glass-container,
-.project-item .glass-pill,
-.project-item .glass-tag,
-.project-item .glass-button {
-    border: none !important;
+/* Mobile Solid Background - Replace Video */
+.mobile-optimized .background-video {
+    background: var(--mobile-solid-bg) !important;
 }
 
-/* Keep borders only for main containers */
-.profile-section.glass-card,
-.project-item.glass-card,
-.filter-container.glass-border {
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+.mobile-optimized .background-video video {
+    display: none !important; /* Completely hide video on mobile */
 }
 
-/* Mobile Glass Cards - Flat Design with Gradients */
+/* Mobile Solid Cards - No Transparency */
 .mobile-optimized .glass-card {
-    background: var(--mobile-glass-bg) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    box-shadow: var(--mobile-glass-shadow) !important;
+    background: var(--mobile-solid-card) !important;
+    border: 1px solid var(--mobile-solid-border) !important;
+    box-shadow: none !important;
 }
 
-/* Mobile Glass Buttons - Optimized Flat Design */
+/* Mobile Solid Buttons - No Transparency or Shadows */
 .mobile-optimized .glass-button,
 .mobile-optimized .glass-bubble {
-    background: var(--mobile-button-bg) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    box-shadow: 
-        0 2px 4px rgba(0, 0, 0, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    background: var(--mobile-solid-button) !important;
+    border: 1px solid var(--mobile-solid-border) !important;
+    box-shadow: none !important;
 }
 
 .mobile-optimized .glass-button:hover,
 .mobile-optimized .glass-bubble:hover {
-    background: var(--mobile-button-hover-bg) !important;
-    box-shadow: 
-        0 3px 6px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    background: var(--mobile-solid-button-hover) !important;
+    box-shadow: none !important;
 }
 
-/* Mobile Glass Containers and Pills */
+/* Mobile Solid Containers and Pills - No Transparency */
 .mobile-optimized .glass-container,
 .mobile-optimized .glass-pill {
-    background: var(--mobile-glass-bg) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    box-shadow: 
-        0 2px 6px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    background: var(--mobile-solid-container) !important;
+    border: 1px solid var(--mobile-solid-border) !important;
+    box-shadow: none !important;
 }
 
-/* Mobile Glass Tags and Borders */
+/* Mobile Solid Tags and Borders - No Transparency */
 .mobile-optimized .glass-tag,
 .mobile-optimized .glass-border {
-    background: var(--mobile-button-bg) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    box-shadow: 
-        0 1px 3px rgba(0, 0, 0, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+    background: var(--mobile-solid-tag) !important;
+    border: 1px solid var(--mobile-solid-border) !important;
+    box-shadow: none !important;
 }
 
 /* Mobile Critical CSS Override for Inline Styles */
 .mobile-optimized .profile-section {
     backdrop-filter: none !important;
-    background: var(--mobile-glass-bg) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    box-shadow: var(--mobile-glass-shadow) !important;
+    background: var(--mobile-solid-card) !important;
+    border: 1px solid var(--mobile-solid-border) !important;
+    box-shadow: none !important;
 }
 
-/* Mobile Video Background Optimization */
-.mobile-optimized .background-video video {
-    filter: brightness(0.6) !important; /* Remove any complex filters */
-}
-
-/* Mobile Carousel Optimizations */
-.mobile-optimized .carousel-slide img {
-    filter: none !important; /* Remove heavy drop-shadows */
-}
-
-/* Mobile Filter Selector - Flat Design */
-.mobile-optimized .filter-selector {
-    background: var(--mobile-button-bg) !important;
-    box-shadow: 
-        0 2px 4px rgba(0, 0, 0, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
-    backdrop-filter: none !important;
-}
-
-/* Mobile Certificate Items - Optimized Flat Design */
-.mobile-optimized .certificate-item.glass-pill {
-    background: var(--mobile-glass-bg) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    box-shadow: 
-        0 2px 6px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-}
-
-.mobile-optimized .certificate-item.glass-pill:hover {
-    background: var(--mobile-button-hover-bg) !important;
-    box-shadow: 
-        0 3px 8px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
-}
-
-/* Mobile Disable Heavy Visual Effects */
-.mobile-optimized *[class*="glass-"]:hover::after {
-    display: none !important; /* Remove pseudo-element effects */
-}
-
-.mobile-optimized img {
-    filter: none !important; /* Remove all image filters for performance */
-}
-
-/* Re-enable minimal shadows for essential UI elements */
+/* Mobile Remove ALL Filters and Shadows */
+.mobile-optimized img,
+.mobile-optimized .carousel-slide img,
 .mobile-optimized .social-btn img,
 .mobile-optimized .contact-btn img,
 .mobile-optimized .filter-btn img,
-.mobile-optimized .menu-button img {
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15)) !important;
+.mobile-optimized .menu-button img,
+.mobile-optimized .tech-tag,
+.mobile-optimized .project-link img,
+.mobile-optimized .profile-img,
+.mobile-optimized .project-screenshot {
+    filter: none !important; /* Remove ALL filters and shadows */
+    box-shadow: none !important;
+}
+
+/* Mobile Filter Selector - Solid Design */
+.mobile-optimized .filter-selector {
+    background: var(--mobile-solid-button) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+/* Mobile Certificate Items - Solid Design */
+.mobile-optimized .certificate-item.glass-pill {
+    background: var(--mobile-solid-container) !important;
+    border: 1px solid var(--mobile-solid-border) !important;
+    box-shadow: none !important;
+}
+
+.mobile-optimized .certificate-item.glass-pill:hover {
+    background: var(--mobile-solid-container-hover) !important;
+    box-shadow: none !important;
+}
+
+/* Mobile Disable ALL Visual Effects */
+.mobile-optimized *[class*="glass-"]:hover::after,
+.mobile-optimized *::before,
+.mobile-optimized *::after {
+    display: none !important; /* Remove ALL pseudo-element effects */
+}
+
+/* Mobile Remove ALL Transparency from ALL Elements */
+.mobile-optimized * {
+    background-color: var(--mobile-solid-override) !important;
+}
+
+.mobile-optimized *[style*="rgba"],
+.mobile-optimized *[style*="hsla"],
+.mobile-optimized *[style*="transparent"] {
+    background: var(--mobile-solid-override) !important;
+}
+
+/* Mobile Specific Element Overrides - No Transparency */
+.mobile-optimized .menu-button {
+    background: var(--mobile-solid-button) !important;
+    box-shadow: none !important;
+}
+
+.mobile-optimized .portfolio-container {
+    background: transparent !important; /* Only container can be transparent */
+}
+
+.mobile-optimized .social-btn,
+.mobile-optimized .contact-btn,
+.mobile-optimized .filter-btn {
+    background: var(--mobile-solid-button) !important;
+    box-shadow: none !important;
 }
 
 /* Optimized drop-shadows for better performance */
