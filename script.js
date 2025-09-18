@@ -36,219 +36,18 @@ const performanceCache = {
 
 // Utility for optimized will-change management
 const willChangeManager = {
-    activeElements: new WeakSet(),
-
     set(element, property = "transform") {
-        if (!element) return;
-
-        const capabilities = hardwareCapabilities.getCapabilities();
-
-        // Only use will-change on capable devices to reduce memory pressure
-        if (capabilities.performanceLevel !== "low" && capabilities.hasGPU) {
-            element.style.willChange = property;
-            this.activeElements.add(element);
-        }
+        if (element) element.style.willChange = property;
     },
-
     clear(element, delay = 100) {
-        if (!element || !this.activeElements.has(element)) return;
-
+        if (!element) return;
         const timerId = setTimeout(() => {
-            if (element.style) {
-                element.style.willChange = "auto";
-                this.activeElements.delete(element);
-            }
+            element.style.willChange = "auto";
             performanceCache.timers.delete(timerId);
         }, delay);
         performanceCache.timers.add(timerId);
     },
-
-    clearAll() {
-        // Cleanup function for page unload
-        this.activeElements = new WeakSet();
-    },
 };
-
-// Hardware Capability Detection and Progressive Enhancement System
-const hardwareCapabilities = (() => {
-    let capabilities = {
-        hasGPU: true,
-        hasBackdropFilter: true,
-        hasTransform3D: true,
-        hardwareConcurrency: navigator.hardwareConcurrency || 1,
-        isLowEndDevice: false,
-        performanceLevel: "high", // 'high', 'medium', 'low'
-    };
-
-    // Test GPU acceleration capabilities
-    const testGPUSupport = () => {
-        try {
-            // Test for 3D transform support
-            const testEl = document.createElement("div");
-            testEl.style.transform = "translate3d(0,0,0)";
-            capabilities.hasTransform3D = testEl.style.transform !== "";
-
-            // Test for backdrop-filter support
-            capabilities.hasBackdropFilter =
-                CSS.supports("backdrop-filter", "blur(1px)") ||
-                CSS.supports("-webkit-backdrop-filter", "blur(1px)");
-
-            // Detect low-end devices
-            capabilities.isLowEndDevice =
-                capabilities.hardwareConcurrency < 4 ||
-                navigator.deviceMemory < 4 || // If available
-                /Android.*4\.|iPhone.*OS [5-9]_/.test(navigator.userAgent);
-
-            // Determine performance level with more granular detection
-            if (capabilities.isLowEndDevice || !capabilities.hasTransform3D) {
-                capabilities.performanceLevel = "low";
-                capabilities.hasGPU = false;
-            } else if (
-                capabilities.hardwareConcurrency < 8 ||
-                !capabilities.hasBackdropFilter ||
-                navigator.deviceMemory < 8 // More conservative memory threshold
-            ) {
-                capabilities.performanceLevel = "medium";
-            } else {
-                capabilities.performanceLevel = "high";
-            }
-        } catch (e) {
-            capabilities.hasGPU = false;
-            capabilities.hasTransform3D = false;
-            capabilities.performanceLevel = "low";
-        }
-
-        return capabilities;
-    };
-
-    // Apply performance optimizations based on capabilities
-    const applyOptimizations = () => {
-        const root = document.documentElement;
-
-        if (!capabilities.hasGPU || capabilities.performanceLevel === "low") {
-            // Apply CPU-optimized styles
-            root.style.setProperty("--gpu-layer", "scale(1)");
-            root.style.setProperty("--gpu-transform3d", "translate(0, 0)");
-            root.classList.add("cpu-optimized");
-        }
-
-        if (!capabilities.hasBackdropFilter) {
-            // Apply backdrop-filter fallbacks
-            root.classList.add("no-backdrop-filter");
-        }
-
-        if (capabilities.isLowEndDevice) {
-            root.classList.add("low-end-device");
-        }
-
-        // Set performance level class
-        root.classList.add(`performance-${capabilities.performanceLevel}`);
-    };
-
-    return {
-        init() {
-            testGPUSupport();
-            applyOptimizations();
-            return capabilities;
-        },
-        getCapabilities: () => capabilities,
-        isGPUEnabled: () => capabilities.hasGPU,
-        getPerformanceLevel: () => capabilities.performanceLevel,
-    };
-})();
-
-// Viewport Visibility Manager for Performance Optimization
-const viewportManager = (() => {
-    const visibleCarousels = new Set();
-    const carouselObservers = new Map();
-
-    // Throttled intersection handler for better performance
-    let updateTimeout = null;
-    const pendingUpdates = new Set();
-
-    const processPendingUpdates = () => {
-        updateTimeout = null;
-        for (const update of pendingUpdates) {
-            update();
-        }
-        pendingUpdates.clear();
-    };
-
-    // Intersection Observer for carousel visibility
-    const createCarouselObserver = () => {
-        return new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    const projectContainer = entry.target;
-                    const carouselState = projectContainer._carouselState;
-
-                    if (!carouselState) return;
-
-                    // Queue update for throttled processing
-                    const update = () => {
-                        if (entry.isIntersecting) {
-                            // Carousel is visible - resume autoplay if not manually paused
-                            visibleCarousels.add(projectContainer);
-                            carouselState.setVisibility(true);
-                        } else {
-                            // Carousel is not visible - pause to save resources
-                            visibleCarousels.delete(projectContainer);
-                            carouselState.setVisibility(false);
-                        }
-                    };
-
-                    pendingUpdates.add(update);
-
-                    // Throttle updates for better performance
-                    if (!updateTimeout) {
-                        updateTimeout = setTimeout(processPendingUpdates, 50);
-                    }
-                });
-            },
-            {
-                threshold: 0.15, // Trigger when 15% visible for better UX
-                rootMargin: "100px 0px", // Larger margin for smoother transitions
-            }
-        );
-    };
-
-    const observeCarousel = (projectContainer) => {
-        if (carouselObservers.has(projectContainer)) return;
-
-        const observer = createCarouselObserver();
-        observer.observe(projectContainer);
-        carouselObservers.set(projectContainer, observer);
-    };
-
-    const unobserveCarousel = (projectContainer) => {
-        const observer = carouselObservers.get(projectContainer);
-        if (observer) {
-            observer.unobserve(projectContainer);
-            observer.disconnect();
-            carouselObservers.delete(projectContainer);
-        }
-        visibleCarousels.delete(projectContainer);
-    };
-
-    // Cleanup function
-    const cleanup = () => {
-        if (updateTimeout) {
-            clearTimeout(updateTimeout);
-            updateTimeout = null;
-        }
-        pendingUpdates.clear();
-        carouselObservers.forEach((observer) => observer.disconnect());
-        carouselObservers.clear();
-        visibleCarousels.clear();
-    };
-
-    return {
-        observeCarousel,
-        unobserveCarousel,
-        isVisible: (projectContainer) => visibleCarousels.has(projectContainer),
-        cleanup,
-    };
-})();
 
 // Performance utility: High-frequency RAF scheduler
 const rafScheduler = (() => {
@@ -330,9 +129,6 @@ const idleScheduler = (() => {
 document.addEventListener("DOMContentLoaded", function () {
     perfMonitor.mark("dom-ready");
 
-    // Initialize hardware capability detection first
-    const capabilities = hardwareCapabilities.init();
-
     // Cache frequently used elements for performance
     performanceCache.body = document.body;
     performanceCache.viewport = document.querySelector(".portfolio-container");
@@ -344,14 +140,17 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeProjectCarousel();
     perfMonitor.measure("critical-init", "critical-init-start");
 
-    // Background video optimization - Removed mobile restriction
+    // Optimize background video for mobile devices
     const bgVideo = document.getElementById("bg-video");
-    if (bgVideo) {
-        // Apply performance optimizations based on hardware capabilities
-        const capabilities = hardwareCapabilities.getCapabilities();
-        if (capabilities.performanceLevel === "low") {
-            bgVideo.style.filter = "brightness(0.6)"; // Simpler filter for low-end devices
-        }
+    if (
+        bgVideo &&
+        (navigator.hardwareConcurrency < 4 ||
+            /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+                navigator.userAgent
+            ))
+    ) {
+        bgVideo.pause();
+        bgVideo.style.display = "none";
     }
 
     // Schedule non-critical initializations during idle time
@@ -380,38 +179,17 @@ function debounce(func, delay) {
     };
 }
 
-// Performance-optimized animation function with CPU/GPU fallbacks
+// Performance-optimized animation function
 function animatePress(el, scale = 0.9, duration = 150) {
     if (!el) return;
 
-    const capabilities = hardwareCapabilities.getCapabilities();
-
-    if (capabilities.hasGPU && capabilities.performanceLevel !== "low") {
-        // GPU-accelerated path
-        el.style.transform = `scale(${scale}) translateZ(0)`;
-        willChangeManager.set(el);
-    } else {
-        // CPU-optimized path
-        el.style.transform = `scale(${scale})`;
-        // Skip will-change on low-end devices to reduce memory pressure
-        if (capabilities.performanceLevel !== "low") {
-            willChangeManager.set(el);
-        }
-    }
+    // Use transform for hardware acceleration
+    el.style.transform = `scale(${scale}) translateZ(0)`;
+    willChangeManager.set(el);
 
     const timerId = setTimeout(() => {
-        if (capabilities.hasGPU && capabilities.performanceLevel !== "low") {
-            el.style.transform = "translateZ(0)";
-        } else {
-            el.style.transform = "scale(1)";
-        }
-
-        if (capabilities.performanceLevel !== "low") {
-            willChangeManager.clear(el, 0);
-        } else {
-            el.style.willChange = "auto";
-        }
-
+        el.style.transform = "translateZ(0)";
+        willChangeManager.clear(el, 0);
         performanceCache.timers.delete(timerId);
     }, duration);
 
@@ -503,7 +281,7 @@ function initializeProjectCarousel() {
     });
 }
 
-// Initialize carousel for a single project with viewport optimization
+// Initialize carousel for a single project
 function initializeSingleCarousel(projectContainer) {
     const media = projectContainer.querySelector(".project-media");
     if (!media) return;
@@ -532,8 +310,6 @@ function initializeSingleCarousel(projectContainer) {
     let pauseElapsed = 0;
     let paused = false;
     let hoverExitTO = null;
-    let manuallyPaused = false; // Track manual pause state
-    let isVisible = true; // Assume visible initially
 
     const setActive = (i, { animate = true } = {}) => {
         index = (i + slides.length) % slides.length;
@@ -565,8 +341,6 @@ function initializeSingleCarousel(projectContainer) {
         if (timer) {
             clearTimeout(timer);
             timer = null;
-            // Remove from performance cache if exists
-            performanceCache.timers.delete(timer);
         }
         if (progressFill) {
             const computed = getComputedStyle(progressFill).width;
@@ -584,9 +358,6 @@ function initializeSingleCarousel(projectContainer) {
     };
 
     const startAuto = () => {
-        // Only start if carousel is visible and not manually paused
-        if (!isVisible || manuallyPaused) return;
-
         stopAuto();
         const remaining = Math.max(16, intervalMs - pauseElapsed);
         if (progressFill) {
@@ -599,24 +370,17 @@ function initializeSingleCarousel(projectContainer) {
             void progressFill.offsetWidth;
             progressFill.style.transition = `width ${remaining}ms linear`;
             requestAnimationFrame(() => {
-                if (progressFill && isVisible) {
+                if (progressFill) {
                     progressFill.style.width = "100%";
                 }
             });
         }
         startTs = performance.now() - pauseElapsed;
         timer = setTimeout(() => {
-            if (isVisible && !manuallyPaused) {
-                next();
-                pauseElapsed = 0;
-                startAuto();
-            }
+            next();
+            pauseElapsed = 0;
+            startAuto();
         }, remaining);
-
-        // Track timer for cleanup
-        if (timer) {
-            performanceCache.timers.add(timer);
-        }
     };
 
     const pauseAutoplay = () => {
@@ -634,43 +398,8 @@ function initializeSingleCarousel(projectContainer) {
 
     const resumeAutoplay = () => {
         if (!paused) return;
-        // Only resume if carousel is visible and not manually paused
-        if (!isVisible || manuallyPaused) return;
         paused = false;
         startAuto();
-    };
-
-    // Enhanced pause function for manual control
-    const pauseManually = () => {
-        manuallyPaused = true;
-        pauseAutoplay();
-    };
-
-    // Enhanced resume function for manual control
-    const resumeManually = () => {
-        manuallyPaused = false;
-        // Only resume if carousel is visible
-        if (isVisible) {
-            resumeAutoplay();
-        }
-    };
-
-    // Visibility change handler
-    const setVisibility = (visible) => {
-        const wasVisible = isVisible;
-        isVisible = visible;
-
-        if (visible && !wasVisible) {
-            // Becoming visible - resume only if not manually paused
-            if (!manuallyPaused && paused) {
-                resumeAutoplay();
-            }
-        } else if (!visible && wasVisible) {
-            // Becoming invisible - pause to save resources
-            if (!paused) {
-                pauseAutoplay();
-            }
-        }
     };
 
     const resetProgress = () => {
@@ -740,29 +469,21 @@ function initializeSingleCarousel(projectContainer) {
         paused ? resetProgress() : startAuto();
     });
 
-    // Hover pause on image viewport only - using manual pause system
+    // Hover pause on image viewport only
     const onEnter = () => {
         if (hoverExitTO) {
             clearTimeout(hoverExitTO);
             hoverExitTO = null;
         }
-        pauseManually();
+        pauseAutoplay();
     };
 
     const onLeave = () => {
-        if (hoverExitTO) {
-            clearTimeout(hoverExitTO);
-            performanceCache.timers.delete(hoverExitTO);
-        }
+        if (hoverExitTO) clearTimeout(hoverExitTO);
         hoverExitTO = setTimeout(() => {
             hoverExitTO = null;
-            resumeManually();
+            resumeAutoplay();
         }, 60);
-
-        // Track hover timeout for cleanup
-        if (hoverExitTO) {
-            performanceCache.timers.add(hoverExitTO);
-        }
     };
 
     viewport.addEventListener("pointerenter", onEnter);
@@ -795,46 +516,29 @@ function initializeSingleCarousel(projectContainer) {
             void progressFill.offsetWidth;
         }
         setActive(0);
-        // Small delay to ensure DOM is ready and viewport observation is active
+        // Small delay to ensure DOM is ready for animations
         setTimeout(() => {
-            // Only start auto if visible and not manually paused
-            if (isVisible && !manuallyPaused) {
-                startAuto();
-            }
-        }, 150);
+            startAuto();
+        }, 100);
     }
 
-    // Exponer el estado del carousel para funcionalidad de pantalla completa y viewport management
+    // Exponer el estado del carousel para funcionalidad de pantalla completa
     const carouselState = {
-        pauseAutoplay: pauseManually,
-        resumeAutoplay: resumeManually,
+        pauseAutoplay,
+        resumeAutoplay,
         next,
         prev,
         setActive,
         getCurrentIndex: () => index,
         getSlides: () => slides,
-        setVisibility,
-        _isPaused: () => paused,
-        _manuallyPaused: () => manuallyPaused,
-        _wasAutoPlaying: false,
     };
-
-    // Store state reference and start viewport observation
-    projectContainer._carouselState = carouselState;
-    viewportManager.observeCarousel(projectContainer);
 
     exposeCarouselState(projectContainer, carouselState);
 }
 
-// Event delegation system - Enhanced for better performance
+// Event delegation system
 const eventDelegator = (() => {
     const delegateMap = new Map();
-    const passiveEvents = new Set([
-        "scroll",
-        "wheel",
-        "touchstart",
-        "touchmove",
-    ]);
 
     function addDelegatedListener(
         container,
@@ -844,47 +548,20 @@ const eventDelegator = (() => {
         options = {}
     ) {
         const key = `${event}-${selector}`;
+        if (!delegateMap.has(key)) {
+            const delegatedHandler = (e) => {
+                const target = e.target.closest(selector);
+                if (target && container.contains(target)) {
+                    handler.call(target, e);
+                }
+            };
 
-        if (delegateMap.has(key)) return; // Prevent duplicate listeners
-
-        // Auto-detect if event should be passive for better performance
-        const finalOptions = {
-            passive: passiveEvents.has(event),
-            capture: false,
-            ...options,
-        };
-
-        const delegatedHandler = (e) => {
-            const target = e.target.closest(selector);
-            if (target && container.contains(target)) {
-                handler.call(target, e);
-            }
-        };
-
-        container.addEventListener(event, delegatedHandler, finalOptions);
-        delegateMap.set(key, {
-            container,
-            event,
-            handler: delegatedHandler,
-            options: finalOptions,
-        });
-    }
-
-    function removeAllListeners() {
-        for (const [
-            key,
-            { container, event, handler, options },
-        ] of delegateMap) {
-            try {
-                container.removeEventListener(event, handler, options);
-            } catch (e) {
-                // Silent cleanup
-            }
+            container.addEventListener(event, delegatedHandler, options);
+            delegateMap.set(key, { container, handler: delegatedHandler });
         }
-        delegateMap.clear();
     }
 
-    return { addDelegatedListener, removeAllListeners };
+    return { addDelegatedListener };
 })();
 
 // Contact buttons functionality
@@ -1147,9 +824,6 @@ const performanceManager = {
         this.observers.clear();
         this.timers.clear();
         this.listeners.clear();
-
-        // Clean up viewport manager
-        viewportManager.cleanup();
     },
 };
 
@@ -1169,12 +843,6 @@ window.addEventListener(
 
         // Clean up all managed resources
         performanceManager.cleanup();
-
-        // Clean up event delegator
-        eventDelegator.removeAllListeners();
-
-        // Clean up will-change properties
-        willChangeManager.clearAll();
 
         // Clear caches
         performanceCache.rafIds.clear();
@@ -1225,36 +893,23 @@ function initializeProjectScroll(projectContainer) {
             return;
         }
 
-        // Update thumb with progressive enhancement for CPU/GPU
-        const capabilities = hardwareCapabilities.getCapabilities();
+        // Update thumb with maximum hardware acceleration and performance
         const ratio = clientHeight / scrollHeight;
         const thumbH = Math.max(20, track.clientHeight * ratio);
         const maxThumbTop = track.clientHeight - thumbH;
         const scrollRatio = scrollTop / (scrollHeight - clientHeight || 1);
         const top = maxThumbTop * scrollRatio;
 
+        // Use translate3d with will-change for maximum GPU acceleration
         thumb.style.height = `${thumbH}px`;
+        thumb.style.transform = `translate3d(0, ${
+            Math.round(top * 100) / 100
+        }px, 0)`;
 
-        if (
-            capabilities.hasGPU &&
-            capabilities.hasTransform3D &&
-            capabilities.performanceLevel !== "low"
-        ) {
-            // GPU-accelerated path with 3D transforms
-            thumb.style.transform = `translate3d(0, ${
-                Math.round(top * 100) / 100
-            }px, 0)`;
-        } else {
-            // CPU-optimized path with 2D transforms
-            thumb.style.transform = `translateY(${
-                Math.round(top * 100) / 100
-            }px)`;
-        }
-
-        // Dynamic will-change optimization based on device capabilities
-        if (isDragging && capabilities.performanceLevel !== "low") {
+        // Dynamic will-change optimization
+        if (isDragging) {
             willChangeManager.set(thumb);
-        } else if (capabilities.performanceLevel !== "low") {
+        } else {
             willChangeManager.clear(thumb);
         }
 
@@ -1424,26 +1079,16 @@ function initializeProjectScroll(projectContainer) {
     // Initialize with optimized performance settings
     desc.style.scrollBehavior = "smooth";
 
-    // Performance-optimized initialization with progressive enhancement
+    // Performance-optimized initialization with RAF scheduler
     const initUpdate = () => {
         updateThumb();
-
-        const capabilities = hardwareCapabilities.getCapabilities();
-
-        if (capabilities.hasGPU && capabilities.performanceLevel !== "low") {
-            // GPU-accelerated path
-            thumb.style.transform += " translateZ(0)";
-            thumb.style.backfaceVisibility = "hidden";
-            thumb.style.perspective = "1000px";
-            desc.style.transform = "translateZ(0)";
-            desc.style.backfaceVisibility = "hidden";
-        } else {
-            // CPU-optimized path - avoid 3D transforms
-            thumb.style.backfaceVisibility = "hidden";
-            desc.style.backfaceVisibility = "hidden";
-        }
-
-        // Layout containment is beneficial for all devices
+        // Only enable hardware acceleration when needed
+        thumb.style.transform += " translateZ(0)";
+        thumb.style.backfaceVisibility = "hidden";
+        thumb.style.perspective = "1000px";
+        // Optimize the container too
+        desc.style.transform = "translateZ(0)";
+        desc.style.backfaceVisibility = "hidden";
         desc.style.contain = "layout style";
     };
 
@@ -1663,12 +1308,3 @@ function initializeDownloadButtons() {
         });
     });
 }
-
-// Global error handler to prevent runtime.lastError warnings
-window.addEventListener("error", function (e) {
-    // Silently handle extension-related errors that don't affect functionality
-    if (e.message && e.message.includes("Extension context invalidated")) {
-        e.preventDefault();
-        return true;
-    }
-});

@@ -1,14 +1,13 @@
 /* CSS Variables */
 :root {
-    /* Glass morphism effects - ALL EFFECTS REMOVED */
+    /* Glass morphism effects */
     --glass-bg: linear-gradient(
         90deg,
         rgba(208, 208, 208, 0.035) 0%,
-        rgba(208, 208, 208, 0.07) 50%,
-        rgba(208, 208, 208, 0.14) 100%
+        rgba(208, 208, 208, 0.09) 50%,
+        rgba(208, 208, 208, 0.2) 100%
     );
     --glass-border: rgba(208, 208, 208, 0.5);
-    /* ALL BLUR AND SHADOW EFFECTS REMOVED */
 
     /* Colors */
     --text-primary: rgb(208, 208, 208);
@@ -63,26 +62,11 @@
     --cert-external-w: 16px;
     --cert-row-gap: var(--space-lg);
 
-    /* Interactions - ALL SHADOW EFFECTS REMOVED */
+    /* Interactions */
     --hover-tint: rgba(208, 208, 208, 0.22);
     --focus-ring: rgba(208, 208, 208, 0.7);
 
-    /* Effects - ALL SHADOW EFFECTS REMOVED */
-
-    /* GPU Acceleration System - Progressive Enhancement */
-    --gpu-layer: translateZ(0); /* Default GPU acceleration */
-    --gpu-fallback: scale(1); /* CPU fallback for transforms */
-    --gpu-transform3d: translate3d(0, 0, 0); /* GPU 3D transform */
-    --cpu-transform2d: translate(0, 0); /* CPU 2D fallback */
-
-    /* Backdrop Filter Fallbacks */
-    --glass-fallback-bg: linear-gradient(
-        90deg,
-        rgba(208, 208, 208, 0.08) 0%,
-        rgba(208, 208, 208, 0.12) 50%,
-        rgba(208, 208, 208, 0.18) 100%
-    );
-    --glass-fallback-border: rgba(208, 208, 208, 0.7);
+    /* Effects */
 
     /* Smooth Transitions */
     --transition-ease-out: cubic-bezier(0.4, 0, 0.2, 1);
@@ -148,7 +132,7 @@ body {
         background var(--transition-medium);
 }
 
-/* Image effects - ALL FILTER EFFECTS REMOVED */
+/* Image effects */
 img[src$=".svg"],
 img[src$=".webp"],
 img[src$=".SVG"],
@@ -176,56 +160,6 @@ img[src$=".WEBP"] {
     margin: 0 auto;
 }
 
-/* CPU Optimization Classes */
-.cpu-optimized * {
-    transform: var(--gpu-fallback) !important;
-}
-
-.cpu-optimized .carousel-slide img,
-.cpu-optimized .profile-img,
-.cpu-optimized .project-screenshot {
-    transform: none !important;
-}
-
-/* Backdrop Filter Fallbacks */
-.no-backdrop-filter .glass-card,
-.no-backdrop-filter .glass-bubble,
-.no-backdrop-filter .glass-button,
-.no-backdrop-filter .glass-pill,
-.no-backdrop-filter .glass-tag,
-.no-backdrop-filter .glass-container,
-.no-backdrop-filter .glass-border {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: var(--glass-fallback-bg) !important;
-    border-color: var(--glass-fallback-border) !important;
-}
-
-/* Low-end device optimizations */
-.low-end-device .carousel-progress-fill,
-.low-end-device .filter-selector {
-    transition: none !important;
-}
-
-.low-end-device *[class*="glass-"]:hover::after {
-    display: none !important;
-}
-
-/* Performance level optimizations */
-.performance-low * {
-    will-change: auto !important;
-    transform: var(--cpu-transform2d) !important;
-}
-
-.performance-low .carousel-slide,
-.performance-low .project-media {
-    transform: none !important;
-}
-
-/* ALL BACKDROP-FILTER EFFECTS REMOVED FROM PERFORMANCE CLASSES */
-
-/* ALL SHADOW AND FILTER EFFECTS COMPLETELY REMOVED */
-
 /* Background video */
 .background-video {
     position: fixed;
@@ -248,7 +182,6 @@ img[src$=".WEBP"] {
     min-height: 100%;
     object-fit: cover;
     transform: translate(-50%, -50%);
-    /* ALL FILTER EFFECTS REMOVED */
     contain: layout;
 }
 
@@ -295,47 +228,32 @@ img[src$=".WEBP"] {
 
 .menu-button:hover {
     transform: translateY(-2px) scale(1.1); /* Efecto de elevación y escala */
-    /* ALL FILTER EFFECTS REMOVED */
 }
 
 .menu-button::after {
     display: none;
 }
 
-/* Glass Effects with Progressive Enhancement - ALL BACKDROP-FILTER REMOVED */
+/* Glass Effects */
 .glass-card {
     padding: var(--card-padding);
     border-radius: var(--button-radius-xl);
     border: 0.1px solid var(--glass-border);
     background: var(--glass-bg);
-    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
-    /* ALL BOX-SHADOW EFFECTS REMOVED */
     transition: padding var(--transition-smooth),
         border-radius var(--transition-smooth),
         transform var(--transition-medium);
-    /* Enhanced performance optimizations with smart containment */
+    /* Performance optimizations */
     will-change: transform;
     transform: var(--gpu-layer);
-    contain: layout style paint;
-    content-visibility: auto;
-    contain-intrinsic-size: 0 400px;
+    contain: layout;
     backface-visibility: hidden;
-}
-
-/* CPU-only fallback for glass-card */
-.cpu-optimized .glass-card,
-.performance-low .glass-card {
-    will-change: auto;
-    transform: none;
-    contain: layout style;
-    content-visibility: auto;
 }
 
 .glass-bubble {
     padding: var(--space-md) var(--space-lg);
     border-radius: var(--radius-pill);
     background: var(--glass-bg);
-    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
     border: none;
     color: var(--text-primary);
     cursor: pointer;
@@ -347,17 +265,10 @@ img[src$=".WEBP"] {
     transform: translateY(-2px);
 }
 
-/* CPU fallback for glass-bubble hover */
-.cpu-optimized .glass-bubble:hover,
-.performance-low .glass-bubble:hover {
-    transform: none;
-}
-
 .glass-container {
     padding: clamp(12px, 3.5vw, 18px) clamp(20px, 5vw, 26px);
     border-radius: var(--button-radius-lg);
     background: var(--glass-bg);
-    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
 }
 
 .glass-button {
@@ -366,7 +277,6 @@ img[src$=".WEBP"] {
     padding: var(--button-padding);
     border-radius: var(--button-radius-md);
     background: var(--glass-bg);
-    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
     border: none;
     color: var(--text-primary);
     cursor: pointer;
@@ -375,22 +285,11 @@ img[src$=".WEBP"] {
     justify-content: center;
     transition: all var(--transition-medium), width var(--transition-smooth),
         height var(--transition-smooth);
-    /* Enhanced performance optimizations with smart containment */
+    /* Performance optimizations */
     will-change: transform;
     transform: var(--gpu-layer);
-    contain: layout style paint;
-    content-visibility: auto;
-    contain-intrinsic-size: 60px 60px;
-    backface-visibility: hidden;
-}
-
-/* CPU fallback for glass-button */
-.cpu-optimized .glass-button,
-.performance-low .glass-button {
-    will-change: auto;
-    transform: none;
     contain: layout style;
-    content-visibility: auto;
+    backface-visibility: hidden;
 }
 
 .glass-button:hover {
@@ -398,25 +297,17 @@ img[src$=".WEBP"] {
     transform: translateY(-2px);
 }
 
-/* CPU fallback for glass-button hover */
-.cpu-optimized .glass-button:hover,
-.performance-low .glass-button:hover {
-    transform: none;
-}
-
 .glass-border {
     padding: 1px;
     border-radius: var(--button-radius-sm);
     border: 0.5px solid var(--glass-border);
     background: var(--glass-bg);
-    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
 }
 
 .glass-pill {
     padding: clamp(12px, 3.5vw, 16px) clamp(20px, 5vw, 26px);
     border-radius: var(--radius-full);
     background: var(--glass-bg);
-    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
 }
 
 .glass-tag {
@@ -424,12 +315,11 @@ img[src$=".WEBP"] {
     padding: 5px clamp(18px, 4.5vw, 24px);
     border-radius: var(--button-radius-sm);
     background: var(--glass-bg);
-    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
     display: flex;
     align-items: center;
 }
 
-/* Unified hover/focus effects for interactive elements - ALL SHADOW EFFECTS REMOVED */
+/* Unified hover/focus effects for interactive elements */
 .contact-btn.glass-bubble,
 .social-btn.glass-button,
 .certificate-item.glass-pill,
@@ -440,9 +330,8 @@ img[src$=".WEBP"] {
 .glass-tag {
     position: relative;
     transition: transform var(--transition-fast),
-        background var(--transition-fast),
-        width var(--transition-smooth), height var(--transition-smooth),
-        padding var(--transition-smooth);
+        background var(--transition-fast), width var(--transition-smooth),
+        height var(--transition-smooth), padding var(--transition-smooth);
 }
 .contact-btn.glass-bubble::after,
 .social-btn.glass-button::after,
@@ -472,7 +361,6 @@ img[src$=".WEBP"] {
 .project-icon.glass-button:hover,
 .glass-tag:hover {
     background: var(--hover-tint);
-    /* ALL BOX-SHADOW EFFECTS REMOVED */
     transform: translateY(-2px);
 }
 
@@ -482,19 +370,25 @@ img[src$=".WEBP"] {
     color: #000000 !important; /* Texto e iconos en negro */
 }
 
+/* Asegurar que los íconos SVG en botones blancos sean negros */
+.project-link.glass-pill:not(.download-btn) img {
+    filter: brightness(0) !important; /* Convierte cualquier color a negro */
+}
+
 .project-link.glass-pill:not(.download-btn):hover {
     background: #b8b8b8 !important; /* Ligeramente más oscuro en hover */
     color: #000000 !important; /* Mantener texto negro */
-    /* ALL BOX-SHADOW EFFECTS REMOVED */
     transform: translateY(-2px);
 }
 
-/* ALL FILTER EFFECTS REMOVED FROM GITHUB BUTTON ICONS */
+/* Mantener los íconos negros en hover */
+.project-link.glass-pill:not(.download-btn):hover img {
+    filter: brightness(0) !important; /* Mantener íconos negros en hover */
+}
 
-/* Hover más sutil para certificados - ALL SHADOW EFFECTS REMOVED */
+/* Hover más sutil para certificados */
 .certificate-item.glass-pill:hover {
     background: rgba(208, 208, 208, 0.12);
-    /* ALL BOX-SHADOW EFFECTS REMOVED */
     transform: translateY(-1px);
 }
 
@@ -527,7 +421,6 @@ img[src$=".WEBP"] {
 .project-icon.glass-button:active,
 .glass-tag:active {
     transform: translateY(-1px) scale(0.98);
-    /* ALL FILTER EFFECTS REMOVED */
 }
 
 .contact-btn.glass-bubble:focus-visible,
@@ -586,7 +479,6 @@ img[src$=".WEBP"] {
     height: 50px;
     border-radius: 50px;
     background: var(--glass-bg);
-    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -761,7 +653,6 @@ img[src$=".WEBP"] {
     height: 50px;
     border-radius: 100px;
     background: var(--glass-bg);
-    /* ALL BACKDROP-FILTER EFFECTS REMOVED */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -916,7 +807,7 @@ img[src$=".WEBP"] {
 
 /* Hover sutil solo sobre el icono: no usa fondo ni sombra para no competir con el selector */
 .filter-btn img {
-    transition: transform 160ms ease;
+    transition: transform 160ms ease, filter 160ms ease;
     transform-origin: center;
 }
 .filter-btn:hover img {
@@ -926,13 +817,11 @@ img[src$=".WEBP"] {
 /* Sin hover visual en el botón activo */
 .filter-btn.active img {
     transform: none !important;
-    /* ALL FILTER DROP-SHADOW EFFECTS REMOVED */
 }
 
 /* Mientras el selector se mueve, desactiva cualquier hover para evitar solaparse con la animación */
 .filter-container.animating .filter-btn:hover img {
     transform: none !important;
-    /* ALL FILTER DROP-SHADOW EFFECTS REMOVED */
 }
 .filter-container.animating .filter-btn img {
     transition: none; /* elimina fading/jitter durante el movimiento */
@@ -963,19 +852,11 @@ img[src$=".WEBP"] {
     border-radius: var(--radius-md);
     background: var(--glass-bg);
     border: none; /* Sin stroke/border */
-    transform: translate3d(0, -50%, 0);
+    transform: translate(0, -50%);
     transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
     z-index: var(
         --z-base
     ); /* por debajo de los botones, por encima del fondo */
-    will-change: transform;
-}
-
-/* Optimización para dispositivos de bajo rendimiento */
-.low-end-device .filter-selector {
-    transform: var(--cpu-transform2d);
-    transition: none;
-    will-change: auto;
 }
 
 /* Reducir tamaño SOLO de los íconos All y Design */
@@ -1171,22 +1052,11 @@ img[src$=".WEBP"] {
     opacity: 0; /* crossfade por opacidad */
     transition: opacity 380ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
     pointer-events: none;
-    /* Enhanced performance optimizations with smart containment */
+    /* Performance optimizations */
     will-change: opacity;
     transform: var(--gpu-layer);
-    contain: layout style paint;
-    content-visibility: auto;
-    contain-intrinsic-size: 100% 300px;
+    contain: var(--contain-content);
     backface-visibility: hidden;
-}
-
-/* CPU fallback for carousel-slide */
-.cpu-optimized .carousel-slide,
-.performance-low .carousel-slide {
-    will-change: auto;
-    transform: none;
-    contain: layout style;
-    content-visibility: auto;
 }
 .carousel-slide img {
     display: block;
@@ -1228,26 +1098,14 @@ img[src$=".WEBP"] {
     transition: transform 160ms ease, background 160ms ease;
     z-index: var(--z-mid);
     box-sizing: border-box; /* Asegurar que width/height incluyan border y padding */
+    position: relative; /* Asegurar que los pseudo-elementos se posicionen relativos al botón */
 }
 .carousel-btn:hover {
     background: var(--hover-tint);
     transform: translateY(-50%) translateY(-2px);
 }
-
-/* CPU fallback for carousel-btn hover */
-.cpu-optimized .carousel-btn:hover,
-.performance-low .carousel-btn:hover {
-    transform: translateY(-50%);
-}
-
 .carousel-btn:active {
     transform: translateY(-50%) scale(0.95); /* Efecto activo consistente con el modal */
-}
-
-/* CPU fallback for carousel-btn active */
-.cpu-optimized .carousel-btn:active,
-.performance-low .carousel-btn:active {
-    transform: translateY(-50%);
 }
 .carousel-btn:focus-visible {
     outline: 2px solid var(--focus-ring);
@@ -1262,24 +1120,18 @@ img[src$=".WEBP"] {
 .carousel-btn.prev::before,
 .carousel-btn.next::before {
     content: "";
-    position: absolute; /* centrar dentro del botón */
-    left: 50%;
-    top: 50%;
     width: 8px; /* Reducido de 10px a 8px para hacer más pequeño */
     height: 8px; /* Reducido de 10px a 8px para hacer más pequeño */
-    border-top: 3px solid currentColor; /* Aumentado de 2px a 3px para hacer más grueso */
-    border-right: 3px solid currentColor; /* Aumentado de 2px a 3px para hacer más grueso */
-    transform: translate(-50%, -50%);
+    border-top: 2px solid currentColor; /* Usar 2px para mejor definición */
+    border-right: 2px solid currentColor; /* Usar 2px para mejor definición */
 }
 .carousel-btn.prev::before {
-    /* Mueve 4px a la derecha para centrar visualmente */
-    left: calc(50% + 1.5px);
-    transform: translate(-50%, -50%) rotate(-135deg);
+    transform: rotate(-135deg);
+    margin-left: 1px; /* Ajuste visual mínimo para centrar */
 }
 .carousel-btn.next::before {
-    /* Mueve 4px a la izquierda para centrar visualmente */
-    left: calc(50% - 1.5px);
-    transform: translate(-50%, -50%) rotate(45deg);
+    transform: rotate(45deg);
+    margin-right: 1px; /* Ajuste visual mínimo para centrar */
 }
 
 /* Botón de maximizar pantalla completa - Solo icono, sin contenedor glass */
@@ -1305,17 +1157,14 @@ img[src$=".WEBP"] {
     transform: var(--gpu-layer);
     contain: layout style;
     backface-visibility: hidden;
-    /* ALL FILTER DROP-SHADOW EFFECTS REMOVED */
 }
 
 .carousel-fullscreen-btn:hover {
     transform: scale(1.1); /* Solo escala al hacer hover */
-    /* ALL FILTER DROP-SHADOW EFFECTS REMOVED */
 }
 
 .carousel-fullscreen-btn:active {
     transform: scale(0.95); /* Efecto de presión */
-    /* ALL FILTER BRIGHTNESS EFFECTS REMOVED */
 }
 
 .carousel-fullscreen-btn:focus-visible {
@@ -1437,7 +1286,7 @@ img[src$=".WEBP"] {
 .carousel-fullscreen-nav button {
     position: absolute;
     top: 50%;
-    transform: translate3d(0, -50%, 0);
+    transform: translateY(-50%);
     width: 26px; /* Reducido de 32px a 26px para ser más compacto */
     height: 26px; /* Reducido de 32px a 26px para ser más compacto */
     padding: 0; /* Asegurar que no hay padding que afecte las dimensiones */
@@ -1452,31 +1301,16 @@ img[src$=".WEBP"] {
     transition: transform 160ms ease, background 160ms ease;
     z-index: 10001;
     box-sizing: border-box; /* Asegurar que width/height incluyan border y padding */
-    will-change: transform;
+    position: relative; /* Asegurar que los pseudo-elementos se posicionen relativos al botón */
 }
 
 .carousel-fullscreen-nav button:hover {
     background: var(--hover-tint);
-    transform: translate3d(0, -50%, 0) translate3d(0, -2px, 0);
-}
-
-.carousel-fullscreen-nav button:active {
-    transform: translate3d(0, -50%, 0) scale3d(0.95, 0.95, 1); /* Efecto activo consistente con el modal */
-}
-
-/* Optimización para dispositivos de bajo rendimiento */
-.low-end-device .carousel-fullscreen-nav button {
-    transform: translateY(-50%);
-    transition: none;
-    will-change: auto;
-}
-
-.low-end-device .carousel-fullscreen-nav button:hover {
     transform: translateY(-50%) translateY(-2px);
 }
 
-.low-end-device .carousel-fullscreen-nav button:active {
-    transform: translateY(-50%) scale(0.95);
+.carousel-fullscreen-nav button:active {
+    transform: translateY(-50%) scale(0.95); /* Efecto activo consistente con el modal */
 }
 
 .carousel-fullscreen-nav button:focus-visible {
@@ -1488,26 +1322,20 @@ img[src$=".WEBP"] {
 .carousel-fullscreen-prev::before,
 .carousel-fullscreen-next::before {
     content: "";
-    position: absolute; /* centrar dentro del botón */
-    left: 50%;
-    top: 50%;
     width: 8px; /* Reducido de 10px a 8px para hacer más pequeño */
     height: 8px; /* Reducido de 10px a 8px para hacer más pequeño */
-    border-top: 3px solid currentColor; /* Aumentado de 2px a 3px para hacer más grueso */
-    border-right: 3px solid currentColor; /* Aumentado de 2px a 3px para hacer más grueso */
-    transform: translate(-50%, -50%);
+    border-top: 2px solid currentColor; /* Usar 2px para mejor definición */
+    border-right: 2px solid currentColor; /* Usar 2px para mejor definición */
 }
 
 .carousel-fullscreen-prev::before {
-    /* Mueve 4px a la derecha para centrar visualmente */
-    left: calc(50% + 1.5px);
-    transform: translate(-50%, -50%) rotate(-135deg);
+    transform: rotate(-135deg);
+    margin-left: 1px; /* Ajuste visual mínimo para centrar */
 }
 
 .carousel-fullscreen-next::before {
-    /* Mueve 4px a la izquierda para centrar visualmente */
-    left: calc(50% - 1.5px);
-    transform: translate(-50%, -50%) rotate(45deg);
+    transform: rotate(45deg);
+    margin-right: 1px; /* Ajuste visual mínimo para centrar */
 }
 
 /* Posicionamiento de botones */
@@ -1868,12 +1696,6 @@ img[src$=".WEBP"] {
 .scroll-thumb:active {
     cursor: default;
     background: var(--text-primary);
-}
-
-/* Optimización para dispositivos de bajo rendimiento */
-.low-end-device .scroll-thumb {
-    transition: none;
-    will-change: auto;
 }
 
 /* Project Link */
@@ -2400,7 +2222,7 @@ button:focus-visible {
     .glass-bubble,
     .glass-container {
         background: rgba(208, 208, 208, 0.1);
-        /* BACKDROP-FILTER ALREADY REMOVED */
+        backdrop-filter: none;
     }
 }
 
