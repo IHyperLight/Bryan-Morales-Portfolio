@@ -3,9 +3,9 @@
     /* Glass morphism effects */
     --glass-bg: linear-gradient(
         90deg,
-        rgba(208, 208, 208, 0.035) 0%,
-        rgba(208, 208, 208, 0.09) 50%,
-        rgba(208, 208, 208, 0.2) 100%
+        rgba(208, 208, 208, 0.03) 0%,
+        rgba(208, 208, 208, 0.07) 50%,
+        rgba(208, 208, 208, 0.16) 100%
     );
     --glass-border: rgba(208, 208, 208, 0.5);
 
@@ -370,20 +370,10 @@ img[src$=".WEBP"] {
     color: #000000 !important; /* Texto e iconos en negro */
 }
 
-/* Asegurar que los íconos SVG en botones blancos sean negros */
-.project-link.glass-pill:not(.download-btn) img {
-    filter: brightness(0) !important; /* Convierte cualquier color a negro */
-}
-
 .project-link.glass-pill:not(.download-btn):hover {
     background: #b8b8b8 !important; /* Ligeramente más oscuro en hover */
     color: #000000 !important; /* Mantener texto negro */
     transform: translateY(-2px);
-}
-
-/* Mantener los íconos negros en hover */
-.project-link.glass-pill:not(.download-btn):hover img {
-    filter: brightness(0) !important; /* Mantener íconos negros en hover */
 }
 
 /* Hover más sutil para certificados */
@@ -944,7 +934,7 @@ img[src$=".WEBP"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-md);
+    gap: var(--space-xl); /* Aumentado de var(--space-md) [12px] a var(--space-xl) [20px] */
     flex-wrap: wrap;
     width: 100%;
 }
@@ -965,7 +955,7 @@ img[src$=".WEBP"] {
 
 /* Anular posicionamiento absoluto cuando los botones están fuera de la imagen */
 .carousel-controls .carousel-btn {
-    position: static;
+    position: relative; /* Cambiar a relative para que los pseudo-elementos funcionen */
     top: auto;
     left: auto;
     right: auto;
@@ -1082,12 +1072,10 @@ img[src$=".WEBP"] {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 26px; /* Reducido de 32px a 26px para ser más compacto */
-    height: 26px; /* Reducido de 32px a 26px para ser más compacto */
-    padding: 0; /* Asegurar que no hay padding que afecte las dimensiones */
-    border-radius: var(
-        --radius-sm
-    ); /* Ajustado proporcionalmente de 10px a 8px */
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border-radius: var(--radius-sm);
     border: none;
     background: var(--glass-bg);
     color: var(--text-primary);
@@ -1097,8 +1085,8 @@ img[src$=".WEBP"] {
     cursor: pointer;
     transition: transform 160ms ease, background 160ms ease;
     z-index: var(--z-mid);
-    box-sizing: border-box; /* Asegurar que width/height incluyan border y padding */
-    position: relative; /* Asegurar que los pseudo-elementos se posicionen relativos al botón */
+    box-sizing: border-box;
+    overflow: visible; /* Asegurar que las flechas sean visibles */
 }
 .carousel-btn:hover {
     background: var(--hover-tint);
@@ -1120,18 +1108,23 @@ img[src$=".WEBP"] {
 .carousel-btn.prev::before,
 .carousel-btn.next::before {
     content: "";
-    width: 8px; /* Reducido de 10px a 8px para hacer más pequeño */
-    height: 8px; /* Reducido de 10px a 8px para hacer más pequeño */
-    border-top: 2px solid currentColor; /* Usar 2px para mejor definición */
-    border-right: 2px solid currentColor; /* Usar 2px para mejor definición */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-top: 3px solid currentColor;
+    border-right: 3px solid currentColor;
+    transform: translate(-50%, -50%);
+    z-index: 1;
 }
 .carousel-btn.prev::before {
-    transform: rotate(-135deg);
-    margin-left: 1px; /* Ajuste visual mínimo para centrar */
+    left: calc(50% + 1.5px);
+    transform: translate(-50%, -50%) rotate(-135deg);
 }
 .carousel-btn.next::before {
-    transform: rotate(45deg);
-    margin-right: 1px; /* Ajuste visual mínimo para centrar */
+    left: calc(50% - 1.5px);
+    transform: translate(-50%, -50%) rotate(45deg);
 }
 
 /* Botón de maximizar pantalla completa - Solo icono, sin contenedor glass */
@@ -1301,7 +1294,6 @@ img[src$=".WEBP"] {
     transition: transform 160ms ease, background 160ms ease;
     z-index: 10001;
     box-sizing: border-box; /* Asegurar que width/height incluyan border y padding */
-    position: relative; /* Asegurar que los pseudo-elementos se posicionen relativos al botón */
 }
 
 .carousel-fullscreen-nav button:hover {
@@ -1322,29 +1314,34 @@ img[src$=".WEBP"] {
 .carousel-fullscreen-prev::before,
 .carousel-fullscreen-next::before {
     content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
     width: 8px;
     height: 8px;
-    border-top: 2px solid currentColor;
-    border-right: 2px solid currentColor;
+    border-top: 3px solid currentColor;
+    border-right: 3px solid currentColor;
+    transform: translate(-50%, -50%);
+    z-index: 1;
 }
 
 .carousel-fullscreen-prev::before {
-    transform: rotate(-135deg);
-    margin-left: 1px;
+    left: calc(50% + 1.5px);
+    transform: translate(-50%, -50%) rotate(-135deg);
 }
 
 .carousel-fullscreen-next::before {
-    transform: rotate(45deg);
-    margin-right: 1px;
+    left: calc(50% - 1.5px);
+    transform: translate(-50%, -50%) rotate(45deg);
 }
 
 /* Posicionamiento de botones */
 .carousel-fullscreen-prev {
-    left: 10px;
+    left: 10px; /* Exactamente igual que .carousel-btn.prev */
 }
 
 .carousel-fullscreen-next {
-    right: 10px;
+    right: 10px; /* Exactamente igual que .carousel-btn.next */
 }
 
 .carousel-fullscreen-counter {
@@ -1397,27 +1394,27 @@ img[src$=".WEBP"] {
     }
 
     .carousel-fullscreen-nav button {
-        width: 24px;
-        height: 24px;
-        padding: 0;
-        box-sizing: border-box;
+        width: 24px; /* Ligeramente más pequeño en móvil pero manteniendo proporciones */
+        height: 24px; /* Ligeramente más pequeño en móvil pero manteniendo proporciones */
+        padding: 0; /* Asegurar sin padding en móvil */
+        box-sizing: border-box; /* Consistencia en móvil */
     }
 
     /* Ajustar el tamaño de las flechas en móvil */
     .carousel-fullscreen-prev::before,
     .carousel-fullscreen-next::before {
-        width: 7px;
-        height: 7px;
-        border-top: 2px solid currentColor;
-        border-right: 2px solid currentColor;
+        width: 7px; /* Ligeramente más pequeño en móvil */
+        height: 7px; /* Ligeramente más pequeño en móvil */
+        border-top: 2px solid currentColor; /* Más delgado en móvil */
+        border-right: 2px solid currentColor; /* Más delgado en móvil */
     }
 
     .carousel-fullscreen-prev {
-        left: 5px;
+        left: 5px; /* Aún más cerca del borde en móvil */
     }
 
     .carousel-fullscreen-next {
-        right: 5px;
+        right: 5px; /* Aún más cerca del borde en móvil */
     }
 
     .carousel-fullscreen-counter {
@@ -1735,6 +1732,12 @@ img[src$=".WEBP"] {
 .project-link.glass-pill > * {
     position: relative;
     z-index: 1;
+}
+
+/* Íconos GitHub y External en negro para botones blancos */
+.project-link.glass-pill:not(.download-btn) img[alt="GitHub"],
+.project-link.glass-pill:not(.download-btn) img[alt="External"] {
+    filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%);
 }
 
 /* Estado activo mejorado para botón negro */
