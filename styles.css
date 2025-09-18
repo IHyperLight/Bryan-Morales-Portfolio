@@ -3,9 +3,9 @@
     /* Glass morphism effects */
     --glass-bg: linear-gradient(
         90deg,
-        rgba(208, 208, 208, 0.03) 0%,
-        rgba(208, 208, 208, 0.07) 50%,
-        rgba(208, 208, 208, 0.16) 100%
+        rgba(208, 208, 208, 0.035) 0%,
+        rgba(208, 208, 208, 0.08) 50%,
+        rgba(208, 208, 208, 0.18) 100%
     );
     --glass-border: rgba(208, 208, 208, 0.5);
 
@@ -934,7 +934,9 @@ img[src$=".WEBP"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-xl); /* Aumentado de var(--space-md) [12px] a var(--space-xl) [20px] */
+    gap: var(
+        --space-xl
+    ); /* Aumentado de var(--space-md) [12px] a var(--space-xl) [20px] */
     flex-wrap: wrap;
     width: 100%;
 }
@@ -1737,7 +1739,8 @@ img[src$=".WEBP"] {
 /* Íconos GitHub y External en negro para botones blancos */
 .project-link.glass-pill:not(.download-btn) img[alt="GitHub"],
 .project-link.glass-pill:not(.download-btn) img[alt="External"] {
-    filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%);
+    filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%)
+        hue-rotate(0deg) brightness(0%) contrast(100%);
 }
 
 /* Estado activo mejorado para botón negro */
