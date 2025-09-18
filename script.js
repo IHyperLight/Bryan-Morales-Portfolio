@@ -140,19 +140,6 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeProjectCarousel();
     perfMonitor.measure("critical-init", "critical-init-start");
 
-    // Optimize background video for mobile devices
-    const bgVideo = document.getElementById("bg-video");
-    if (
-        bgVideo &&
-        (navigator.hardwareConcurrency < 4 ||
-            /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-                navigator.userAgent
-            ))
-    ) {
-        bgVideo.pause();
-        bgVideo.style.display = "none";
-    }
-
     // Schedule non-critical initializations during idle time
     idleScheduler.schedule(() => {
         perfMonitor.mark("idle-init-start");

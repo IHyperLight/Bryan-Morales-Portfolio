@@ -1322,29 +1322,29 @@ img[src$=".WEBP"] {
 .carousel-fullscreen-prev::before,
 .carousel-fullscreen-next::before {
     content: "";
-    width: 8px; /* Reducido de 10px a 8px para hacer más pequeño */
-    height: 8px; /* Reducido de 10px a 8px para hacer más pequeño */
-    border-top: 2px solid currentColor; /* Usar 2px para mejor definición */
-    border-right: 2px solid currentColor; /* Usar 2px para mejor definición */
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
 }
 
 .carousel-fullscreen-prev::before {
     transform: rotate(-135deg);
-    margin-left: 1px; /* Ajuste visual mínimo para centrar */
+    margin-left: 1px;
 }
 
 .carousel-fullscreen-next::before {
     transform: rotate(45deg);
-    margin-right: 1px; /* Ajuste visual mínimo para centrar */
+    margin-right: 1px;
 }
 
 /* Posicionamiento de botones */
 .carousel-fullscreen-prev {
-    left: 10px; /* Exactamente igual que .carousel-btn.prev */
+    left: 10px;
 }
 
 .carousel-fullscreen-next {
-    right: 10px; /* Exactamente igual que .carousel-btn.next */
+    right: 10px;
 }
 
 .carousel-fullscreen-counter {
@@ -1397,27 +1397,27 @@ img[src$=".WEBP"] {
     }
 
     .carousel-fullscreen-nav button {
-        width: 24px; /* Ligeramente más pequeño en móvil pero manteniendo proporciones */
-        height: 24px; /* Ligeramente más pequeño en móvil pero manteniendo proporciones */
-        padding: 0; /* Asegurar sin padding en móvil */
-        box-sizing: border-box; /* Consistencia en móvil */
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        box-sizing: border-box;
     }
 
     /* Ajustar el tamaño de las flechas en móvil */
     .carousel-fullscreen-prev::before,
     .carousel-fullscreen-next::before {
-        width: 7px; /* Ligeramente más pequeño en móvil */
-        height: 7px; /* Ligeramente más pequeño en móvil */
-        border-top: 2px solid currentColor; /* Más delgado en móvil */
-        border-right: 2px solid currentColor; /* Más delgado en móvil */
+        width: 7px;
+        height: 7px;
+        border-top: 2px solid currentColor;
+        border-right: 2px solid currentColor;
     }
 
     .carousel-fullscreen-prev {
-        left: 5px; /* Aún más cerca del borde en móvil */
+        left: 5px;
     }
 
     .carousel-fullscreen-next {
-        right: 5px; /* Aún más cerca del borde en móvil */
+        right: 5px;
     }
 
     .carousel-fullscreen-counter {
