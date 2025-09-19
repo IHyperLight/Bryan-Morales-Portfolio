@@ -24,7 +24,7 @@
     --card-padding: clamp(26px, 5.5vw, 46px);
     --card-xpad: clamp(18px, 5vw, 26px);
 
-    --container-padding: clamp(40px, 8vw, 60px) clamp(16px, 4vw, 24px);
+    --container-padding: clamp(40px, 8vw, 60px) clamp(12px, 3vw, 20px);
     --container-gap: clamp(20px, 4vw, 30px);
 
     /* Project-specific spacing - increased further for better separation */
@@ -200,7 +200,6 @@ img[src$=".WEBP"] {
     flex-direction: column;
     gap: var(--container-gap);
     position: relative;
-    padding-right: clamp(18px, 4.5vw, 24px);
     transition: all var(--transition-smooth), padding var(--transition-medium),
         gap var(--transition-medium);
 }
@@ -1888,7 +1887,7 @@ img[src$=".WEBP"] {
 @media (min-width: 480px) and (max-width: 767px) {
     .portfolio-container {
         max-width: clamp(440px, 92vw, 560px);
-        padding: clamp(50px, 7vw, 70px) clamp(20px, 4vw, 32px);
+        padding: clamp(50px, 7vw, 70px) clamp(16px, 3.2vw, 28px);
         transition: max-width var(--transition-smooth),
             padding var(--transition-smooth);
     }
@@ -1908,7 +1907,9 @@ img[src$=".WEBP"] {
 @media (min-width: 900px) and (max-width: 1199px) {
     .portfolio-container {
         max-width: clamp(640px, 84vw, 760px);
-        transition: max-width var(--transition-smooth);
+        padding: clamp(75px, 8vw, 90px) clamp(24px, 4.2vw, 48px);
+        transition: max-width var(--transition-smooth),
+            padding var(--transition-smooth);
     }
 
     .certificates-section {
@@ -1926,7 +1927,7 @@ img[src$=".WEBP"] {
 @media (min-width: 768px) {
     .portfolio-container {
         max-width: clamp(560px, 86vw, 640px);
-        padding: clamp(70px, 8vw, 80px) clamp(24px, 5vw, 40px);
+        padding: clamp(70px, 8vw, 80px) clamp(20px, 4vw, 36px);
         transition: max-width var(--transition-smooth),
             padding var(--transition-smooth);
     }
@@ -1955,7 +1956,7 @@ img[src$=".WEBP"] {
 @media (min-width: 1024px) {
     .portfolio-container {
         max-width: clamp(760px, 86vw, 880px);
-        padding: clamp(80px, 8vw, 100px) clamp(32px, 5vw, 60px);
+        padding: clamp(80px, 8vw, 100px) clamp(28px, 4.5vw, 56px);
         transition: max-width var(--transition-smooth),
             padding var(--transition-smooth);
     }
@@ -1988,7 +1989,7 @@ img[src$=".WEBP"] {
             90vw,
             1200px
         ); /* Aumentado significativamente para proyectos más grandes */
-        padding: clamp(90px, 8vw, 110px) clamp(32px, 5vw, 60px);
+        padding: clamp(90px, 8vw, 110px) clamp(28px, 4.5vw, 56px);
         transition: max-width var(--transition-smooth),
             padding var(--transition-smooth);
     }
@@ -1999,12 +2000,12 @@ img[src$=".WEBP"] {
         grid-template-columns: 1fr 1fr; /* izquierda: info, derecha: acciones */
         align-items: start;
         gap: var(--space-2xl); /* mantiene ritmo vertical/horizontal */
-        /* Control específico del ancho de la sección personal - tamaño original fijo */
+        /* Control específico del ancho de la sección personal - ampliado para aprovechar nuevo espacio */
         max-width: clamp(
-            760px,
-            82vw,
-            860px
-        ); /* Tamaño máximo original desde el primer breakpoint de 2 columnas */
+            800px,
+            85vw,
+            920px
+        ); /* Ampliado para aprovechar la reducción de padding lateral */
         margin: 0 auto; /* Centrar la sección personal */
         transition: grid-template-columns var(--transition-smooth),
             gap var(--transition-smooth), align-items var(--transition-smooth);
