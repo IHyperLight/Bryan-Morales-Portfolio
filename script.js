@@ -258,6 +258,89 @@ function initializeFilters() {
     }
 }
 
+// Viewport-based carousel activation system
+// This system prevents carousels from consuming resources when not visible,
+// significantly improving performance especially on mobile devices.
+//
+// Key features:
+// - Lazy initialization: Carousels only start when they enter the viewport
+// - Smart pause/resume: Carousels pause when leaving viewport and resume when returning
+// - No conflicts: Works seamlessly with hover pause/resume functionality
+// - Memory efficient: Proper cleanup prevents memory leaks
+// - Configurable thresholds: 30% visibility required, 50px margin for smooth transitions
+const carouselViewportObserver = (() => {
+    let observer = null;
+    const observedCarousels = new Map();
+
+    const initObserver = () => {
+        if (observer) return observer;
+
+        observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    const carouselData = observedCarousels.get(entry.target);
+                    if (!carouselData) return;
+
+                    const { carouselState, isInitialized } = carouselData;
+
+                    if (entry.isIntersecting) {
+                        // Carousel enters viewport
+                        if (!isInitialized.value) {
+                            // First time initialization
+                            carouselState.initialize();
+                            isInitialized.value = true;
+                        } else {
+                            // Resume from viewport pause
+                            carouselState.resumeFromViewportPause();
+                        }
+                    } else {
+                        // Carousel exits viewport
+                        if (isInitialized.value) {
+                            carouselState.pauseForViewport();
+                        }
+                    }
+                });
+            },
+            {
+                root: null,
+                rootMargin: "50px 0px", // Start/stop slightly before entering/leaving viewport
+                threshold: 0.3, // 30% of carousel must be visible
+            }
+        );
+
+        return observer;
+    };
+
+    const observe = (projectContainer, carouselState) => {
+        const obs = initObserver();
+        const isInitialized = { value: false };
+
+        observedCarousels.set(projectContainer, {
+            carouselState,
+            isInitialized,
+        });
+
+        obs.observe(projectContainer);
+    };
+
+    const unobserve = (projectContainer) => {
+        if (observer) {
+            observer.unobserve(projectContainer);
+            observedCarousels.delete(projectContainer);
+        }
+    };
+
+    const cleanup = () => {
+        if (observer) {
+            observer.disconnect();
+            observer = null;
+        }
+        observedCarousels.clear();
+    };
+
+    return { observe, unobserve, cleanup };
+})();
+
 // Project carousel with autoplay and pause functionality - Updated for multiple projects
 function initializeProjectCarousel() {
     // Use cached project items for better performance
@@ -297,6 +380,8 @@ function initializeSingleCarousel(projectContainer) {
     let pauseElapsed = 0;
     let paused = false;
     let hoverExitTO = null;
+    let viewportPaused = false; // New: Track viewport pause state
+    let initialized = false; // New: Track initialization state
 
     const setActive = (i, { animate = true } = {}) => {
         index = (i + slides.length) % slides.length;
@@ -314,7 +399,7 @@ function initializeSingleCarousel(projectContainer) {
                 d.removeAttribute("aria-current");
             }
         });
-        if (!paused && progressFill) {
+        if (!paused && !viewportPaused && progressFill) {
             progressFill.style.transition = "none";
             progressFill.style.width = "0%";
             void progressFill.offsetWidth;
@@ -345,6 +430,9 @@ function initializeSingleCarousel(projectContainer) {
     };
 
     const startAuto = () => {
+        // Don't start if viewport paused
+        if (viewportPaused) return;
+
         stopAuto();
         const remaining = Math.max(16, intervalMs - pauseElapsed);
         if (progressFill) {
@@ -357,16 +445,19 @@ function initializeSingleCarousel(projectContainer) {
             void progressFill.offsetWidth;
             progressFill.style.transition = `width ${remaining}ms linear`;
             requestAnimationFrame(() => {
-                if (progressFill) {
+                if (progressFill && !viewportPaused) {
                     progressFill.style.width = "100%";
                 }
             });
         }
         startTs = performance.now() - pauseElapsed;
         timer = setTimeout(() => {
-            next();
-            pauseElapsed = 0;
-            startAuto();
+            if (!viewportPaused) {
+                // Check viewport state before auto-advance
+                next();
+                pauseElapsed = 0;
+                startAuto();
+            }
         }, remaining);
     };
 
@@ -384,9 +475,63 @@ function initializeSingleCarousel(projectContainer) {
     };
 
     const resumeAutoplay = () => {
-        if (!paused) return;
+        if (!paused || viewportPaused) return; // Don't resume if viewport paused
         paused = false;
         startAuto();
+    };
+
+    // New: Viewport-specific pause functions
+    const pauseForViewport = () => {
+        if (viewportPaused) return;
+        viewportPaused = true;
+
+        // Save current state before pausing
+        if (timer && !paused) {
+            const elapsed = performance.now() - startTs;
+            pauseElapsed = Math.max(0, Math.min(intervalMs, elapsed));
+        }
+
+        stopAuto();
+
+        // Pause progress bar
+        if (progressFill) {
+            const pct = Math.max(0, Math.min(1, pauseElapsed / intervalMs));
+            progressFill.style.transition = "none";
+            progressFill.style.width = `${pct * 100}%`;
+        }
+    };
+
+    const resumeFromViewportPause = () => {
+        if (!viewportPaused) return;
+        viewportPaused = false;
+
+        // Resume only if not manually paused (hover)
+        if (!paused) {
+            startAuto();
+        }
+    };
+
+    // New: Initialize function for viewport observer
+    const initialize = () => {
+        if (initialized) return;
+        initialized = true;
+
+        // Set initial state
+        if (slides.length > 0) {
+            if (progressFill) {
+                progressFill.style.transition = "none";
+                progressFill.style.width = "0%";
+                void progressFill.offsetWidth;
+            }
+            setActive(0);
+
+            // Start autoplay after a small delay
+            setTimeout(() => {
+                if (!viewportPaused) {
+                    startAuto();
+                }
+            }, 100);
+        }
     };
 
     const resetProgress = () => {
@@ -400,35 +545,44 @@ function initializeSingleCarousel(projectContainer) {
     nextBtn?.addEventListener("click", () => {
         next();
         pauseElapsed = 0;
-        paused ? resetProgress() : startAuto();
+        if (paused) {
+            resetProgress();
+        } else if (!viewportPaused) {
+            startAuto();
+        }
     });
 
     prevBtn?.addEventListener("click", () => {
         prev();
         pauseElapsed = 0;
-        paused ? resetProgress() : startAuto();
+        if (paused) {
+            resetProgress();
+        } else if (!viewportPaused) {
+            startAuto();
+        }
     });
 
     dots.forEach((d, idx) =>
         d.addEventListener("click", () => {
             setActive(idx);
             pauseElapsed = 0;
-            paused ? resetProgress() : startAuto();
+            if (paused) {
+                resetProgress();
+            } else if (!viewportPaused) {
+                startAuto();
+            }
         })
     );
 
-    // Teclado (no reanuda si está pausado por hover)
+    // Teclado (no reanuda si está pausado por hover o viewport)
     media.addEventListener("keydown", (e) => {
         if (e.key === "ArrowRight") {
             e.preventDefault();
             next();
             pauseElapsed = 0;
             if (paused) {
-                if (progressFill) {
-                    progressFill.style.transition = "none";
-                    progressFill.style.width = "0%";
-                }
-            } else {
+                resetProgress();
+            } else if (!viewportPaused) {
                 startAuto();
             }
         } else if (e.key === "ArrowLeft") {
@@ -436,11 +590,8 @@ function initializeSingleCarousel(projectContainer) {
             prev();
             pauseElapsed = 0;
             if (paused) {
-                if (progressFill) {
-                    progressFill.style.transition = "none";
-                    progressFill.style.width = "0%";
-                }
-            } else {
+                resetProgress();
+            } else if (!viewportPaused) {
                 startAuto();
             }
         }
@@ -453,7 +604,11 @@ function initializeSingleCarousel(projectContainer) {
         if (e.clientX >= mid) next();
         else prev();
         pauseElapsed = 0;
-        paused ? resetProgress() : startAuto();
+        if (paused) {
+            resetProgress();
+        } else if (!viewportPaused) {
+            startAuto();
+        }
     });
 
     // Hover pause on image viewport only
@@ -494,23 +649,9 @@ function initializeSingleCarousel(projectContainer) {
     resizeObserver.observe(projectContainer);
     adjustProgressWidth();
 
-    // Initialize carousel
-    if (slides.length > 0) {
-        // Ensure progress bar is reset initially
-        if (progressFill) {
-            progressFill.style.transition = "none";
-            progressFill.style.width = "0%";
-            void progressFill.offsetWidth;
-        }
-        setActive(0);
-        // Small delay to ensure DOM is ready for animations
-        setTimeout(() => {
-            startAuto();
-        }, 100);
-    }
-
-    // Exponer el estado del carousel para funcionalidad de pantalla completa
+    // Extended carousel state for viewport management
     const carouselState = {
+        // Original functions
         pauseAutoplay,
         resumeAutoplay,
         next,
@@ -518,8 +659,32 @@ function initializeSingleCarousel(projectContainer) {
         setActive,
         getCurrentIndex: () => index,
         getSlides: () => slides,
+
+        // New viewport-aware functions
+        initialize,
+        pauseForViewport,
+        resumeFromViewportPause,
+
+        // State getters
+        isInitialized: () => initialized,
+        isViewportPaused: () => viewportPaused,
+        isHoverPaused: () => paused,
+
+        // Cleanup function
+        cleanup: () => {
+            stopAuto();
+            if (hoverExitTO) {
+                clearTimeout(hoverExitTO);
+                hoverExitTO = null;
+            }
+            resizeObserver.disconnect();
+        },
     };
 
+    // Register with viewport observer instead of auto-initializing
+    carouselViewportObserver.observe(projectContainer, carouselState);
+
+    // Expose state for fullscreen functionality
     exposeCarouselState(projectContainer, carouselState);
 }
 
@@ -828,6 +993,20 @@ window.addEventListener(
             clearTimeout(id);
         }
 
+        // Clean up carousel viewport observer
+        carouselViewportObserver.cleanup();
+
+        // Clean up all carousel states
+        const projectItems = performanceCache.projectItems;
+        if (projectItems) {
+            projectItems.forEach((projectItem) => {
+                const media = projectItem.querySelector(".project-media");
+                if (media && media._carouselState) {
+                    media._carouselState.cleanup();
+                }
+            });
+        }
+
         // Clean up all managed resources
         performanceManager.cleanup();
 
@@ -1038,7 +1217,7 @@ function initializeProjectScroll(projectContainer) {
     // High performance scroll handling optimized for 60fps
     let scrollTicking = false;
     let lastScrollTime = 0;
-    const SCROLL_THROTTLE = 16; // 60fps - optimal balance of smoothness and performance
+    const SCROLL_THROTTLE = 32; // 30fps - optimal balance of smoothness and performance
 
     const handleScroll = () => {
         const currentTime = performance.now();
