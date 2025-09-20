@@ -450,6 +450,8 @@ function initializeSingleCarousel(projectContainer) {
     let pausedByFullscreen = false; // true cuando el modal de pantalla completa pausa el carrusel
     let shouldAutoStart = false; // iniciar autoplay al entrar en viewport o al inicializar
     let isInViewport = false; // estado actual de intersección
+    // Handler para sincronizar con el fin de la transición de la barra
+    let progressEndHandler = null;
 
     // Cleanup tracking (separado para mayor control)
     const cleanupFns = new Set();
@@ -540,6 +542,15 @@ function initializeSingleCarousel(projectContainer) {
         if (!validateState()) return;
 
         try {
+            // Quitar listener de fin de transición si existe
+            if (progressFill && progressEndHandler) {
+                progressFill.removeEventListener(
+                    "transitionend",
+                    progressEndHandler
+                );
+                progressEndHandler = null;
+            }
+
             if (timer) {
                 const t = timer;
                 clearTimeout(t);
@@ -597,6 +608,47 @@ function initializeSingleCarousel(projectContainer) {
                 // Enable smooth transition to 100%
                 progressFill.style.transition = `width ${remaining}ms linear`;
 
+                // Función unificada para avanzar al siguiente slide exactamente al terminar la transición
+                let advanced = false;
+                const advance = (source) => {
+                    if (advanced) return;
+                    if (viewportPaused || destroyed || paused) return;
+                    advanced = true;
+
+                    // Limpieza previa
+                    if (progressFill && progressEndHandler) {
+                        progressFill.removeEventListener(
+                            "transitionend",
+                            progressEndHandler
+                        );
+                        progressEndHandler = null;
+                    }
+                    if (timer) {
+                        clearTimeout(timer);
+                        cleanupTimeouts.delete(timer);
+                        timer = null;
+                    }
+
+                    // Reiniciar ciclo
+                    pauseElapsed = 0;
+                    setActive(index + 1, { resetProgress: true });
+                    startAuto();
+                };
+
+                // Listener preciso de fin de transición
+                progressEndHandler = (e) => {
+                    if (
+                        e.target === progressFill &&
+                        e.propertyName === "width"
+                    ) {
+                        advance("transitionend");
+                    }
+                };
+                progressFill.addEventListener(
+                    "transitionend",
+                    progressEndHandler
+                );
+
                 // Start progress animation on next frame
                 animationFrame = requestAnimationFrame(() => {
                     const raf = animationFrame;
@@ -612,24 +664,21 @@ function initializeSingleCarousel(projectContainer) {
                     animationFrame = null;
                 });
                 cleanupRafs.add(animationFrame);
+
+                // Temporizador de respaldo por si no se dispara transitionend
+                timer = setTimeout(() => {
+                    if (!viewportPaused && !destroyed && !paused) {
+                        advance("timeout-fallback");
+                    }
+                    if (timer != null) cleanupTimeouts.delete(timer);
+                    timer = null;
+                }, Math.max(16, remaining + 120));
+                cleanupTimeouts.add(timer);
             }
 
             // Set timestamp for elapsed time calculation
             startTs = performance.now() - pauseElapsed;
-
-            // Schedule next image change
-            timer = setTimeout(() => {
-                if (!viewportPaused && !destroyed && !paused) {
-                    // Auto advance to next image
-                    pauseElapsed = 0;
-                    setActive(index + 1, { resetProgress: true });
-                    // Restart automation
-                    startAuto();
-                }
-                if (timer != null) cleanupTimeouts.delete(timer);
-                timer = null;
-            }, remaining);
-            cleanupTimeouts.add(timer);
+            // El avance se controla por transitionend; el temporizador anterior ahora es solo respaldo
         } catch (error) {
             console.warn("Error in startAuto:", error);
         }
