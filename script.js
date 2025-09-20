@@ -265,7 +265,7 @@ function initializeFilters() {
 // Key features:
 // - Lazy initialization: Carousels only start when they enter the viewport
 // - Smart pause/resume: Carousels pause when leaving viewport and resume when returning
-// - No conflicts: Works seamlessly with hover pause/resume functionality
+// - Sin conflictos con otras pausas (viewport/fullscreen)
 // - Memory efficient: Proper cleanup prevents memory leaks
 // - Configurable thresholds: 30% visibility required, 50px margin for smooth transitions
 // - Robust error handling: Recovery from corrupted states
@@ -443,13 +443,18 @@ function initializeSingleCarousel(projectContainer) {
     let startTs = 0;
     let pauseElapsed = 0;
     let paused = false;
-    let hoverExitTO = null;
     let viewportPaused = false;
     let initialized = false;
     let destroyed = false;
+    // Fullscreen/viewport coordination flags
+    let pausedByFullscreen = false; // true cuando el modal de pantalla completa pausa el carrusel
+    let shouldAutoStart = false; // iniciar autoplay al entrar en viewport o al inicializar
+    let isInViewport = false; // estado actual de intersección
 
-    // Cleanup tracking
-    const cleanupTasks = new Set();
+    // Cleanup tracking (separado para mayor control)
+    const cleanupFns = new Set();
+    const cleanupTimeouts = new Set();
+    const cleanupRafs = new Set();
 
     const validateState = () => {
         if (destroyed) {
@@ -459,11 +464,16 @@ function initializeSingleCarousel(projectContainer) {
         return true;
     };
 
-    const setActive = (i, { animate = true } = {}) => {
+    const setActive = (i, { animate = true, resetProgress = false } = {}) => {
         if (!validateState()) return;
 
         try {
-            index = (i + slides.length) % slides.length;
+            const newIndex = (i + slides.length) % slides.length;
+
+            // Only proceed if index actually changed or force reset requested
+            if (newIndex === index && !resetProgress) return;
+
+            index = newIndex;
 
             slides.forEach((s, idx) => {
                 const isActive = idx === index;
@@ -481,8 +491,8 @@ function initializeSingleCarousel(projectContainer) {
                 }
             });
 
-            // Reset progress bar if not paused
-            if (!paused && !viewportPaused && progressFill) {
+            // Always reset progress bar completely on manual changes
+            if (resetProgress && progressFill) {
                 progressFill.style.transition = "none";
                 progressFill.style.width = "0%";
                 void progressFill.offsetWidth;
@@ -492,12 +502,38 @@ function initializeSingleCarousel(projectContainer) {
         }
     };
 
+    const completeProgressReset = () => {
+        if (!validateState()) return;
+
+        try {
+            // Stop any ongoing automation immediately
+            stopAuto();
+
+            // Force reset progress bar to 0
+            if (progressFill) {
+                progressFill.style.transition = "none";
+                progressFill.style.width = "0%";
+                void progressFill.offsetWidth;
+            }
+
+            // Reset timing variables
+            pauseElapsed = 0;
+            startTs = 0;
+        } catch (error) {
+            console.warn("Error in completeProgressReset:", error);
+        }
+    };
+
     const next = () => {
-        if (validateState()) setActive(index + 1);
+        if (!validateState()) return;
+        completeProgressReset();
+        setActive(index + 1, { resetProgress: true });
     };
 
     const prev = () => {
-        if (validateState()) setActive(index - 1);
+        if (!validateState()) return;
+        completeProgressReset();
+        setActive(index - 1, { resetProgress: true });
     };
 
     const stopAuto = () => {
@@ -505,15 +541,17 @@ function initializeSingleCarousel(projectContainer) {
 
         try {
             if (timer) {
-                clearTimeout(timer);
+                const t = timer;
+                clearTimeout(t);
+                cleanupTimeouts.delete(t);
                 timer = null;
-                cleanupTasks.delete(timer);
             }
 
             if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
+                const raf = animationFrame;
+                cancelAnimationFrame(raf);
+                cleanupRafs.delete(raf);
                 animationFrame = null;
-                cleanupTasks.delete(animationFrame);
             }
 
             if (progressFill) {
@@ -538,38 +576,60 @@ function initializeSingleCarousel(projectContainer) {
         if (!validateState() || viewportPaused) return;
 
         try {
+            // Always stop any existing automation first
             stopAuto();
+
+            // Calculate remaining time, defaulting to full interval if no elapsed time
             const remaining = Math.max(16, intervalMs - pauseElapsed);
 
+            // Set up progress bar animation
             if (progressFill) {
                 const currentPct = Math.max(
                     0,
                     Math.min(1, pauseElapsed / intervalMs)
                 );
+
+                // Set current position without transition
                 progressFill.style.transition = "none";
                 progressFill.style.width = `${currentPct * 100}%`;
-                void progressFill.offsetWidth;
+                void progressFill.offsetWidth; // Force reflow
+
+                // Enable smooth transition to 100%
                 progressFill.style.transition = `width ${remaining}ms linear`;
 
+                // Start progress animation on next frame
                 animationFrame = requestAnimationFrame(() => {
-                    if (progressFill && !viewportPaused && !destroyed) {
+                    const raf = animationFrame;
+                    if (
+                        progressFill &&
+                        !viewportPaused &&
+                        !destroyed &&
+                        !paused
+                    ) {
                         progressFill.style.width = "100%";
                     }
+                    if (raf != null) cleanupRafs.delete(raf);
                     animationFrame = null;
                 });
-                cleanupTasks.add(animationFrame);
+                cleanupRafs.add(animationFrame);
             }
 
+            // Set timestamp for elapsed time calculation
             startTs = performance.now() - pauseElapsed;
+
+            // Schedule next image change
             timer = setTimeout(() => {
-                if (!viewportPaused && !destroyed) {
-                    next();
+                if (!viewportPaused && !destroyed && !paused) {
+                    // Auto advance to next image
                     pauseElapsed = 0;
+                    setActive(index + 1, { resetProgress: true });
+                    // Restart automation
                     startAuto();
                 }
+                if (timer != null) cleanupTimeouts.delete(timer);
                 timer = null;
             }, remaining);
-            cleanupTasks.add(timer);
+            cleanupTimeouts.add(timer);
         } catch (error) {
             console.warn("Error in startAuto:", error);
         }
@@ -580,15 +640,21 @@ function initializeSingleCarousel(projectContainer) {
 
         try {
             paused = true;
-            const elapsed = performance.now() - startTs;
+
+            // Calculate elapsed time more precisely
+            const elapsed = timer && startTs ? performance.now() - startTs : 0;
             pauseElapsed = Math.max(0, Math.min(intervalMs, elapsed));
 
+            // Stop automation and preserve current progress position
+            stopAuto();
+
+            // Set progress bar to current position
             if (progressFill) {
                 const pct = Math.max(0, Math.min(1, pauseElapsed / intervalMs));
                 progressFill.style.transition = "none";
                 progressFill.style.width = `${pct * 100}%`;
+                void progressFill.offsetWidth;
             }
-            stopAuto();
         } catch (error) {
             console.warn("Error in pauseAutoplay:", error);
         }
@@ -610,6 +676,7 @@ function initializeSingleCarousel(projectContainer) {
 
         try {
             viewportPaused = true;
+            isInViewport = false;
 
             // Save current state before pausing
             if (timer && !paused) {
@@ -631,12 +698,25 @@ function initializeSingleCarousel(projectContainer) {
     };
 
     const resumeFromViewportPause = () => {
-        if (!validateState() || !viewportPaused) return;
+        if (!validateState()) return;
 
         try {
             viewportPaused = false;
+            isInViewport = true;
 
-            // Resume only if not manually paused (hover)
+            // No auto-start if fullscreen is open
+            if (pausedByFullscreen) return;
+
+            // If there's a pending auto-start request (e.g., from closing fullscreen), honor it
+            if (shouldAutoStart) {
+                shouldAutoStart = false;
+                paused = false;
+                completeProgressReset();
+                startAuto();
+                return;
+            }
+
+            // Otherwise, resume only if not manually paused (e.g., fullscreen)
             if (!paused) {
                 startAuto();
             }
@@ -650,27 +730,74 @@ function initializeSingleCarousel(projectContainer) {
 
         try {
             initialized = true;
+            isInViewport = true; // initialize solo se llama cuando intersecta
 
-            // Set initial state
+            // Set initial state with complete reset
             if (slides.length > 0) {
-                if (progressFill) {
-                    progressFill.style.transition = "none";
-                    progressFill.style.width = "0%";
-                    void progressFill.offsetWidth;
-                }
-                setActive(0);
+                completeProgressReset();
+                setActive(0, { resetProgress: true });
 
-                // Start autoplay after a small delay
+                // Si hay una pausa por fullscreen, no iniciar aún
+                if (pausedByFullscreen) {
+                    shouldAutoStart = true; // iniciar cuando se cierre fullscreen y/o vuelva a viewport
+                    return;
+                }
+
+                // Start autoplay after a small delay to ensure everything is ready
                 const initTimer = setTimeout(() => {
-                    if (!viewportPaused && !destroyed) {
+                    if (!viewportPaused && !destroyed && !paused) {
                         startAuto();
                     }
-                    cleanupTasks.delete(initTimer);
+                    cleanupTimeouts.delete(initTimer);
                 }, 100);
-                cleanupTasks.add(initTimer);
+                cleanupTimeouts.add(initTimer);
             }
         } catch (error) {
             console.warn("Error in initialize:", error);
+        }
+    };
+
+    // Fullscreen coordination API
+    const onFullscreenOpen = () => {
+        if (!validateState()) return;
+
+        try {
+            pausedByFullscreen = true;
+
+            // Si aún no se ha inicializado, marcar para iniciar luego y simular pausa
+            if (!initialized) {
+                paused = true;
+                shouldAutoStart = true;
+                return;
+            }
+
+            // Si ya está inicializado, pausar de forma segura
+            pauseAutoplay();
+        } catch (error) {
+            console.warn("Error in onFullscreenOpen:", error);
+        }
+    };
+
+    const onFullscreenClose = () => {
+        if (!validateState()) return;
+
+        try {
+            pausedByFullscreen = false;
+
+            // Si está en viewport e inicializado, reanudar inmediatamente
+            if (initialized && isInViewport) {
+                paused = false;
+                shouldAutoStart = false;
+                completeProgressReset();
+                startAuto();
+                return;
+            }
+
+            // Si aún no está en viewport o no se ha inicializado, marcar para auto-start posterior
+            paused = false;
+            shouldAutoStart = true;
+        } catch (error) {
+            console.warn("Error in onFullscreenClose:", error);
         }
     };
 
@@ -690,107 +817,107 @@ function initializeSingleCarousel(projectContainer) {
 
     // Control event listeners
     nextBtn?.addEventListener("click", () => {
-        next();
-        pauseElapsed = 0;
-        if (paused) {
-            resetProgress();
-        } else if (!viewportPaused) {
-            startAuto();
+        if (!validateState()) return;
+
+        try {
+            next();
+            // Restart autoplay immediately if not paused
+            if (!paused && !viewportPaused) {
+                startAuto();
+            } else if (paused) {
+                resetProgress();
+            }
+        } catch (error) {
+            console.warn("Error in nextBtn click:", error);
         }
     });
 
     prevBtn?.addEventListener("click", () => {
-        prev();
-        pauseElapsed = 0;
-        if (paused) {
-            resetProgress();
-        } else if (!viewportPaused) {
-            startAuto();
+        if (!validateState()) return;
+
+        try {
+            prev();
+            // Restart autoplay immediately if not paused
+            if (!paused && !viewportPaused) {
+                startAuto();
+            } else if (paused) {
+                resetProgress();
+            }
+        } catch (error) {
+            console.warn("Error in prevBtn click:", error);
         }
     });
 
     dots.forEach((d, idx) =>
         d.addEventListener("click", () => {
-            setActive(idx);
-            pauseElapsed = 0;
-            if (paused) {
-                resetProgress();
-            } else if (!viewportPaused) {
-                startAuto();
+            if (!validateState()) return;
+
+            try {
+                completeProgressReset();
+                setActive(idx, { resetProgress: true });
+                // Restart autoplay immediately if not paused
+                if (!paused && !viewportPaused) {
+                    startAuto();
+                } else if (paused) {
+                    resetProgress();
+                }
+            } catch (error) {
+                console.warn("Error in dot click:", error);
             }
         })
     );
 
-    // Teclado (no reanuda si está pausado por hover o viewport)
+    // Teclado (no reanuda si está pausado por viewport o fullscreen)
     media.addEventListener("keydown", (e) => {
-        if (e.key === "ArrowRight") {
-            e.preventDefault();
-            next();
-            pauseElapsed = 0;
-            if (paused) {
-                resetProgress();
-            } else if (!viewportPaused) {
-                startAuto();
+        if (!validateState()) return;
+
+        try {
+            if (e.key === "ArrowRight") {
+                e.preventDefault();
+                next();
+                if (!paused && !viewportPaused) {
+                    startAuto();
+                } else if (paused) {
+                    resetProgress();
+                }
+            } else if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                prev();
+                if (!paused && !viewportPaused) {
+                    startAuto();
+                } else if (paused) {
+                    resetProgress();
+                }
             }
-        } else if (e.key === "ArrowLeft") {
-            e.preventDefault();
-            prev();
-            pauseElapsed = 0;
-            if (paused) {
-                resetProgress();
-            } else if (!viewportPaused) {
-                startAuto();
-            }
+        } catch (error) {
+            console.warn("Error in keyboard navigation:", error);
         }
     });
 
     // Click navigation on image (left/right side)
     viewport.addEventListener("click", (e) => {
-        const rect = viewport.getBoundingClientRect();
-        const mid = rect.left + rect.width / 2;
-        if (e.clientX >= mid) next();
-        else prev();
-        pauseElapsed = 0;
-        if (paused) {
-            resetProgress();
-        } else if (!viewportPaused) {
-            startAuto();
+        if (!validateState()) return;
+
+        try {
+            const rect = viewport.getBoundingClientRect();
+            const mid = rect.left + rect.width / 2;
+            if (e.clientX >= mid) {
+                next();
+            } else {
+                prev();
+            }
+
+            if (!paused && !viewportPaused) {
+                startAuto();
+            } else if (paused) {
+                resetProgress();
+            }
+        } catch (error) {
+            console.warn("Error in viewport click:", error);
         }
     });
 
-    // Hover pause on image viewport only
-    const onEnter = () => {
-        if (!validateState()) return;
-
-        try {
-            if (hoverExitTO) {
-                clearTimeout(hoverExitTO);
-                hoverExitTO = null;
-            }
-            pauseAutoplay();
-        } catch (error) {
-            console.warn("Error in onEnter:", error);
-        }
-    };
-
-    const onLeave = () => {
-        if (!validateState()) return;
-
-        try {
-            if (hoverExitTO) clearTimeout(hoverExitTO);
-            hoverExitTO = setTimeout(() => {
-                if (!destroyed) {
-                    hoverExitTO = null;
-                    resumeAutoplay();
-                }
-            }, 60);
-        } catch (error) {
-            console.warn("Error in onLeave:", error);
-        }
-    };
-
-    viewport.addEventListener("pointerenter", onEnter);
-    viewport.addEventListener("pointerleave", onLeave);
+    // (Pausa por hover eliminada intencionalmente)
 
     // Adjust progress bar width to match indicators
     const adjustProgressWidth = () => {
@@ -818,7 +945,7 @@ function initializeSingleCarousel(projectContainer) {
         }
     });
 
-    cleanupTasks.add(() => {
+    cleanupFns.add(() => {
         resizeObserver.disconnect();
     });
 
@@ -840,12 +967,15 @@ function initializeSingleCarousel(projectContainer) {
         initialize,
         pauseForViewport,
         resumeFromViewportPause,
+        onFullscreenOpen,
+        onFullscreenClose,
 
         // State getters
         isInitialized: () => initialized,
         isViewportPaused: () => viewportPaused,
-        isHoverPaused: () => paused,
         isDestroyed: () => destroyed,
+        isPausedByFullscreen: () => pausedByFullscreen,
+        isInViewport: () => isInViewport,
 
         // Comprehensive cleanup function
         cleanup: () => {
@@ -857,25 +987,33 @@ function initializeSingleCarousel(projectContainer) {
                 // Stop all automation
                 stopAuto();
 
-                // Clear hover timeouts
-                if (hoverExitTO) {
-                    clearTimeout(hoverExitTO);
-                    hoverExitTO = null;
-                }
+                // (Timeouts de hover eliminados)
 
-                // Execute all tracked cleanup tasks
-                cleanupTasks.forEach((task) => {
+                // Execute function cleanups
+                cleanupFns.forEach((fn) => {
                     try {
-                        if (typeof task === "function") {
-                            task();
-                        } else if (typeof task === "number") {
-                            clearTimeout(task);
-                        }
+                        fn();
                     } catch (error) {
-                        console.warn("Error in cleanup task:", error);
+                        console.warn("Error in cleanup fn:", error);
                     }
                 });
-                cleanupTasks.clear();
+                cleanupFns.clear();
+
+                // Cancel rAFs
+                cleanupRafs.forEach((id) => {
+                    try {
+                        cancelAnimationFrame(id);
+                    } catch {}
+                });
+                cleanupRafs.clear();
+
+                // Clear timeouts
+                cleanupTimeouts.forEach((id) => {
+                    try {
+                        clearTimeout(id);
+                    } catch {}
+                });
+                cleanupTimeouts.clear();
 
                 // Reset state
                 initialized = false;
@@ -884,10 +1022,7 @@ function initializeSingleCarousel(projectContainer) {
                 pauseElapsed = 0;
                 index = 0;
 
-                console.log(
-                    "Carousel cleanup completed for:",
-                    projectContainer.dataset.project || "unknown"
-                );
+                // Limpieza del carrusel completada (log eliminado para evitar ruido)
             } catch (error) {
                 console.warn("Error in carousel cleanup:", error);
             }
@@ -1521,8 +1656,12 @@ function initializeFullscreenModal() {
         originalCarousel = carousel;
 
         // Pausar carousel original si existe
-        if (originalCarousel && originalCarousel.pauseAutoplay) {
-            originalCarousel.pauseAutoplay();
+        if (originalCarousel) {
+            if (typeof originalCarousel.onFullscreenOpen === "function") {
+                originalCarousel.onFullscreenOpen();
+            } else if (typeof originalCarousel.pauseAutoplay === "function") {
+                originalCarousel.pauseAutoplay();
+            }
         }
 
         showCurrentImage();
@@ -1536,7 +1675,10 @@ function initializeFullscreenModal() {
 
         // Reanudar carousel original si existe
         setTimeout(() => {
-            if (originalCarousel && originalCarousel.resumeAutoplay) {
+            if (!originalCarousel) return;
+            if (typeof originalCarousel.onFullscreenClose === "function") {
+                originalCarousel.onFullscreenClose();
+            } else if (typeof originalCarousel.resumeAutoplay === "function") {
                 originalCarousel.resumeAutoplay();
             }
         }, 300);
