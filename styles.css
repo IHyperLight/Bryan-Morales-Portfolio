@@ -580,12 +580,21 @@ img[src$=".WEBP"] {
 /* Contact Buttons */
 .contact-buttons {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: center; /* centrar el grupo horizontalmente */
+    align-items: flex-start; /* alinear los botones en la misma línea (arriba) aunque el texto tenga alturas distintas) */
     gap: var(--space-2xl); /* consistente con el ritmo general */
     width: 100%;
     padding: 0; /* sin padding lateral para evitar desalineación */
     transition: gap var(--transition-smooth), padding var(--transition-smooth);
+}
+
+/* Contenedor individual de contacto (botón + etiqueta) */
+.contact-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
 }
 
 .contact-btn {
@@ -602,6 +611,17 @@ img[src$=".WEBP"] {
         height var(--transition-smooth), padding var(--transition-smooth);
 }
 
+/* Etiqueta bajo el botón, heredando estilo de idiomas */
+.contact-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    opacity: 0.9; /* igual a .language-label */
+    text-align: center;
+    line-height: 1.3;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
 /* Social Media */
 .social-media {
     height: 90px;
@@ -613,6 +633,50 @@ img[src$=".WEBP"] {
     justify-content: center;
     transition: all var(--transition-medium), height var(--transition-smooth),
         padding var(--transition-smooth);
+}
+
+/* Skills Section (similar a Social Media, pero con tags) */
+.skills-title {
+    font-size: var(--font-size-sm); /* igual que la descripción */
+    font-weight: 900; /* igual que el nombre */
+    text-align: center; /* centrado uniforme en todas las vistas */
+    margin: 0; /* sin espacio extra debajo del título */
+}
+.skills-section {
+    height: auto;
+    padding: var(--space-lg) var(--space-lg);
+    border-radius: 25px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-medium), height var(--transition-smooth),
+        padding var(--transition-smooth);
+}
+
+.skills-lines {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    gap: clamp(var(--space-sm), 5vw, var(--space-lg));
+    row-gap: var(--space-lg);
+    transition: gap var(--transition-smooth),
+        justify-content var(--transition-medium);
+}
+
+/* Tags de Skills con esquinas redondeadas (rectángulos, no cápsulas) */
+.skills-lines .tech-tag {
+    border-radius: 10px;
+}
+
+/* Asegurar tamaño homogéneo de íconos dentro de tech-tag en Skills */
+.skills-lines .tech-tag img {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
 }
 
 .social-lines {
@@ -638,6 +702,15 @@ img[src$=".WEBP"] {
 
 /* Mobile responsive optimization - consolidated */
 @media (max-width: 640px) {
+    .skills-section {
+        padding: var(--space-md) var(--space-lg) var(--space-lg) var(--space-lg); /* reducir padding-top para acercar al título */
+    }
+
+    .skills-lines {
+        gap: var(--space-lg);
+        row-gap: var(--space-lg);
+        justify-content: center;
+    }
     .social-media {
         height: auto;
         min-height: 90px;
@@ -1675,13 +1748,15 @@ img[src$=".WEBP"] {
     border-radius: 100px;
     background: var(--glass-bg);
     font-size: 14px;
-    font-weight: 900; /* igual que .project-title h2 */
+    font-weight: normal; /* peso normal solicitado (Inter 400) */
     color: var(--text-primary);
     white-space: nowrap;
     cursor: default; /* Quitar cursor de manita */
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Stroke sutil sin afectar el layout (en lugar de border) */
+    box-shadow: inset 0 0 0 1.5px rgba(208, 208, 208, 0.15);
     transition: all var(--transition-fast), padding var(--transition-smooth),
         height var(--transition-smooth);
 }
@@ -1848,39 +1923,6 @@ img[src$=".WEBP"] {
     transform: translateY(-2px);
 }
 
-/* Project Image */
-.project-image {
-    grid-area: image;
-    position: relative;
-    width: 100%;
-    border-radius: 30px;
-    overflow: hidden;
-    aspect-ratio: 16 / 9;
-    min-height: clamp(200px, 40vw, 280px);
-    max-height: clamp(320px, 48vh, 540px);
-    transition: max-height var(--transition-medium),
-        min-height var(--transition-medium),
-        border-radius var(--transition-medium);
-}
-
-.project-screenshot {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 30px;
-}
-
-.project-controls {
-    position: absolute;
-    bottom: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-}
-
 /* Grid area mapping */
 .project-header {
     grid-area: header;
@@ -1896,58 +1938,6 @@ img[src$=".WEBP"] {
 }
 .project-link {
     grid-area: link;
-}
-
-.progress-indicators {
-    width: clamp(80px, 12vw, 120px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-}
-
-.progress-dots {
-    display: flex;
-    gap: 6px;
-}
-
-.dot {
-    width: 7.5px;
-    height: 7.5px;
-    border-radius: 50%;
-    background: rgba(208, 208, 208, 0.5);
-}
-
-.dot.active {
-    background: var(--text-primary);
-}
-
-.progress-bar {
-    width: clamp(80px, 12vw, 120px);
-    height: 2px;
-    border-radius: 1px;
-    background: rgba(208, 208, 208, 0.5);
-    overflow: hidden;
-}
-
-.progress-fill {
-    width: 20%;
-    height: 100%;
-    background: var(--text-primary);
-    border-radius: 1px;
-}
-
-.next-btn {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 15px;
-    height: 30px;
-    background: none;
-    border: none;
-    color: rgba(208, 208, 208, 0.6);
-    cursor: pointer;
 }
 
 /* Responsive Design */
@@ -2105,10 +2095,9 @@ img[src$=".WEBP"] {
     .languages {
         grid-column: 1;
         grid-row: 4;
-        /* Compensar exceso de espacio superior del grid en este punto */
-        margin-top: calc(-1 * var(--space-lg));
-        /* Mantener base inferior ordenada acorde al ritmo vertical */
-        margin-bottom: var(--space-lg);
+        /* En desktop, confiar en el gap del grid para el ritmo vertical */
+        margin-top: 0;
+        margin-bottom: 0;
     }
 
     /* Evitar expansión horizontal de los ítems del grid en desktop */
@@ -2126,24 +2115,46 @@ img[src$=".WEBP"] {
     }
 
     .contact-buttons {
-        grid-column: 2;
-        grid-row: 2; /* misma fila que el nombre */
+        grid-column: 1;
+        grid-row: 5; /* debajo de languages */
         align-self: start;
         justify-content: center;
         width: 100%;
     }
 
     .social-media {
-        grid-column: 2;
-        grid-row: 3; /* misma fila que la descripción */
+        grid-column: 1;
+        grid-row: 6; /* debajo de contact-buttons */
         align-self: start;
         width: 100%;
+    }
+
+    /* Título de Skills (desktop): ubicado en la columna derecha, comenzando a la altura del nombre */
+    .skills-title {
+        grid-column: 2;
+        grid-row: 2;
+        align-self: start;
+        width: 100%;
+        margin-bottom: 0; /* sin espacio extra antes del contenedor */
+        text-align: center; /* centrado uniforme también en desktop */
+    }
+
+    /* Skills section: en columna derecha abarcando título→redes para distribuir altura y evitar huecos */
+    .skills-section {
+        grid-column: 2;
+        grid-row: 3 / 7; /* debajo del título: Descripción(3) hasta Social(6); certificados inician en 7 */
+        align-self: stretch;
+        /* Cancelar el gap de la grilla entre el título (fila 2) y esta sección (fila 3) */
+        margin-top: calc(-1.5 * var(--space-2xl));
+        width: 100%;
+        /* Reducir aún más el padding superior para compactar distancia al título */
+        padding-top: var(--space-md);
     }
 
     /* Certificados al pie ocupando ambas columnas, con distribución interna alineada al layout padre */
     .certificates-section {
         grid-column: 1 / -1; /* abarcar ambas columnas del layout principal */
-        grid-row: 5; /* corre una fila por la inclusión de languages */
+        grid-row: 7; /* después de social-media (fila 6) y contact-buttons (fila 5) */
         /* 2 columnas internas que respetan exactamente el gap de 30px del grid padre */
         grid-template-columns: calc((100% - var(--space-2xl)) / 2) calc(
                 (100% - var(--space-2xl)) / 2
