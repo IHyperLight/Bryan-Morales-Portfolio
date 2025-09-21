@@ -9,7 +9,6 @@ const perfMonitor = (() => {
         mark(name) {
             if (performance.mark) performance.mark(name);
         },
-
         measure(name, startMark) {
             if (
                 performance.measure &&

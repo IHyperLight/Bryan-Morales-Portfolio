@@ -363,7 +363,7 @@ img[src$=".WEBP"] {
     transform: translateY(-2px);
 }
 
-/* Hover específico para botón GitHub - sobrescribe el estilo general */
+/* Hover específico para botón GitHub */
 .project-link.glass-pill:not(.download-btn) {
     background: #d0d0d0 !important; /* Color D0D0D0 como solicitado */
     color: #000000 !important; /* Texto e iconos en negro */
@@ -479,7 +479,7 @@ img[src$=".WEBP"] {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-2xl);
+    gap: var(--space-2xl); /* consistente con profile-section */
     width: 100%;
 }
 
@@ -507,21 +507,93 @@ img[src$=".WEBP"] {
         color var(--transition-medium);
 }
 
+/* Languages Block (static, responsive) */
+.languages {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl); /* separación ligeramente mayor y constante */
+    /* Alinear tamaño tipográfico al de la descripción */
+    font-size: var(--font-size-sm);
+}
+
+.language-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    /* Evitar colapso de márgenes internos con el contenedor */
+    margin: 0;
+}
+
+.language-label {
+    font-size: inherit; /* mismo tamaño que la descripción */
+    color: var(--text-primary);
+    opacity: 0.9;
+}
+
+/* Nombre del idioma + dos puntos con el mismo weight que el nombre principal */
+.language-label .language-key {
+    font-weight: 900;
+}
+
+.lang-progress {
+    position: relative;
+    width: 100%;
+    height: 10px; /* aumentado de 8px a 10px */
+    min-height: 10px;
+    max-height: 10px;
+    border-radius: 999px; /* cápsula */
+    background: rgba(
+        208,
+        208,
+        208,
+        0.25
+    ); /* similar a carousel-progress pero un poco más suave */
+    overflow: hidden;
+}
+
+.lang-progress-fill {
+    height: 100%;
+    min-height: 10px;
+    max-height: 10px;
+    width: 0; /* definido inline por cada idioma */
+    background: linear-gradient(
+        90deg,
+        #7c3aed 0%,
+        #8b5cf6 45%,
+        #d946ef 70%,
+        #ec4899 100%
+    );
+    border-radius: 999px;
+}
+
+/* Responsividad del bloque de idiomas */
+@media (min-width: 640px) {
+    .languages {
+        gap: var(--space-xl);
+    }
+    .language-label {
+        font-size: inherit;
+    }
+}
+
 /* Contact Buttons */
 .contact-buttons {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: var(--space-2xl);
+    gap: var(--space-2xl); /* consistente con el ritmo general */
     width: 100%;
-    padding: 0 var(--card-xpad);
+    padding: 0; /* sin padding lateral para evitar desalineación */
     transition: gap var(--transition-smooth), padding var(--transition-smooth);
 }
 
 .contact-btn {
     width: 60px;
     height: 60px;
-    padding: 15px;
+    padding: var(
+        --space-lg
+    ); /* usar variable del sistema (16px similar a 15px) */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -533,7 +605,7 @@ img[src$=".WEBP"] {
 /* Social Media */
 .social-media {
     height: 90px;
-    padding: 0 clamp(8px, 3vw, var(--card-xpad));
+    padding: 0 var(--space-lg); /* padding lateral consistente */
     border-radius: 25px;
     width: 100%;
     display: flex;
@@ -569,12 +641,12 @@ img[src$=".WEBP"] {
     .social-media {
         height: auto;
         min-height: 90px;
-        padding: var(--space-lg) clamp(2px, 3vw, var(--card-xpad));
+        padding: var(--space-lg) var(--space-lg); /* padding consistente */
     }
 
     .social-lines {
-        gap: clamp(4px, 5vw, var(--space-lg));
-        row-gap: clamp(var(--space-sm), 2vw, var(--space-lg));
+        gap: var(--space-lg); /* gap consistente */
+        row-gap: var(--space-lg); /* row-gap consistente */
         justify-content: center;
         display: flex;
         flex-wrap: wrap;
@@ -597,7 +669,7 @@ img[src$=".WEBP"] {
 .certificates-section {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 18px; /* Reducido de 24px a 18px para menor separación */
+    gap: var(--space-lg);
     width: 100%;
     transition: grid-template-columns var(--transition-smooth),
         gap var(--transition-smooth), transform var(--transition-medium);
@@ -680,12 +752,8 @@ img[src$=".WEBP"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-}
-
-.external-link:hover {
     opacity: 1;
+    transition: opacity 0.2s ease;
 }
 
 /* Responsive adjustments for certificates on small screens */
@@ -1607,7 +1675,7 @@ img[src$=".WEBP"] {
     border-radius: 100px;
     background: var(--glass-bg);
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 900; /* igual que .project-title h2 */
     color: var(--text-primary);
     white-space: nowrap;
     cursor: default; /* Quitar cursor de manita */
@@ -1997,7 +2065,7 @@ img[src$=".WEBP"] {
     /* Disposición en 2 columnas en la sección Personal con alineación cruzada */
     .profile-section {
         display: grid;
-        grid-template-columns: 1fr 1fr; /* izquierda: info, derecha: acciones */
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); /* izquierda: info, derecha: acciones; permitir contracción */
         align-items: start;
         gap: var(--space-2xl); /* mantiene ritmo vertical/horizontal */
         /* Control específico del ancho de la sección personal - ampliado para aprovechar nuevo espacio */
@@ -2033,6 +2101,30 @@ img[src$=".WEBP"] {
         grid-row: 3; /* alinea con social-media */
     }
 
+    /* Idiomas: primera columna justo debajo de la descripción */
+    .languages {
+        grid-column: 1;
+        grid-row: 4;
+        /* Compensar exceso de espacio superior del grid en este punto */
+        margin-top: calc(-1 * var(--space-lg));
+        /* Mantener base inferior ordenada acorde al ritmo vertical */
+        margin-bottom: var(--space-lg);
+    }
+
+    /* Evitar expansión horizontal de los ítems del grid en desktop */
+    .profile-name,
+    .profile-description,
+    .languages {
+        min-width: 0; /* permitir que el contenido se contraiga dentro del track */
+        max-width: 100%; /* nunca exceder el ancho de la columna */
+    }
+
+    /* Asegurar cortes de línea adecuados para textos largos en la descripción */
+    .profile-description {
+        overflow-wrap: anywhere; /* preferencia moderna */
+        word-break: break-word; /* fallback razonable */
+    }
+
     .contact-buttons {
         grid-column: 2;
         grid-row: 2; /* misma fila que el nombre */
@@ -2051,7 +2143,7 @@ img[src$=".WEBP"] {
     /* Certificados al pie ocupando ambas columnas, con distribución interna alineada al layout padre */
     .certificates-section {
         grid-column: 1 / -1; /* abarcar ambas columnas del layout principal */
-        grid-row: 4;
+        grid-row: 5; /* corre una fila por la inclusión de languages */
         /* 2 columnas internas que respetan exactamente el gap de 30px del grid padre */
         grid-template-columns: calc((100% - var(--space-2xl)) / 2) calc(
                 (100% - var(--space-2xl)) / 2
@@ -2059,7 +2151,7 @@ img[src$=".WEBP"] {
         column-gap: var(
             --space-2xl
         ); /* igual que el gap de columnas del layout padre */
-        row-gap: 18px; /* Reducido de 24px a 18px para consistencia */
+        row-gap: var(--space-lg); /* consistente con mobile (16px) */
     }
 
     /* Proyectos en dos columnas cuando la sección personal también se divide */
@@ -2258,6 +2350,8 @@ button,
 input[type="button"],
 input[type="submit"],
 [role="button"],
+.external-link,
+a,
 .contact-btn,
 .social-btn,
 .filter-btn,
@@ -2270,8 +2364,28 @@ input[type="submit"],
 .carousel-fullscreen-prev,
 .carousel-fullscreen-next,
 .menu-button,
-.external-link,
 .download-btn,
 [tabindex]:not([tabindex="-1"]) {
+    cursor: pointer !important;
+}
+
+/* Asegurar cursor pointer también sobre descendientes (svg/img dentro del botón) */
+button *,
+[role="button"] *,
+.external-link *,
+a *,
+.contact-btn *,
+.social-btn *,
+.filter-btn *,
+.project-link *,
+.certificate-item *,
+.carousel-btn *,
+.carousel-dot *,
+.carousel-fullscreen-btn *,
+.carousel-fullscreen-close *,
+.carousel-fullscreen-prev *,
+.carousel-fullscreen-next *,
+.menu-button *,
+.download-btn * {
     cursor: pointer !important;
 }
