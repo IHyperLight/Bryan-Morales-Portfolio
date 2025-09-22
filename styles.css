@@ -24,7 +24,7 @@
     --card-padding: clamp(26px, 5.5vw, 46px);
     --card-xpad: clamp(18px, 5vw, 26px);
 
-    --container-padding: clamp(40px, 8vw, 60px) clamp(12px, 3vw, 20px);
+    --container-padding: clamp(40px, 8vw, 60px) clamp(9px, 2.25vw, 15px);
     --container-gap: clamp(20px, 4vw, 30px);
 
     /* Project-specific spacing - increased further for better separation */
@@ -2196,25 +2196,16 @@ img[src$=".WEBP"] {
                 4vw,
                 100px
             ); /* Gap optimizado para pantallas ultra-anchas */
-            max-width: 1600px; /* Aumentado para dar más espacio a los proyectos */
+            max-width: 1700px; /* Aumentado para dar más espacio a los proyectos */
             margin: 0 auto;
         }
 
         .portfolio-container {
             max-width: clamp(
-                1200px,
-                92vw,
-                1600px
+                1280px,
+                98vw,
+                1700px
             ); /* Aumentado considerablemente */
-        }
-
-        /* Control específico del ancho de la sección personal para ultra-wide */
-        .profile-section {
-            max-width: clamp(
-                760px,
-                82vw,
-                860px
-            ); /* Mantiene el mismo tamaño máximo original */
         }
 
         /* Asegurar adaptación perfecta del título en desktop grande */
