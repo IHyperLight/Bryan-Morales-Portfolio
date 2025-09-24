@@ -1413,6 +1413,100 @@ window.addEventListener(
     { once: true }
 );
 
+// Force repaint helper to fix disappearing elements on resize
+function forceRepaint(el) {
+    if (!el) return;
+    // Toggle a harmless style to force composite/repaint without layout thrash
+    const originalWillChange = el.style.willChange;
+    el.style.willChange = "auto";
+    // Accessing offsetHeight forces layout read, then toggle a no-op transform
+    // Using requestAnimationFrame ensures we don't block the main thread.
+    // Use minimal changes to avoid visual glitches.
+    /* eslint-disable no-unused-expressions */
+    el.offsetHeight; // Trigger layout read
+    el.style.transform = "translateZ(0)";
+    requestAnimationFrame(() => {
+        el.style.transform = "";
+        el.style.willChange = originalWillChange;
+    });
+}
+
+// Debounced resize repaint for certificates and project descriptions
+const debouncedResizeRepaint = debounce(() => {
+    try {
+        const certs = document.querySelectorAll(".certificate-item");
+        const descs = document.querySelectorAll(".description-content");
+        certs.forEach((el) => {
+            // Ensure visible before repaint (fixes disappearing on some compositors)
+            try {
+                el.style.opacity = "1";
+                el.style.visibility = "visible";
+            } catch (e) {
+                /* ignore */
+            }
+            forceRepaint(el);
+            // Remove temporary inline styles after a couple frames to restore original CSS
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    try {
+                        el.style.removeProperty("opacity");
+                        el.style.removeProperty("visibility");
+                    } catch (e) {
+                        /* ignore */
+                    }
+                }, 60);
+            });
+        });
+        descs.forEach((el) => {
+            // Ensure visible before repaint (fixes disappearing on some compositors)
+            try {
+                el.style.opacity = "1";
+                el.style.visibility = "visible";
+            } catch (e) {
+                /* ignore */
+            }
+            forceRepaint(el);
+            // Remove temporary inline styles after a couple frames to restore original CSS
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    try {
+                        el.style.removeProperty("opacity");
+                        el.style.removeProperty("visibility");
+                    } catch (e) {
+                        /* ignore */
+                    }
+                }, 60);
+            });
+        });
+    } catch (e) {
+        // swallow non-fatal errors during teardown
+        console.warn("Resize repaint helper error", e);
+    }
+}, 180);
+
+// Mark the start of a resize so CSS can neutralize animations during resize
+let _resizeStartTimer = null;
+window.addEventListener(
+    "resize",
+    () => {
+        try {
+            document.body.classList.add("is-resizing");
+            if (_resizeStartTimer) clearTimeout(_resizeStartTimer);
+            // Remove 'is-resizing' shortly after the debounced repaint finishes
+            _resizeStartTimer = setTimeout(() => {
+                // Let the debounced repaint run first
+                // debouncedResizeRepaint will remove temporary inline styles
+                document.body.classList.remove("is-resizing");
+            }, 500);
+        } catch (e) {
+            /* ignore */
+        }
+    },
+    { passive: true }
+);
+
+window.addEventListener("resize", debouncedResizeRepaint, { passive: true });
+
 // Enhanced scroll indicator with drag functionality and smooth scrolling - Updated for multiple projects
 document.addEventListener("DOMContentLoaded", () => {
     // Use cached project items for better performance

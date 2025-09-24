@@ -3,9 +3,9 @@
     /* Glass morphism effects */
     --glass-bg: linear-gradient(
         90deg,
-        rgba(208, 208, 208, 0.0275) 0%,
-        rgba(208, 208, 208, 0.065) 50%,
-        rgba(208, 208, 208, 0.14) 100%
+        rgba(208, 208, 208, 0.1) 0%,
+        rgba(208, 208, 208, 0.05) 50%,
+        rgba(208, 208, 208, 0.025) 100%
     );
     --glass-border: rgba(208, 208, 208, 0.5);
 
@@ -242,10 +242,6 @@ img[src$=".WEBP"] {
     transition: padding var(--transition-smooth),
         border-radius var(--transition-smooth),
         transform var(--transition-medium);
-    /* Performance optimizations */
-    will-change: transform;
-    transform: var(--gpu-layer);
-    contain: layout;
     backface-visibility: hidden;
 }
 
@@ -755,6 +751,17 @@ img[src$=".WEBP"] {
     align-items: center;
     gap: var(--cert-row-gap);
     min-height: 36px;
+}
+
+/* Mientras el usuario esté redimensionando, neutralizar animaciones y will-change
+   en los certificados para evitar que queden en capas separadas que no se actualizan */
+.is-resizing .certificate-item,
+.is-resizing .certificate-item * {
+    animation: none !important;
+    will-change: auto !important;
+    transform: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .certificate-item.glass-pill {
@@ -1658,9 +1665,10 @@ img[src$=".WEBP"] {
         rgba(0, 0, 0, 0) 100%
     );
     /* Performance optimizations for smooth scrolling */
-    will-change: scroll-position, mask-image;
-    transform: var(--gpu-layer);
-    contain: layout;
+    /* Limitar will-change para evitar problemas de compositor al redimensionar
+         (evita desaparecer elementos hasta hover). Eliminar transform/contain
+         que forzaban creación de capas y aislaban el repintado. */
+    will-change: mask-image;
     /* Hardware-accelerated scrolling */
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: y proximity;
@@ -1756,7 +1764,7 @@ img[src$=".WEBP"] {
     align-items: center;
     justify-content: center;
     /* Stroke sutil sin afectar el layout (en lugar de border) */
-    box-shadow: inset 0 0 0 1.25px rgba(208, 208, 208, 0.15);
+    box-shadow: inset 0 0 0 1.25px rgba(208, 208, 208, 0.25);
     transition: all var(--transition-fast), padding var(--transition-smooth),
         height var(--transition-smooth);
 }
