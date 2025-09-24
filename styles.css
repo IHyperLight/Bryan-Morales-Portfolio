@@ -3,7 +3,7 @@
     /* Glass morphism effects */
     --glass-bg: linear-gradient(
         90deg,
-        rgba(255, 255, 255, 0) 0%,
+        rgba(0, 0, 0, 0.08) 0%,
         rgba(255, 255, 255, 0.04) 50%,
         rgb(255, 255, 255, 0.08) 100%
     );
