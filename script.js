@@ -1223,13 +1223,29 @@ function initializeScrollEffects() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
             if (entry.isIntersecting) {
-                // Use RAF for smooth animations
-                rafScheduler.add(() => {
-                    entry.target.style.opacity = "1";
-                    entry.target.style.transform = "translateY(0)";
-                });
-                // Unobserve after animation to save resources
-                observer.unobserve(entry.target);
+                // If already revealed, skip to avoid repeated animations
+                if (entry.target.classList && entry.target.classList.contains("in-view")) {
+                    try {
+                        observer.unobserve(entry.target);
+                    } catch (e) {
+                        /* ignore */
+                    }
+                    return;
+                }
+
+                // Add a one-time class to trigger CSS animation and prevent re-triggers
+                try {
+                    entry.target.classList.add("in-view");
+                } catch (e) {
+                    /* ignore */
+                }
+
+                // Unobserve after first reveal to save resources and avoid repeated triggers
+                try {
+                    observer.unobserve(entry.target);
+                } catch (e) {
+                    /* ignore */
+                }
             }
         });
     }, observerOptions);
@@ -1238,9 +1254,8 @@ function initializeScrollEffects() {
         ".glass-card, .certificate-item, .filter-container"
     );
     sections.forEach((section) => {
-        section.style.opacity = "0";
-        section.style.transform = "translateY(20px)";
-        section.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+        // Ensure initial state via class to avoid inline style toggles
+        section.classList.add("pre-reveal");
         observer.observe(section);
     });
 }
