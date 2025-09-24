@@ -3,9 +3,9 @@
     /* Glass morphism effects */
     --glass-bg: linear-gradient(
         90deg,
-        rgba(255, 255, 255, 0.075) 0%,
-        rgba(0, 0, 0, 0.15) 50%,
-        rgba(0, 0, 0, 0.3) 100%
+        rgba(0, 0, 0, 0.05) 0%,
+        rgba(0, 0, 0, 0.1) 50%,
+        rgba(0, 0, 0, 0.5) 100%
     );
     --glass-border: rgba(208, 208, 208, 0.5);
 
@@ -242,6 +242,10 @@ img[src$=".WEBP"] {
     transition: padding var(--transition-smooth),
         border-radius var(--transition-smooth),
         transform var(--transition-medium);
+    /* Performance optimizations */
+    will-change: transform;
+    transform: var(--gpu-layer);
+    contain: layout;
     backface-visibility: hidden;
 }
 
@@ -680,19 +684,6 @@ img[src$=".WEBP"] {
     flex-wrap: wrap;
     width: 100%;
     justify-content: center;
-
-    /* Reveal helpers: use classes instead of inline styles to prevent frequent
-       JS writes during scroll which can trigger repaints and reflows. Elements
-       start with .pre-reveal and transition to .in-view once observed. */
-    .pre-reveal {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-    .in-view {
-        opacity: 1 !important;
-        transform: translateY(0) !important;
-    }
     align-items: center;
     align-content: center;
     gap: clamp(var(--space-sm), 5vw, var(--space-lg));
@@ -764,17 +755,6 @@ img[src$=".WEBP"] {
     align-items: center;
     gap: var(--cert-row-gap);
     min-height: 36px;
-}
-
-/* Mientras el usuario esté redimensionando, neutralizar animaciones y will-change
-   en los certificados para evitar que queden en capas separadas que no se actualizan */
-.is-resizing .certificate-item,
-.is-resizing .certificate-item * {
-    animation: none !important;
-    will-change: auto !important;
-    transform: none !important;
-    visibility: visible !important;
-    opacity: 1 !important;
 }
 
 .certificate-item.glass-pill {
@@ -1678,10 +1658,9 @@ img[src$=".WEBP"] {
         rgba(0, 0, 0, 0) 100%
     );
     /* Performance optimizations for smooth scrolling */
-    /* Limitar will-change para evitar problemas de compositor al redimensionar
-         (evita desaparecer elementos hasta hover). Eliminar transform/contain
-         que forzaban creación de capas y aislaban el repintado. */
-    will-change: mask-image;
+    will-change: scroll-position, mask-image;
+    transform: var(--gpu-layer);
+    contain: layout;
     /* Hardware-accelerated scrolling */
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: y proximity;
