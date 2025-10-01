@@ -137,6 +137,9 @@ document.addEventListener("DOMContentLoaded", function () {
     perfMonitor.mark("critical-init-start");
     initializeFilters();
     initializeProjectCarousel();
+    // CRITICAL: Initialize scroll effects IMMEDIATELY to prevent projects appearing without animation
+    // This must run synchronously before any elements enter viewport
+    initializeScrollEffects();
     perfMonitor.measure("critical-init", "critical-init-start");
 
     // Schedule non-critical initializations during idle time
@@ -148,7 +151,6 @@ document.addEventListener("DOMContentLoaded", function () {
         initializeFullscreenModal();
         initializeSocialLayout();
         initializeMenuButton();
-        initializeScrollEffects();
         initializeCertificateLinks();
         initializeProjectLink();
         perfMonitor.measure("idle-init", "idle-init-start");
@@ -1214,10 +1216,11 @@ function initializeMenuButton() {
 // Scroll effects
 function initializeScrollEffects() {
     const observerOptions = {
-        threshold: 0.1,
-        rootMargin: "0px 0px -50px 0px",
-        // Performance optimization
-        passive: true,
+        // Trigger when at least 5% of the element is visible (more sensitive)
+        threshold: 0.05,
+        // Trigger animation 100px BEFORE element enters viewport for smooth effect
+        // Negative bottom margin means: start observing when element is this far from entering
+        rootMargin: "0px 0px -100px 0px",
     };
 
     const observer = new IntersectionObserver((entries) => {
@@ -1225,11 +1228,12 @@ function initializeScrollEffects() {
             if (entry.isIntersecting) {
                 // Mark as animated to prevent re-processing
                 if (!entry.target.classList.contains("scroll-animated")) {
-                    // Use RAF for smooth animations
-                    rafScheduler.add(() => {
-                        entry.target.classList.add("scroll-animated");
-                        entry.target.classList.remove("scroll-pending");
-                    });
+                    // Remove inline styles to allow CSS classes to take control
+                    entry.target.style.opacity = "";
+                    entry.target.style.transform = "";
+                    // Apply animation class immediately
+                    entry.target.classList.add("scroll-animated");
+                    entry.target.classList.remove("scroll-pending");
                 }
                 // Unobserve after animation to save resources
                 observer.unobserve(entry.target);
@@ -1240,11 +1244,39 @@ function initializeScrollEffects() {
     const sections = document.querySelectorAll(
         ".glass-card, .certificate-item, .filter-container"
     );
+
     sections.forEach((section) => {
         // Only apply initial state if not already animated
         if (!section.classList.contains("scroll-animated")) {
-            section.classList.add("scroll-pending");
-            observer.observe(section);
+            // Los certificados y filtros que ya están visibles deben animarse inmediatamente
+            const isCertificateOrFilter =
+                section.classList.contains("certificate-item") ||
+                section.classList.contains("filter-container");
+
+            if (isCertificateOrFilter) {
+                // Verificar si el elemento ya está en viewport al cargar
+                const rect = section.getBoundingClientRect();
+                const isInViewport =
+                    rect.top < window.innerHeight && rect.bottom > 0;
+
+                if (isInViewport) {
+                    // Animar inmediatamente sin observar
+                    requestAnimationFrame(() => {
+                        section.style.opacity = "";
+                        section.style.transform = "";
+                        section.classList.add("scroll-animated");
+                        section.classList.remove("scroll-pending");
+                    });
+                } else {
+                    // Si no está visible, observar normalmente
+                    section.classList.add("scroll-pending");
+                    observer.observe(section);
+                }
+            } else {
+                // Proyectos siempre observados para animación al scroll
+                section.classList.add("scroll-pending");
+                observer.observe(section);
+            }
         }
     });
 }

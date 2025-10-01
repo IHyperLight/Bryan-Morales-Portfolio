@@ -39,7 +39,6 @@
     --button-radius-xl: 30px;
 
     /* Border radius scale */
-    --radius-xs: 3px;
     --radius-sm: 8px;
     --radius-md: 10px;
     --radius-lg: 20px;
@@ -55,7 +54,6 @@
     --z-high: 10;
     --z-overlay: 1000;
     --z-modal: 10000;
-    --z-tooltip: 10001;
 
     /* Certificate sizing */
     --cert-logo-w: 100px;
@@ -94,7 +92,6 @@
 .glass-bubble,
 .glass-button,
 .glass-pill,
-.glass-tag,
 .filter-btn,
 .carousel-btn,
 .carousel-dot,
@@ -162,14 +159,19 @@ img[src$=".WEBP"] {
 
 /* Scroll animation states - prevents disappearing elements on resize */
 .scroll-pending {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
+    opacity: 0 !important;
+    transform: translateY(30px) !important;
+    /* Smooth cubic-bezier for professional fade-in effect */
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .scroll-animated {
     opacity: 1 !important;
     transform: translateY(0) !important;
+    /* Maintain transition for smooth animation */
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 /* Background video */
@@ -321,13 +323,9 @@ img[src$=".WEBP"] {
     background: var(--glass-bg);
 }
 
-.glass-tag {
-    height: var(--button-size);
-    padding: 5px clamp(18px, 4.5vw, 24px);
-    border-radius: var(--button-radius-sm);
-    background: var(--glass-bg);
-    display: flex;
-    align-items: center;
+/* Override border-radius para botones de proyecto: rectángulos con bordes redondeados en lugar de cápsulas */
+.project-link.glass-pill {
+    border-radius: var(--radius-lg); /* 15px - un poco más rectangular */
 }
 
 /* Unified hover/focus effects for interactive elements */
@@ -337,8 +335,7 @@ img[src$=".WEBP"] {
 .filter-btn,
 .project-link.glass-pill,
 .project-icon.glass-button,
-.tech-tag,
-.glass-tag {
+.tech-tag {
     position: relative;
     transition: transform var(--transition-fast),
         background var(--transition-fast), width var(--transition-smooth),
@@ -349,8 +346,7 @@ img[src$=".WEBP"] {
 .certificate-item.glass-pill::after,
 .filter-btn::after,
 .project-link.glass-pill::after,
-.project-icon.glass-button::after,
-.glass-tag::after {
+.project-icon.glass-button::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -369,8 +365,7 @@ img[src$=".WEBP"] {
 .contact-btn.glass-bubble:hover,
 .social-btn.glass-button:hover,
 .filter-btn:hover,
-.project-icon.glass-button:hover,
-.glass-tag:hover {
+.project-icon.glass-button:hover {
     background: var(--hover-tint);
     transform: translateY(-2px);
 }
@@ -396,8 +391,7 @@ img[src$=".WEBP"] {
 .contact-btn.glass-bubble:hover::after,
 .social-btn.glass-button:hover::after,
 .filter-btn:hover::after,
-.project-icon.glass-button:hover::after,
-.glass-tag:hover::after {
+.project-icon.glass-button:hover::after {
     opacity: 1;
     transform: translateY(0) scale(1);
 }
@@ -419,8 +413,7 @@ img[src$=".WEBP"] {
 .certificate-item.glass-pill:active,
 .filter-btn:active,
 .project-link.glass-pill:active,
-.project-icon.glass-button:active,
-.glass-tag:active {
+.project-icon.glass-button:active {
     transform: translateY(-1px) scale(0.98);
 }
 
@@ -429,8 +422,7 @@ img[src$=".WEBP"] {
 .certificate-item.glass-pill:focus-visible,
 .filter-btn:focus-visible,
 .project-link.glass-pill:focus-visible,
-.project-icon.glass-button:focus-visible,
-.glass-tag:focus-visible {
+.project-icon.glass-button:focus-visible {
     outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
 }
@@ -743,11 +735,6 @@ img[src$=".WEBP"] {
     .project-meta {
         gap: var(--space-sm);
     }
-
-    .project-title.glass-tag {
-        width: fit-content;
-        max-width: 100%;
-    }
 }
 
 /* Certificates Section */
@@ -857,12 +844,6 @@ img[src$=".WEBP"] {
     .certificate-text {
         font-size: 11.5px;
         min-width: 0;
-    }
-
-    /* Asegurar que el contenedor del título siga adaptándose correctamente en móvil */
-    .project-title.glass-tag {
-        width: fit-content; /* Mantener adaptación al contenido en móvil */
-        max-width: 100%; /* Evitar overflow horizontal */
     }
 
     .project-meta {
@@ -1107,16 +1088,9 @@ img[src$=".WEBP"] {
     max-height: none;
 }
 
-/* Anular posicionamiento absoluto cuando los botones están fuera de la imagen */
+/* Ocultar botones de navegación en carruseles de proyectos */
 .carousel-controls .carousel-btn {
-    position: relative; /* Cambiar a relative para que los pseudo-elementos funcionen */
-    top: auto;
-    left: auto;
-    right: auto;
-    transform: none;
-}
-.carousel-controls .carousel-btn:hover {
-    transform: translateY(-2px);
+    display: none;
 }
 
 /* Indicadores fuera de la imagen: estáticos y centrados */
@@ -1655,7 +1629,7 @@ img[src$=".WEBP"] {
     overflow: auto;
     scroll-behavior: smooth;
     position: relative;
-    font-size: clamp(13px, 2vw, 14px);
+    font-size: var(--font-size-sm);
     font-weight: 400;
     color: var(--text-primary);
     line-height: 1.5;
@@ -1708,6 +1682,16 @@ img[src$=".WEBP"] {
     cursor: default !important; /* Quitar cursor de manita */
 }
 
+.project-title {
+    /* Eliminar glass morphism, mantener solo el comportamiento responsivo */
+    height: auto;
+    min-height: auto;
+    width: fit-content;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+}
+
 .project-title h2 {
     font-size: clamp(
         32px,
@@ -1716,14 +1700,7 @@ img[src$=".WEBP"] {
     ); /* Conservar tamaño mínimo de 32px como el profile-name */
     font-weight: 900; /* Black en lugar de Bold (700) */
     color: var(--text-primary);
-}
-
-/* Asegurar que el contenedor del título se adapte al contenido como antes */
-.project-title.glass-tag {
-    height: auto; /* Sobrescribir el height fijo del glass-tag */
-    min-height: auto; /* Sin altura mínima fija */
-    width: fit-content; /* Adaptarse exactamente al ancho del contenido */
-    max-width: 100%; /* No exceder el ancho del contenedor padre */
+    margin: 0;
 }
 
 .project-meta {
@@ -1734,7 +1711,7 @@ img[src$=".WEBP"] {
 }
 
 .project-category {
-    font-size: clamp(14px, 2.5vw, 16px);
+    font-size: var(--font-size-sm);
     font-weight: 400;
     color: var(--text-primary);
 }
@@ -1780,10 +1757,21 @@ img[src$=".WEBP"] {
         height var(--transition-smooth);
 }
 
+/* Estilo específico para tags de proyectos: fondo negro sólido con degradado claro a la derecha, sin borde */
+.tech-stack .tech-tag {
+    background: linear-gradient(to right, rgb(0, 0, 0), rgb(40, 40, 40));
+    box-shadow: none; /* Eliminar el stroke */
+}
+
 /* Efecto hover para las etiquetas de tecnología */
 .tech-tag:hover {
     background: var(--hover-tint);
     transform: translateY(-2px);
+}
+
+/* Hover específico para tags de proyectos */
+.tech-stack .tech-tag:hover {
+    background: linear-gradient(to right, rgb(20, 20, 20), rgb(60, 60, 60));
 }
 
 /* Scroll indicator para project description */
@@ -1903,15 +1891,24 @@ img[src$=".WEBP"] {
     margin-bottom: 0;
 }
 
-/* Estilo específico para el botón de descarga - Negro como solicitado */
+/* Estilo específico para los botones de descarga y visualización - Negro con degradado */
 .download-btn.glass-pill {
-    background: #000000 !important; /* Fondo negro */
+    background: linear-gradient(
+        to right,
+        rgb(0, 0, 0),
+        rgb(40, 40, 40)
+    ) !important; /* Fondo negro con degradado claro a la derecha */
     color: #d0d0d0 !important; /* Texto e iconos en D0D0D0 */
     border: none !important; /* Sin stroke/borde */
+    box-shadow: none !important; /* Sin sombra/stroke */
 }
 
 .download-btn.glass-pill:hover {
-    background: #1a1a1a !important; /* Negro ligeramente más claro en hover */
+    background: linear-gradient(
+        to right,
+        rgb(20, 20, 20),
+        rgb(60, 60, 60)
+    ) !important; /* Degradado más claro en hover */
     color: #ffffff !important; /* Texto más claro en hover */
     transform: translateY(-2px);
 }
@@ -2024,12 +2021,6 @@ img[src$=".WEBP"] {
     .projects-section {
         grid-template-columns: 1fr;
         gap: var(--projects-gap); /* Maintain increased project spacing */
-    }
-
-    /* Asegurar adaptación perfecta del título en desktop intermedio */
-    .project-title.glass-tag {
-        width: fit-content; /* Mantener adaptación al contenido */
-        max-width: 100%; /* Evitar overflow */
     }
 }
 
@@ -2198,12 +2189,6 @@ img[src$=".WEBP"] {
                 98vw,
                 1700px
             ); /* Aumentado considerablemente */
-        }
-
-        /* Asegurar adaptación perfecta del título en desktop grande */
-        .project-title.glass-tag {
-            width: fit-content; /* Mantener adaptación al contenido */
-            max-width: 100%; /* Evitar overflow */
         }
     }
 }
