@@ -251,8 +251,12 @@ img[src$=".WEBP"] {
 .glass-card {
     padding: var(--card-padding);
     border-radius: var(--button-radius-xl);
-    border: 0.1px solid var(--glass-border);
     background: var(--glass-bg);
+    /* Brillo sutil solo en bordes derecho, superior e inferior (no izquierdo) */
+    box-shadow: 
+        1px 0 0 0 var(--glass-border),      /* Borde derecho */
+        0 -1px 0 0 var(--glass-border),     /* Borde superior */
+        0 1px 0 0 var(--glass-border);      /* Borde inferior */
     transition: padding var(--transition-smooth),
         border-radius var(--transition-smooth),
         transform var(--transition-medium);
@@ -1757,9 +1761,9 @@ img[src$=".WEBP"] {
         height var(--transition-smooth);
 }
 
-/* Estilo específico para tags de proyectos: fondo negro sólido con degradado claro a la derecha, sin borde */
+/* Estilo específico para tags de proyectos: fondo negro sólido con degradado claro hacia abajo, sin borde */
 .tech-stack .tech-tag {
-    background: linear-gradient(to right, rgb(0, 0, 0), rgb(40, 40, 40));
+    background: linear-gradient(to bottom, rgb(0, 0, 0), rgb(40, 40, 40));
     box-shadow: none; /* Eliminar el stroke */
 }
 
