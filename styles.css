@@ -1780,29 +1780,10 @@ img[src$=".WEBP"] {
         height var(--transition-smooth);
 }
 
-/* Estilo específico para tags de proyectos - degradado elegante sin borde */
-.tech-stack .tech-tag {
-    background: linear-gradient(
-        135deg,
-        rgb(20, 20, 20) 0%,
-        rgb(50, 50, 50) 100%
-    );
-    box-shadow: none;
-}
-
 /* Efecto hover para las etiquetas de tecnología */
 .tech-tag:hover {
     background: var(--hover-tint);
     transform: translateY(-2px);
-}
-
-/* Hover específico para tags de proyectos */
-.tech-stack .tech-tag:hover {
-    background: linear-gradient(
-        135deg,
-        rgb(30, 30, 30) 0%,
-        rgb(60, 60, 60) 100%
-    );
 }
 
 /* Scroll indicator para project description */
@@ -1922,24 +1903,15 @@ img[src$=".WEBP"] {
     margin-bottom: 0;
 }
 
-/* Estilo específico para el botón de descarga - Degradado elegante como los tags */
+/* Estilo específico para el botón de descarga - Negro como solicitado */
 .download-btn.glass-pill {
-    background: linear-gradient(
-        135deg,
-        rgb(20, 20, 20) 0%,
-        rgb(50, 50, 50) 100%
-    ) !important;
+    background: #000000 !important; /* Fondo negro */
     color: #d0d0d0 !important; /* Texto e iconos en D0D0D0 */
     border: none !important; /* Sin stroke/borde */
-    box-shadow: none !important;
 }
 
 .download-btn.glass-pill:hover {
-    background: linear-gradient(
-        135deg,
-        rgb(30, 30, 30) 0%,
-        rgb(60, 60, 60) 100%
-    ) !important;
+    background: #1a1a1a !important; /* Negro ligeramente más claro en hover */
     color: #ffffff !important; /* Texto más claro en hover */
     transform: translateY(-2px);
 }
