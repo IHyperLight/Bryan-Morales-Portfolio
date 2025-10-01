@@ -252,8 +252,7 @@ img[src$=".WEBP"] {
     padding: var(--card-padding);
     border-radius: var(--button-radius-xl);
     background: var(--glass-bg);
-    position: relative; /* Necesario para pseudo-elementos de borde */
-    overflow: hidden; /* Asegurar que los pseudo-elementos no se salgan */
+    position: relative; /* Necesario para pseudo-elemento de borde */
     transition: padding var(--transition-smooth),
         border-radius var(--transition-smooth),
         transform var(--transition-medium);
@@ -264,29 +263,16 @@ img[src$=".WEBP"] {
     backface-visibility: hidden;
 }
 
-/* Borde derecho usando pseudo-elemento (más confiable que box-shadow) */
+/* Borde parcial (derecha, superior e inferior) con border-radius suave usando pseudo-elemento */
 .glass-card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 1px;
-    background: var(--glass-border);
-    pointer-events: none;
-    z-index: 1;
-}
-
-/* Bordes superior e inferior usando pseudo-elemento */
-.glass-card::after {
     content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    border-top: 1px solid var(--glass-border);
-    border-bottom: 1px solid var(--glass-border);
+    border: 1px solid var(--glass-border);
+    border-left: none; /* Sin borde izquierdo */
     border-radius: var(--button-radius-xl);
     pointer-events: none;
     z-index: 1;
@@ -1633,7 +1619,13 @@ img[src$=".WEBP"] {
     height: 100%; /* Asegurar que ocupe toda la altura del contenedor */
     min-height: 3px; /* Altura mínima consistente */
     max-height: 3px; /* Altura máxima consistente */
-    background: var(--text-primary);
+    background: linear-gradient(
+        90deg,
+        #7c3aed 0%,
+        #8b5cf6 45%,
+        #d946ef 70%,
+        #ec4899 100%
+    );
 }
 
 /* Drag cursor hint removido: ya no hay arrastre; usar cursor por defecto limpio */
