@@ -1929,10 +1929,9 @@ img[src$=".WEBP"] {
     background: linear-gradient(
         135deg,
         #4c1d95 0%,
-        #5b21b6 20%,
-        #6d28d9 40%,
-        #7c3aed 60%,
-        #a855f7 80%,
+        #5b21b6 25%,
+        #7c3aed 50%,
+        #a855f7 75%,
         #e879f9 100%
     ) !important; /* Morado ultra profundo al inicio (#4c1d95), transición rica hasta rosa-morado */
     color: #ffffff !important; /* Texto e iconos en blanco */
