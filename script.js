@@ -1223,11 +1223,14 @@ function initializeScrollEffects() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
             if (entry.isIntersecting) {
-                // Use RAF for smooth animations
-                rafScheduler.add(() => {
-                    entry.target.style.opacity = "1";
-                    entry.target.style.transform = "translateY(0)";
-                });
+                // Mark as animated to prevent re-processing
+                if (!entry.target.classList.contains("scroll-animated")) {
+                    // Use RAF for smooth animations
+                    rafScheduler.add(() => {
+                        entry.target.classList.add("scroll-animated");
+                        entry.target.classList.remove("scroll-pending");
+                    });
+                }
                 // Unobserve after animation to save resources
                 observer.unobserve(entry.target);
             }
@@ -1238,10 +1241,11 @@ function initializeScrollEffects() {
         ".glass-card, .certificate-item, .filter-container"
     );
     sections.forEach((section) => {
-        section.style.opacity = "0";
-        section.style.transform = "translateY(20px)";
-        section.style.transition = "opacity 0.6s ease, transform 0.6s ease";
-        observer.observe(section);
+        // Only apply initial state if not already animated
+        if (!section.classList.contains("scroll-animated")) {
+            section.classList.add("scroll-pending");
+            observer.observe(section);
+        }
     });
 }
 
@@ -1305,27 +1309,15 @@ function initializeProjectLink() {
 // Loading states and animations
 window.addEventListener("load", function () {
     document.body.classList.add("loaded");
-
-    const elements = document.querySelectorAll(
-        ".glass-card, .certificate-item"
-    );
-    elements.forEach((element, index) => {
-        setTimeout(() => {
-            element.classList.add("fade-in");
-        }, index * 100);
-    });
+    // Animation handling now done by IntersectionObserver in initializeScrollEffects
 });
 
-// Dynamic styles for keyboard navigation and animations
+// Dynamic styles for keyboard navigation
 const style = document.createElement("style");
 style.textContent = `
     .keyboard-navigation *:focus {
         outline: 2px solid var(--text-primary) !important;
         outline-offset: 2px !important;
-    }
-    
-    .fade-in {
-        animation: fadeInUp 0.6s ease-out forwards;
     }
 `;
 document.head.appendChild(style);
