@@ -254,9 +254,9 @@ img[src$=".WEBP"] {
     background: var(--glass-bg);
     /* Brillo sutil solo en bordes derecho, superior e inferior (no izquierdo) */
     box-shadow: 
-        1px 0 0 0 var(--glass-border),      /* Borde derecho */
-        0 -1px 0 0 var(--glass-border),     /* Borde superior */
-        0 1px 0 0 var(--glass-border);      /* Borde inferior */
+        inset -1px 0 0 0 var(--glass-border),   /* Borde derecho (interior) */
+        inset 0 1px 0 0 var(--glass-border),    /* Borde superior (interior) */
+        inset 0 -1px 0 0 var(--glass-border);   /* Borde inferior (interior) */
     transition: padding var(--transition-smooth),
         border-radius var(--transition-smooth),
         transform var(--transition-medium);
@@ -1761,9 +1761,9 @@ img[src$=".WEBP"] {
         height var(--transition-smooth);
 }
 
-/* Estilo específico para tags de proyectos: fondo negro sólido con degradado claro hacia abajo, sin borde */
+/* Estilo específico para tags de proyectos: fondo negro sólido con degradado claro a la derecha, sin borde */
 .tech-stack .tech-tag {
-    background: linear-gradient(to bottom, rgb(0, 0, 0), rgb(40, 40, 40));
+    background: linear-gradient(to right, rgb(0, 0, 0), rgb(30, 30, 30));
     box-shadow: none; /* Eliminar el stroke */
 }
 
@@ -1775,7 +1775,7 @@ img[src$=".WEBP"] {
 
 /* Hover específico para tags de proyectos */
 .tech-stack .tech-tag:hover {
-    background: linear-gradient(to right, rgb(20, 20, 20), rgb(60, 60, 60));
+    background: linear-gradient(to right, rgb(20, 20, 20), rgb(50, 50, 50));
 }
 
 /* Scroll indicator para project description */
@@ -1900,7 +1900,7 @@ img[src$=".WEBP"] {
     background: linear-gradient(
         to right,
         rgb(0, 0, 0),
-        rgb(40, 40, 40)
+        rgb(30, 30, 30)
     ) !important; /* Fondo negro con degradado claro a la derecha */
     color: #d0d0d0 !important; /* Texto e iconos en D0D0D0 */
     border: none !important; /* Sin stroke/borde */
@@ -1911,7 +1911,7 @@ img[src$=".WEBP"] {
     background: linear-gradient(
         to right,
         rgb(20, 20, 20),
-        rgb(60, 60, 60)
+        rgb(50, 50, 50)
     ) !important; /* Degradado más claro en hover */
     color: #ffffff !important; /* Texto más claro en hover */
     transform: translateY(-2px);
