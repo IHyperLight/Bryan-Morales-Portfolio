@@ -24,7 +24,7 @@
     --card-padding: clamp(26px, 5.5vw, 46px);
     --card-xpad: clamp(18px, 5vw, 26px);
 
-    --container-padding: clamp(40px, 8vw, 60px) clamp(9px, 2.25vw, 15px);
+    --container-padding: clamp(40px, 8vw, 60px) clamp(6px, 1.5vw, 12px);
     --container-gap: clamp(20px, 4vw, 30px);
 
     /* Project-specific spacing - increased further for better separation */
