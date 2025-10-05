@@ -567,17 +567,16 @@ function initializeSingleCarousel(projectContainer) {
             }
 
             if (progressFill) {
-                const computed = getComputedStyle(progressFill).width;
+                // Capturar el ancho actual con más precisión
+                const computed = window.getComputedStyle(progressFill);
+                const currentWidth = computed.width;
+
+                // Detener la transición inmediatamente
                 progressFill.style.transition = "none";
-                const track = progressFill.parentElement;
-                const px = parseFloat(computed) || 0;
-                const total = track ? track.clientWidth || 0 : 0;
-                if (total > 0) {
-                    const pct = Math.max(0, Math.min(100, (px / total) * 100));
-                    progressFill.style.width = `${pct}%`;
-                } else {
-                    progressFill.style.width = computed;
-                }
+                progressFill.style.width = currentWidth;
+
+                // Forzar reflow para aplicar cambios
+                void progressFill.offsetWidth;
             }
         } catch (error) {
             console.warn("Error in stopAuto:", error);
@@ -629,6 +628,11 @@ function initializeSingleCarousel(projectContainer) {
                         cleanupTimeouts.delete(timer);
                         timer = null;
                     }
+                    if (animationFrame) {
+                        cancelAnimationFrame(animationFrame);
+                        cleanupRafs.delete(animationFrame);
+                        animationFrame = null;
+                    }
 
                     // Reiniciar ciclo
                     pauseElapsed = 0;
@@ -647,7 +651,8 @@ function initializeSingleCarousel(projectContainer) {
                 };
                 progressFill.addEventListener(
                     "transitionend",
-                    progressEndHandler
+                    progressEndHandler,
+                    { once: true }
                 );
 
                 // Start progress animation on next frame
@@ -666,14 +671,15 @@ function initializeSingleCarousel(projectContainer) {
                 });
                 cleanupRafs.add(animationFrame);
 
-                // Temporizador de respaldo por si no se dispara transitionend
+                // Temporizador de respaldo SOLO para casos extremos donde transitionend no se dispara
+                // Aumentamos el margen a 200ms para evitar que se dispare antes de tiempo
                 timer = setTimeout(() => {
-                    if (!viewportPaused && !destroyed && !paused) {
+                    if (!viewportPaused && !destroyed && !paused && !advanced) {
                         advance("timeout-fallback");
                     }
                     if (timer != null) cleanupTimeouts.delete(timer);
                     timer = null;
-                }, Math.max(16, remaining + 120));
+                }, remaining + 200);
                 cleanupTimeouts.add(timer);
             }
 
@@ -691,14 +697,15 @@ function initializeSingleCarousel(projectContainer) {
         try {
             paused = true;
 
-            // Calculate elapsed time more precisely
-            const elapsed = timer && startTs ? performance.now() - startTs : 0;
+            // Calculate elapsed time more precisely using timestamp
+            const now = performance.now();
+            const elapsed = startTs ? now - startTs : 0;
             pauseElapsed = Math.max(0, Math.min(intervalMs, elapsed));
 
             // Stop automation and preserve current progress position
             stopAuto();
 
-            // Set progress bar to current position
+            // Set progress bar to current position with high precision
             if (progressFill) {
                 const pct = Math.max(0, Math.min(1, pauseElapsed / intervalMs));
                 progressFill.style.transition = "none";
