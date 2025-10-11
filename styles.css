@@ -578,7 +578,7 @@ img[src$=".WEBP"] {
     width: 0; /* definido inline por cada idioma */
     background: linear-gradient(
         90deg,
-        #7c3aed 0%,
+        #4c1d95 0%,
         #8b5cf6 45%,
         #d946ef 70%,
         #ec4899 100%
@@ -1625,7 +1625,7 @@ img[src$=".WEBP"] {
     max-height: 3px; /* Altura máxima consistente */
     background: linear-gradient(
         90deg,
-        #7c3aed 0%,
+        #4c1d95 0%,
         #8b5cf6 45%,
         #d946ef 70%,
         #ec4899 100%
