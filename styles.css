@@ -347,7 +347,7 @@ img[src$=".WEBP"] {
     overflow-x: hidden;
     max-height: calc(85vh - clamp(48px, 10vw, 80px));
     padding-right: 16px;
-    margin-right: -4px;
+    margin-right: -8px;
     /* Smooth scrolling */
     scroll-behavior: smooth;
     /* Custom scrollbar */

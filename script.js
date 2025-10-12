@@ -1336,6 +1336,14 @@ function initializeNavigationMenu() {
 
     if (!menuButton || !navMenu || !navMenuList) return;
 
+    // Prevent multiple initializations
+    if (navMenuList.dataset.initialized === "true") return;
+    navMenuList.dataset.initialized = "true";
+
+    // State management
+    let isScrolling = false;
+    let scrollTimeout = null;
+
     // Populate menu with project entries
     const populateMenu = () => {
         const projects = document.querySelectorAll(
@@ -1429,17 +1437,34 @@ function initializeNavigationMenu() {
         document.body.classList.remove("menu-open");
         menuButton.classList.remove("active");
         menuButton.setAttribute("aria-label", "Abrir menú");
+
+        // Cancel any pending scroll action if menu is closed manually
+        if (scrollTimeout && isScrolling) {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = null;
+            isScrolling = false;
+        }
     };
 
     // Smooth scroll to target
     const scrollToTarget = (targetId) => {
+        // Prevent multiple simultaneous scroll actions
+        if (isScrolling) return;
+
         const target = document.getElementById(targetId);
         if (!target) return;
 
+        isScrolling = true;
         closeMenu();
 
+        // Clear any pending scroll timeout
+        if (scrollTimeout) {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = null;
+        }
+
         // Wait for menu close animation before scrolling
-        setTimeout(() => {
+        scrollTimeout = setTimeout(() => {
             const offset = 80; // Offset from top for better visibility
             const targetPosition =
                 target.getBoundingClientRect().top +
@@ -1452,52 +1477,68 @@ function initializeNavigationMenu() {
             });
 
             // Add subtle highlight animation when arriving at target
-            setTimeout(() => {
+            scrollTimeout = setTimeout(() => {
                 target.style.transition = "transform 0.3s ease-out";
                 target.style.transform = "scale(1.01)";
 
-                setTimeout(() => {
+                scrollTimeout = setTimeout(() => {
                     target.style.transform = "";
                     // Clean up inline styles after animation
-                    setTimeout(() => {
+                    scrollTimeout = setTimeout(() => {
                         target.style.transition = "";
+                        isScrolling = false;
+                        scrollTimeout = null;
                     }, 300);
                 }, 300);
             }, 800); // Wait for scroll to mostly complete
         }, 300);
     };
 
-    // Event listeners
-    menuButton.addEventListener("click", () => {
+    // Event listener handlers (named functions to prevent duplicates)
+    const handleMenuButtonClick = () => {
         if (navMenu.classList.contains("active")) {
             closeMenu();
         } else {
             openMenu();
         }
-    });
+    };
+
+    const handleMenuItemClick = (e) => {
+        const menuItem = e.target.closest(".nav-menu-item");
+        if (!menuItem) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const targetId = menuItem.dataset.target;
+        if (targetId && !isScrolling) {
+            scrollToTarget(targetId);
+        }
+    };
+
+    const handleEscapeKey = (e) => {
+        if (e.key === "Escape" && navMenu.classList.contains("active")) {
+            closeMenu();
+        }
+    };
+
+    // Remove any existing listeners before adding new ones
+    menuButton.removeEventListener("click", handleMenuButtonClick);
+    navMenuList.removeEventListener("click", handleMenuItemClick);
+    document.removeEventListener("keydown", handleEscapeKey);
+
+    // Add event listeners
+    menuButton.addEventListener("click", handleMenuButtonClick);
 
     if (navMenuOverlay) {
         navMenuOverlay.addEventListener("click", closeMenu);
     }
 
     // Handle menu item clicks
-    navMenuList.addEventListener("click", (e) => {
-        const menuItem = e.target.closest(".nav-menu-item");
-        if (!menuItem) return;
-
-        e.preventDefault();
-        const targetId = menuItem.dataset.target;
-        if (targetId) {
-            scrollToTarget(targetId);
-        }
-    });
+    navMenuList.addEventListener("click", handleMenuItemClick);
 
     // Handle keyboard navigation
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && navMenu.classList.contains("active")) {
-            closeMenu();
-        }
-    });
+    document.addEventListener("keydown", handleEscapeKey);
 
     // Focus trap for accessibility
     const trapFocus = (e) => {
@@ -1526,6 +1567,8 @@ function initializeNavigationMenu() {
         }
     };
 
+    // Remove existing listener before adding
+    document.removeEventListener("keydown", trapFocus);
     document.addEventListener("keydown", trapFocus);
 
     // Initialize scroll fade effect for navigation menu
