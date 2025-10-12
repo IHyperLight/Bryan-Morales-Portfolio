@@ -71,9 +71,6 @@
         <link rel="preload" href="assets/icons/linkedin.svg" as="image" />
         <link rel="preload" href="assets/icons/github.svg" as="image" />
         <link rel="preload" href="assets/icons/discord.svg" as="image" />
-        <link rel="preload" href="assets/icons/all.svg" as="image" />
-        <link rel="preload" href="assets/icons/code.svg" as="image" />
-        <link rel="preload" href="assets/icons/design.svg" as="image" />
 
         <link rel="stylesheet" href="styles.css" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -93,17 +90,42 @@
         <div class="portfolio-container">
             <!-- Menu Button -->
             <button class="menu-button" aria-label="Abrir menú">
-                <img
-                    src="assets/icons/menu.svg"
-                    alt="Menu"
-                    width="24"
-                    height="24"
-                />
+                <span class="menu-button-line"></span>
+                <span class="menu-button-line"></span>
+                <span class="menu-button-line"></span>
             </button>
+
+            <!-- Navigation Menu -->
+            <nav class="nav-menu" aria-label="Navegación principal">
+                <div class="nav-menu-overlay"></div>
+                <div class="nav-menu-content glass-card">
+                    <ul class="nav-menu-list">
+                        <!-- About Me Entry -->
+                        <li>
+                            <a
+                                href="#profile"
+                                class="nav-menu-item"
+                                data-target="profile-section"
+                            >
+                                <div class="nav-item-content">
+                                    <span class="nav-item-title"
+                                        >👤 About Me</span
+                                    >
+                                </div>
+                            </a>
+                        </li>
+                        <!-- Project Entries will be dynamically added by JavaScript -->
+                    </ul>
+                </div>
+            </nav>
+
             <!-- Main Content -->
             <main class="portfolio-main">
                 <!-- Profile Section -->
-                <section class="profile-section glass-card">
+                <section
+                    id="profile-section"
+                    class="profile-section glass-card"
+                >
                     <div class="profile-picture">
                         <img
                             src="assets/profile.webp"
@@ -191,7 +213,8 @@
                                 aria-hidden="true"
                             >
                                 <span class="language-key">📫 Email</span><br />
-                                <span class="language-key">♥️ Contact me!</span><br />
+                                <span class="language-key">♥️ Contact me!</span
+                                ><br />
                                 <span>bryan.a.morales</span><br />
                                 <span>@outlook.com</span>
                             </div>
@@ -679,43 +702,16 @@
                     </section>
                 </section>
 
-                <!-- Filters Section -->
-                <section class="filters-section">
-                    <div class="filter-container glass-border">
-                        <div class="filter-selector" aria-hidden="true"></div>
-                        <button class="filter-btn active" aria-label="All">
-                            <img
-                                src="assets/icons/all.svg"
-                                alt="All"
-                                width="26"
-                                height="26"
-                            />
-                        </button>
-                        <button class="filter-btn" aria-label="Code">
-                            <img
-                                src="assets/icons/code.svg"
-                                alt="Code"
-                                width="26"
-                                height="26"
-                            />
-                        </button>
-                        <button class="filter-btn" aria-label="Design">
-                            <img
-                                src="assets/icons/design.svg"
-                                alt="Design"
-                                width="28"
-                                height="28"
-                            />
-                        </button>
-                    </div>
-                </section>
-
                 <!-- Projects Section -->
                 <section class="projects-section">
                     <!-- Project 1: Keeptive -->
                     <article
+                        id="project-keeptive"
                         class="project-item glass-card scroll-pending"
                         style="opacity: 0; transform: translateY(30px)"
+                        data-project-title="🟢 Keeptive"
+                        data-project-category="Full-Stack"
+                        data-project-description="Discreet Window Interaction Tool"
                     >
                         <!-- Project Media Carousel -->
                         <div class="project-media">
@@ -963,8 +959,12 @@
 
                     <!-- Project 2: Genetic Algorithm -->
                     <article
+                        id="project-genetic-algorithm"
                         class="project-item glass-card scroll-pending"
                         style="opacity: 0; transform: translateY(30px)"
+                        data-project-title="🧬 Genetic Algorithm"
+                        data-project-category="Full-Stack"
+                        data-project-description="GA for Nutritional Diet Optimization"
                     >
                         <!-- Project Media Carousel -->
                         <div class="project-media">
@@ -1071,8 +1071,7 @@
                             <p class="project-category">
                                 <strong>Full-Stack</strong>
                                 <span class="separator">·</span>
-                                Genetic Algorithm for Nutritional Diet
-                                Optimization
+                                GA for Nutritional Diet Optimization
                             </p>
                         </div>
 
@@ -1176,8 +1175,12 @@
 
                     <!-- Project 3: RESTful API -->
                     <article
+                        id="project-restful-api"
                         class="project-item glass-card scroll-pending"
                         style="opacity: 0; transform: translateY(30px)"
+                        data-project-title="🌐 RESTful API"
+                        data-project-category="Full-Stack"
+                        data-project-description="RESTful User Management API"
                     >
                         <!-- Project Media Carousel -->
                         <div class="project-media">
@@ -1405,8 +1408,12 @@
 
                     <!-- Project 4: Deterministic Finite Automaton -->
                     <article
+                        id="project-dfa"
                         class="project-item glass-card scroll-pending"
                         style="opacity: 0; transform: translateY(30px)"
+                        data-project-title="🔀 Deterministic Finite Automaton"
+                        data-project-category="Full-Stack"
+                        data-project-description="HTTPS URL Extractor Using DFA"
                     >
                         <!-- Project Media Carousel -->
                         <div class="project-media">
@@ -1540,8 +1547,8 @@
                                     💻.<br /><br />
                                     The project features a deterministic finite
                                     automaton (DFA) 🔄 designed to parse and
-                                    extract secure HTTPS external links 🔒
-                                    from web pages 📄.<br /><br />
+                                    extract secure HTTPS external links 🔒 from
+                                    web pages 📄.<br /><br />
                                     Built with Flask 🔥 and Python 🐍, the
                                     application takes a URL 🌍 as input, fetches
                                     the webpage content 📥, and uses a
@@ -1616,8 +1623,12 @@
                     </article>
 
                     <article
+                        id="project-analyzer"
                         class="project-item glass-card scroll-pending"
                         style="opacity: 0; transform: translateY(30px)"
+                        data-project-title="📚 Lexical, Syntactic & Semantic Analyzer"
+                        data-project-category="Full-Stack"
+                        data-project-description="SQL Statement Analyzer With Lexer, Parser And Semantic Checker"
                     >
                         <!-- Project Media Carousel -->
                         <div class="project-media">
@@ -1625,7 +1636,7 @@
                                 class="carousel"
                                 role="region"
                                 aria-roledescription="carousel"
-                                aria-label="Galería del proyecto Keeptive Cloud"
+                                aria-label="Galería del proyecto Lexical, Syntactic & Semantic Analyzer"
                                 tabindex="0"
                             >
                                 <div class="carousel-viewport">
@@ -1762,21 +1773,20 @@
                                     commands.<br /><br />
                                     It provides real-time feedback ⚡ on query
                                     validation through three independent
-                                    analyzers 3️⃣ that can be tested
-                                    individually or in sequence 🔀. The
-                                    application uses SQLite 🗄️ as its backend
-                                    database engine and features a modern,
-                                    responsive UI 🖥️ with dark mode support
-                                    🌙.<br /><br />
+                                    analyzers 3️⃣ that can be tested individually
+                                    or in sequence 🔀. The application uses
+                                    SQLite 🗄️ as its backend database engine and
+                                    features a modern, responsive UI 🖥️ with
+                                    dark mode support 🌙.<br /><br />
                                     Users can write SQL statements directly in
                                     dedicated text areas ✍️ for each analyzer
                                     type and instantly see detailed results
                                     including token lists 📜, abstract syntax
                                     trees (AST) 🌳, and semantic validation
-                                    messages ✅. The semantic analyzer
-                                    verifies database and table existence 🔍,
-                                    validates SQL statement structure 🧩, and
-                                    executes valid queries ▶️ against the SQLite
+                                    messages ✅. The semantic analyzer verifies
+                                    database and table existence 🔍, validates
+                                    SQL statement structure 🧩, and executes
+                                    valid queries ▶️ against the SQLite
                                     database, making it an excellent tool for
                                     learning SQL syntax 📘 and understanding
                                     compiler design concepts 🛠️.

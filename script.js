@@ -135,7 +135,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Initialize critical components immediately
     perfMonitor.mark("critical-init-start");
-    initializeFilters();
     initializeProjectCarousel();
     // CRITICAL: Initialize scroll effects IMMEDIATELY to prevent projects appearing without animation
     // This must run synchronously before any elements enter viewport
@@ -182,81 +181,6 @@ function animatePress(el, scale = 0.9, duration = 150) {
     }, duration);
 
     performanceCache.timers.add(timerId);
-}
-
-// Filter functionality
-function initializeFilters() {
-    const filterButtons = document.querySelectorAll(".filter-btn");
-    const container = document.querySelector(".filter-container");
-    const selector = document.querySelector(".filter-selector");
-
-    const positionSelector = (btn, animate = true) => {
-        if (!container || !selector || !btn) return;
-        if (animate) container.classList.add("animating");
-        else container.classList.remove("animating");
-
-        const buttons = Array.from(container.querySelectorAll(".filter-btn"));
-        const gap = parseFloat(getComputedStyle(container).gap) || 0;
-        const idx = buttons.indexOf(btn);
-        const x = idx * (btn.offsetWidth + gap);
-        selector.style.transform = `translate(${x}px, -50%)`;
-    };
-
-    // Initialize selector position
-    const currentActive =
-        document.querySelector(".filter-btn.active") || filterButtons[0];
-    if (currentActive && selector) {
-        const prev = selector.style.transition;
-        selector.style.transition = "none";
-        positionSelector(currentActive, false);
-        requestAnimationFrame(() => {
-            selector.style.transition =
-                prev || "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
-        });
-    }
-
-    filterButtons.forEach((button) => {
-        button.addEventListener("click", function () {
-            // Update active state
-            filterButtons.forEach((btn) => btn.classList.remove("active"));
-            this.classList.add("active");
-
-            // Move selector with animation
-            positionSelector(this, true);
-
-            // Safety guard for animation cleanup
-            if (container) {
-                if (container._animGuard) clearTimeout(container._animGuard);
-                container._animGuard = setTimeout(() => {
-                    container.classList.remove("animating");
-                    container._animGuard = null;
-                }, 600);
-            }
-
-            // Remove persistent focus
-            this.blur();
-            document.body.focus({ preventScroll: true });
-        });
-    });
-
-    // Handle window resize
-    window.addEventListener("resize", () => {
-        const active = document.querySelector(".filter-btn.active");
-        if (active) positionSelector(active, false);
-    });
-
-    // Clean up animation class on transition end
-    if (selector) {
-        selector.addEventListener("transitionend", (e) => {
-            if (e.propertyName === "transform") {
-                container?.classList.remove("animating");
-                if (container?._animGuard) {
-                    clearTimeout(container._animGuard);
-                    container._animGuard = null;
-                }
-            }
-        });
-    }
 }
 
 // Viewport-based carousel activation system - ROBUSTLY REFACTORED
@@ -454,6 +378,10 @@ function initializeSingleCarousel(projectContainer) {
     // Handler para sincronizar con el fin de la transición de la barra
     let progressEndHandler = null;
 
+    // Page Visibility tracking para sincronización perfecta
+    let pageHidden = false;
+    let hiddenTimestamp = 0;
+
     // Cleanup tracking (separado para mayor control)
     const cleanupFns = new Set();
     const cleanupTimeouts = new Set();
@@ -567,7 +495,7 @@ function initializeSingleCarousel(projectContainer) {
             }
 
             if (progressFill) {
-                // Capturar el ancho actual con más precisión
+                // Capturar el ancho actual con máxima precisión
                 const computed = window.getComputedStyle(progressFill);
                 const currentWidth = computed.width;
 
@@ -577,18 +505,35 @@ function initializeSingleCarousel(projectContainer) {
 
                 // Forzar reflow para aplicar cambios
                 void progressFill.offsetWidth;
+
+                // Actualizar pauseElapsed basado en el ancho actual
+                const track = progressFill.parentElement;
+                if (track && track.clientWidth > 0) {
+                    const currentPx = parseFloat(currentWidth) || 0;
+                    const totalPx = track.clientWidth;
+                    const currentPct = Math.max(
+                        0,
+                        Math.min(1, currentPx / totalPx)
+                    );
+                    pauseElapsed = Math.round(currentPct * intervalMs);
+                }
             }
         } catch (error) {
             console.warn("Error in stopAuto:", error);
         }
     };
-
     const startAuto = () => {
-        if (!validateState() || viewportPaused) return;
+        if (!validateState() || viewportPaused || pageHidden) return;
 
         try {
             // Always stop any existing automation first
             stopAuto();
+
+            // Validación adicional: si la página está oculta, no iniciar
+            if (document.hidden) {
+                pageHidden = true;
+                return;
+            }
 
             // Calculate remaining time, defaulting to full interval if no elapsed time
             const remaining = Math.max(16, intervalMs - pauseElapsed);
@@ -605,17 +550,19 @@ function initializeSingleCarousel(projectContainer) {
                 progressFill.style.width = `${currentPct * 100}%`;
                 void progressFill.offsetWidth; // Force reflow
 
-                // Enable smooth transition to 100%
+                // Enable smooth transition to 100% con timing perfecto
                 progressFill.style.transition = `width ${remaining}ms linear`;
 
                 // Función unificada para avanzar al siguiente slide exactamente al terminar la transición
                 let advanced = false;
                 const advance = (source) => {
+                    // Protección múltiple contra ejecuciones duplicadas
                     if (advanced) return;
-                    if (viewportPaused || destroyed || paused) return;
+                    if (viewportPaused || destroyed || paused || pageHidden)
+                        return;
                     advanced = true;
 
-                    // Limpieza previa
+                    // Limpieza exhaustiva previa
                     if (progressFill && progressEndHandler) {
                         progressFill.removeEventListener(
                             "transitionend",
@@ -634,17 +581,35 @@ function initializeSingleCarousel(projectContainer) {
                         animationFrame = null;
                     }
 
-                    // Reiniciar ciclo
+                    // Verificación final antes de avanzar
+                    if (document.hidden) {
+                        pageHidden = true;
+                        pauseElapsed = 0;
+                        return;
+                    }
+
+                    // Reiniciar ciclo con reset completo
                     pauseElapsed = 0;
                     setActive(index + 1, { resetProgress: true });
-                    startAuto();
+
+                    // Re-iniciar solo si sigue siendo válido
+                    if (
+                        !viewportPaused &&
+                        !destroyed &&
+                        !paused &&
+                        !pageHidden
+                    ) {
+                        startAuto();
+                    }
                 };
 
-                // Listener preciso de fin de transición
+                // Listener preciso de fin de transición con validación adicional
                 progressEndHandler = (e) => {
+                    // Validar que es el evento correcto y que la página está visible
                     if (
                         e.target === progressFill &&
-                        e.propertyName === "width"
+                        e.propertyName === "width" &&
+                        !document.hidden
                     ) {
                         advance("transitionend");
                     }
@@ -655,14 +620,15 @@ function initializeSingleCarousel(projectContainer) {
                     { once: true }
                 );
 
-                // Start progress animation on next frame
+                // Start progress animation on next frame con validación de visibilidad
                 animationFrame = requestAnimationFrame(() => {
                     const raf = animationFrame;
                     if (
                         progressFill &&
                         !viewportPaused &&
                         !destroyed &&
-                        !paused
+                        !paused &&
+                        !document.hidden
                     ) {
                         progressFill.style.width = "100%";
                     }
@@ -672,18 +638,24 @@ function initializeSingleCarousel(projectContainer) {
                 cleanupRafs.add(animationFrame);
 
                 // Temporizador de respaldo SOLO para casos extremos donde transitionend no se dispara
-                // Aumentamos el margen a 200ms para evitar que se dispare antes de tiempo
+                // Margen generoso de 250ms para máxima precisión
                 timer = setTimeout(() => {
-                    if (!viewportPaused && !destroyed && !paused && !advanced) {
+                    if (
+                        !viewportPaused &&
+                        !destroyed &&
+                        !paused &&
+                        !advanced &&
+                        !document.hidden
+                    ) {
                         advance("timeout-fallback");
                     }
                     if (timer != null) cleanupTimeouts.delete(timer);
                     timer = null;
-                }, remaining + 200);
+                }, remaining + 250);
                 cleanupTimeouts.add(timer);
             }
 
-            // Set timestamp for elapsed time calculation
+            // Set timestamp for elapsed time calculation con alta precisión
             startTs = performance.now() - pauseElapsed;
             // El avance se controla por transitionend; el temporizador anterior ahora es solo respaldo
         } catch (error) {
@@ -697,15 +669,40 @@ function initializeSingleCarousel(projectContainer) {
         try {
             paused = true;
 
-            // Calculate elapsed time more precisely using timestamp
+            // Calculate elapsed time more precisely using high-resolution timestamp
             const now = performance.now();
             const elapsed = startTs ? now - startTs : 0;
-            pauseElapsed = Math.max(0, Math.min(intervalMs, elapsed));
+
+            // Capturar el progreso real de la barra si está disponible
+            if (progressFill) {
+                const computed = window.getComputedStyle(progressFill);
+                const track = progressFill.parentElement;
+                if (track && track.clientWidth > 0) {
+                    const currentPx = parseFloat(computed.width) || 0;
+                    const totalPx = track.clientWidth;
+                    const actualPct = Math.max(
+                        0,
+                        Math.min(1, currentPx / totalPx)
+                    );
+
+                    // Usar el mayor valor entre el calculado y el real para máxima precisión
+                    const calculatedElapsed = Math.max(
+                        0,
+                        Math.min(intervalMs, elapsed)
+                    );
+                    const actualElapsed = Math.round(actualPct * intervalMs);
+                    pauseElapsed = Math.max(calculatedElapsed, actualElapsed);
+                } else {
+                    pauseElapsed = Math.max(0, Math.min(intervalMs, elapsed));
+                }
+            } else {
+                pauseElapsed = Math.max(0, Math.min(intervalMs, elapsed));
+            }
 
             // Stop automation and preserve current progress position
             stopAuto();
 
-            // Set progress bar to current position with high precision
+            // Set progress bar to current position with maximum precision
             if (progressFill) {
                 const pct = Math.max(0, Math.min(1, pauseElapsed / intervalMs));
                 progressFill.style.transition = "none";
@@ -735,19 +732,54 @@ function initializeSingleCarousel(projectContainer) {
             viewportPaused = true;
             isInViewport = false;
 
-            // Save current state before pausing
-            if (timer && !paused) {
-                const elapsed = performance.now() - startTs;
-                pauseElapsed = Math.max(0, Math.min(intervalMs, elapsed));
+            // Save current state before pausing with maximum precision
+            if (startTs && !paused) {
+                const now = performance.now();
+                const elapsed = now - startTs;
+
+                // Capturar el progreso real de la barra si está disponible
+                if (progressFill) {
+                    const computed = window.getComputedStyle(progressFill);
+                    const track = progressFill.parentElement;
+                    if (track && track.clientWidth > 0) {
+                        const currentPx = parseFloat(computed.width) || 0;
+                        const totalPx = track.clientWidth;
+                        const actualPct = Math.max(
+                            0,
+                            Math.min(1, currentPx / totalPx)
+                        );
+
+                        // Usar el mayor valor entre el calculado y el real
+                        const calculatedElapsed = Math.max(
+                            0,
+                            Math.min(intervalMs, elapsed)
+                        );
+                        const actualElapsed = Math.round(
+                            actualPct * intervalMs
+                        );
+                        pauseElapsed = Math.max(
+                            calculatedElapsed,
+                            actualElapsed
+                        );
+                    } else {
+                        pauseElapsed = Math.max(
+                            0,
+                            Math.min(intervalMs, elapsed)
+                        );
+                    }
+                } else {
+                    pauseElapsed = Math.max(0, Math.min(intervalMs, elapsed));
+                }
             }
 
             stopAuto();
 
-            // Pause progress bar
+            // Pause progress bar with precise positioning
             if (progressFill) {
                 const pct = Math.max(0, Math.min(1, pauseElapsed / intervalMs));
                 progressFill.style.transition = "none";
                 progressFill.style.width = `${pct * 100}%`;
+                void progressFill.offsetWidth;
             }
         } catch (error) {
             console.warn("Error in pauseForViewport:", error);
@@ -871,6 +903,94 @@ function initializeSingleCarousel(projectContainer) {
             console.warn("Error in resetProgress:", error);
         }
     };
+
+    // Page Visibility Handler - Recalibración perfecta al volver de segundo plano
+    const handleVisibilityChange = () => {
+        if (!validateState()) return;
+
+        try {
+            const isHidden = document.hidden;
+
+            // Página oculta - pausar y guardar estado
+            if (isHidden && !pageHidden) {
+                pageHidden = true;
+                hiddenTimestamp = performance.now();
+
+                // Solo pausar si está activo y en viewport
+                if (
+                    initialized &&
+                    isInViewport &&
+                    !viewportPaused &&
+                    !paused &&
+                    !pausedByFullscreen
+                ) {
+                    // Calcular tiempo transcurrido antes de ocultar
+                    if (startTs) {
+                        const elapsed = performance.now() - startTs;
+                        pauseElapsed = Math.max(
+                            0,
+                            Math.min(intervalMs, elapsed)
+                        );
+                    }
+
+                    // Pausar completamente
+                    stopAuto();
+                }
+            }
+            // Página visible - recalibrar y reanudar
+            else if (!isHidden && pageHidden) {
+                pageHidden = false;
+
+                // Solo recalibrar si debe estar activo
+                if (
+                    initialized &&
+                    isInViewport &&
+                    !viewportPaused &&
+                    !paused &&
+                    !pausedByFullscreen
+                ) {
+                    // Calcular cuánto tiempo estuvo oculta la página
+                    const timeHidden = performance.now() - hiddenTimestamp;
+
+                    // Si estuvo oculta más de 100ms, hacer reset completo para evitar desincronización
+                    if (timeHidden > 100) {
+                        // Reset completo y reinicio limpio
+                        completeProgressReset();
+
+                        // Pequeño delay para asegurar que el DOM está listo
+                        const recalibrationTimer = setTimeout(() => {
+                            if (
+                                !destroyed &&
+                                !viewportPaused &&
+                                !paused &&
+                                !pausedByFullscreen
+                            ) {
+                                startAuto();
+                            }
+                            cleanupTimeouts.delete(recalibrationTimer);
+                        }, 50);
+                        cleanupTimeouts.add(recalibrationTimer);
+                    } else {
+                        // Si fue muy breve, intentar reanudar normalmente
+                        startAuto();
+                    }
+                }
+
+                hiddenTimestamp = 0;
+            }
+        } catch (error) {
+            console.warn("Error in handleVisibilityChange:", error);
+        }
+    };
+
+    // Registrar el listener de visibilidad
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    cleanupFns.add(() => {
+        document.removeEventListener(
+            "visibilitychange",
+            handleVisibilityChange
+        );
+    });
 
     // Control event listeners
     nextBtn?.addEventListener("click", () => {
@@ -1207,17 +1327,278 @@ function initializeSocialLayout() {
     }
 }
 
-// Menu button functionality
-function initializeMenuButton() {
+// Navigation Menu functionality
+function initializeNavigationMenu() {
     const menuButton = document.querySelector(".menu-button");
-    if (menuButton) {
-        menuButton.addEventListener("click", function () {
-            this.style.transform = "rotate(90deg) scale(0.9)";
-            setTimeout(() => {
-                this.style.transform = "";
-            }, 200);
+    const navMenu = document.querySelector(".nav-menu");
+    const navMenuOverlay = document.querySelector(".nav-menu-overlay");
+    const navMenuList = document.querySelector(".nav-menu-list");
+
+    if (!menuButton || !navMenu || !navMenuList) return;
+
+    // Populate menu with project entries
+    const populateMenu = () => {
+        const projects = document.querySelectorAll(
+            ".project-item[id^='project-']"
+        );
+
+        projects.forEach((project) => {
+            const projectId = project.id;
+            const title = project.dataset.projectTitle || "Untitled Project";
+            const category = project.dataset.projectCategory || "Project";
+            const description = project.dataset.projectDescription || "";
+
+            // Create menu item
+            const li = document.createElement("li");
+            const link = document.createElement("a");
+            link.href = `#${projectId}`;
+            link.className = "nav-menu-item";
+            link.dataset.target = projectId;
+
+            // Create content structure matching project cards exactly
+            const content = document.createElement("div");
+            content.className = "nav-item-content";
+
+            // Title with emoji
+            const titleEl = document.createElement("span");
+            titleEl.className = "nav-item-title";
+            titleEl.textContent = title;
+
+            // Meta with icon and category
+            const metaEl = document.createElement("div");
+            metaEl.className = "nav-item-meta";
+
+            // Icon button (matching project-icon style)
+            const iconWrapper = document.createElement("div");
+            iconWrapper.className = "nav-item-icon";
+            const icon = document.createElement("img");
+            icon.src = "assets/icons/code.svg";
+            icon.alt = "Project icon";
+            icon.width = 16;
+            icon.height = 16;
+            iconWrapper.appendChild(icon);
+
+            // Category text (matching project-category style)
+            const categoryEl = document.createElement("p");
+            categoryEl.className = "nav-item-category";
+
+            const strong = document.createElement("strong");
+            strong.textContent = category;
+
+            const separator = document.createElement("span");
+            separator.className = "separator";
+            separator.textContent = " · ";
+
+            const descText = document.createTextNode(description);
+
+            categoryEl.appendChild(strong);
+            categoryEl.appendChild(separator);
+            categoryEl.appendChild(descText);
+
+            // Assemble meta
+            metaEl.appendChild(iconWrapper);
+            metaEl.appendChild(categoryEl);
+
+            // Assemble content
+            content.appendChild(titleEl);
+            content.appendChild(metaEl);
+
+            link.appendChild(content);
+            li.appendChild(link);
+            navMenuList.appendChild(li);
         });
+    };
+
+    // Open menu
+    const openMenu = () => {
+        navMenu.classList.add("active");
+        document.body.classList.add("menu-open");
+        menuButton.classList.add("active");
+        menuButton.setAttribute("aria-label", "Cerrar menú");
+
+        // Add staggered animation to menu items
+        const menuItems = navMenuList.querySelectorAll("li");
+        menuItems.forEach((item, index) => {
+            item.style.animationDelay = `${0.05 + index * 0.05}s`;
+        });
+    };
+
+    // Close menu
+    const closeMenu = () => {
+        navMenu.classList.remove("active");
+        document.body.classList.remove("menu-open");
+        menuButton.classList.remove("active");
+        menuButton.setAttribute("aria-label", "Abrir menú");
+    };
+
+    // Smooth scroll to target
+    const scrollToTarget = (targetId) => {
+        const target = document.getElementById(targetId);
+        if (!target) return;
+
+        closeMenu();
+
+        // Wait for menu close animation before scrolling
+        setTimeout(() => {
+            const offset = 80; // Offset from top for better visibility
+            const targetPosition =
+                target.getBoundingClientRect().top +
+                window.pageYOffset -
+                offset;
+
+            window.scrollTo({
+                top: targetPosition,
+                behavior: "smooth",
+            });
+
+            // Add subtle highlight animation when arriving at target
+            setTimeout(() => {
+                target.style.transition = "transform 0.3s ease-out";
+                target.style.transform = "scale(1.01)";
+
+                setTimeout(() => {
+                    target.style.transform = "";
+                    // Clean up inline styles after animation
+                    setTimeout(() => {
+                        target.style.transition = "";
+                    }, 300);
+                }, 300);
+            }, 800); // Wait for scroll to mostly complete
+        }, 300);
+    };
+
+    // Event listeners
+    menuButton.addEventListener("click", () => {
+        if (navMenu.classList.contains("active")) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+
+    if (navMenuOverlay) {
+        navMenuOverlay.addEventListener("click", closeMenu);
     }
+
+    // Handle menu item clicks
+    navMenuList.addEventListener("click", (e) => {
+        const menuItem = e.target.closest(".nav-menu-item");
+        if (!menuItem) return;
+
+        e.preventDefault();
+        const targetId = menuItem.dataset.target;
+        if (targetId) {
+            scrollToTarget(targetId);
+        }
+    });
+
+    // Handle keyboard navigation
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && navMenu.classList.contains("active")) {
+            closeMenu();
+        }
+    });
+
+    // Focus trap for accessibility
+    const trapFocus = (e) => {
+        if (!navMenu.classList.contains("active")) return;
+
+        const focusableElements = navMenu.querySelectorAll(
+            'button, a, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.key === "Tab") {
+            if (e.shiftKey) {
+                // Shift + Tab
+                if (document.activeElement === firstElement) {
+                    e.preventDefault();
+                    lastElement.focus();
+                }
+            } else {
+                // Tab
+                if (document.activeElement === lastElement) {
+                    e.preventDefault();
+                    firstElement.focus();
+                }
+            }
+        }
+    };
+
+    document.addEventListener("keydown", trapFocus);
+
+    // Initialize scroll fade effect for navigation menu
+    const initializeNavMenuScrollFade = () => {
+        const updateNavFade = () => {
+            const { scrollTop, scrollHeight, clientHeight } = navMenuList;
+            const hasOverflow = scrollHeight > clientHeight + 1;
+
+            if (!hasOverflow) {
+                navMenuList.style.maskImage = "none";
+                navMenuList.style.webkitMaskImage = "none";
+                return;
+            }
+
+            // Dynamic mask based on scroll position (identical to project descriptions)
+            const fadeThreshold = 20;
+            const topFade = Math.min(scrollTop / fadeThreshold, 1);
+            const bottomFade = Math.min(
+                (scrollHeight - clientHeight - scrollTop) / fadeThreshold,
+                1
+            );
+
+            let maskGradient;
+            if (scrollTop <= 5) {
+                maskGradient = `linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 85%, rgba(0,0,0,${
+                    bottomFade * 0.15
+                }) 95%, rgba(0,0,0,0) 100%)`;
+            } else if (scrollTop >= scrollHeight - clientHeight - 5) {
+                maskGradient = `linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,${
+                    topFade * 0.15
+                }) 5%, rgba(0,0,0,1) 15%, rgba(0,0,0,1) 100%)`;
+            } else {
+                maskGradient = `linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,${
+                    topFade * 0.2
+                }) 4%, rgba(0,0,0,1) 12%, rgba(0,0,0,1) 88%, rgba(0,0,0,${
+                    bottomFade * 0.2
+                }) 96%, rgba(0,0,0,0) 100%)`;
+            }
+
+            navMenuList.style.maskImage = maskGradient;
+            navMenuList.style.webkitMaskImage = maskGradient;
+        };
+
+        // Update on scroll
+        navMenuList.addEventListener("scroll", updateNavFade, {
+            passive: true,
+        });
+
+        // Update on menu open
+        const observer = new MutationObserver(() => {
+            if (navMenu.classList.contains("active")) {
+                setTimeout(updateNavFade, 100);
+            }
+        });
+        observer.observe(navMenu, {
+            attributes: true,
+            attributeFilter: ["class"],
+        });
+
+        // Initial update
+        updateNavFade();
+    };
+
+    // Populate menu on initialization
+    populateMenu();
+
+    // Initialize scroll fade effect
+    initializeNavMenuScrollFade();
+}
+
+// Legacy function name for compatibility
+function initializeMenuButton() {
+    initializeNavigationMenu();
 }
 
 // Scroll effects
@@ -1249,18 +1630,17 @@ function initializeScrollEffects() {
     }, observerOptions);
 
     const sections = document.querySelectorAll(
-        ".glass-card, .certificate-item, .filter-container"
+        ".glass-card, .certificate-item"
     );
 
     sections.forEach((section) => {
         // Only apply initial state if not already animated
         if (!section.classList.contains("scroll-animated")) {
-            // Los certificados y filtros que ya están visibles deben animarse inmediatamente
-            const isCertificateOrFilter =
-                section.classList.contains("certificate-item") ||
-                section.classList.contains("filter-container");
+            // Los certificados que ya están visibles deben animarse inmediatamente
+            const isCertificate =
+                section.classList.contains("certificate-item");
 
-            if (isCertificateOrFilter) {
+            if (isCertificate) {
                 // Verificar si el elemento ya está en viewport al cargar
                 const rect = section.getBoundingClientRect();
                 const isInViewport =
