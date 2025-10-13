@@ -1380,7 +1380,13 @@ function initializeNavigationMenu() {
             const iconWrapper = document.createElement("div");
             iconWrapper.className = "nav-item-icon";
             const icon = document.createElement("img");
-            icon.src = "assets/icons/code.svg";
+            // Use design.svg for design projects, code.svg for others
+            const isDesignProject =
+                category.toLowerCase().includes("design") ||
+                category.toLowerCase().includes("ui/ux");
+            icon.src = isDesignProject
+                ? "assets/icons/design.svg"
+                : "assets/icons/code.svg";
             icon.alt = "Project icon";
             icon.width = 16;
             icon.height = 16;

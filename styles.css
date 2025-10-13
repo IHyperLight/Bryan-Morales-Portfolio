@@ -2118,6 +2118,30 @@ body.menu-open {
         hue-rotate(0deg) brightness(0%) contrast(100%);
 }
 
+/* Botón de Figma con estilo personalizado */
+.project-link.glass-pill.figma-button {
+    background: #2c2c2c !important;
+    color: #ffffff !important;
+}
+
+.project-link.glass-pill.figma-button:hover {
+    background: #2a2a2a !important;
+}
+
+.project-link.glass-pill.figma-button:active {
+    background: #141414 !important;
+}
+
+.project-link.glass-pill.figma-button span {
+    color: #ffffff !important;
+}
+
+/* Ícono external.svg en blanco para botón de Figma */
+.project-link.glass-pill.figma-button img.figma-external-icon {
+    filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%)
+        hue-rotate(0deg) brightness(100%) contrast(100%) !important;
+}
+
 /* Estado activo mejorado para botón negro */
 .project-link:active {
     background: #0d0d0d !important; /* Más oscuro al hacer click */
