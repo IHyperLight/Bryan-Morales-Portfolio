@@ -1499,7 +1499,7 @@ body.menu-open {
     padding: 0; /* Sin padding */
     border: none;
     background: transparent; /* Sin fondo */
-    color: var(--text-primary);
+    color: #ffffff; /* Icono completamente blanco */
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1512,14 +1512,21 @@ body.menu-open {
     transform: var(--gpu-layer);
     contain: layout style;
     backface-visibility: hidden;
+    /* Sombra para que se vea sobre fondos blancos */
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5))
+        drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
 }
 
 .carousel-fullscreen-btn:hover {
     transform: scale(1.1); /* Solo escala al hacer hover */
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.6))
+        drop-shadow(0 1px 4px rgba(0, 0, 0, 0.7)); /* Sombra más pronunciada en hover */
 }
 
 .carousel-fullscreen-btn:active {
     transform: scale(0.95); /* Efecto de presión */
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5))
+        drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
 }
 
 .carousel-fullscreen-btn:focus-visible {
@@ -1997,9 +2004,9 @@ body.menu-open {
         height var(--transition-smooth);
 }
 
-/* Estilo específico para tags de proyectos: fondo negro sólido con degradado claro a la derecha, sin borde */
+/* Estilo específico para tags de proyectos: fondo gris oscuro con degradado claro a la derecha, sin borde */
 .tech-stack .tech-tag {
-    background: linear-gradient(to right, rgb(0, 0, 0), rgb(30, 30, 30));
+    background: linear-gradient(to right, rgb(28, 28, 28), rgb(45, 45, 45));
     box-shadow: none; /* Eliminar el stroke */
 }
 
@@ -2011,7 +2018,7 @@ body.menu-open {
 
 /* Hover específico para tags de proyectos */
 .tech-stack .tech-tag:hover {
-    background: linear-gradient(to right, rgb(20, 20, 20), rgb(50, 50, 50));
+    background: linear-gradient(to right, rgb(45, 45, 45), rgb(65, 65, 65));
 }
 
 /* Scroll indicator para project description */
