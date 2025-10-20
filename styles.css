@@ -226,6 +226,9 @@ img[src$=".WEBP"] {
     transform: var(--gpu-layer);
     contain: layout style;
     backface-visibility: hidden;
+    /* Efecto blur para el fondo */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .menu-button::after {
@@ -1512,21 +1515,20 @@ body.menu-open {
     transform: var(--gpu-layer);
     contain: layout style;
     backface-visibility: hidden;
-    /* Sombra para que se vea sobre fondos blancos */
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5))
-        drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
+    /* Sombra cercana y definida para mejor rendimiento */
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
 }
 
 .carousel-fullscreen-btn:hover {
     transform: scale(1.1); /* Solo escala al hacer hover */
-    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.6))
-        drop-shadow(0 1px 4px rgba(0, 0, 0, 0.7)); /* Sombra más pronunciada en hover */
+    filter: drop-shadow(
+        0 2px 4px rgba(0, 0, 0, 0.7)
+    ); /* Sombra más pronunciada en hover */
 }
 
 .carousel-fullscreen-btn:active {
     transform: scale(0.95); /* Efecto de presión */
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5))
-        drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
 }
 
 .carousel-fullscreen-btn:focus-visible {
