@@ -227,8 +227,8 @@ img[src$=".WEBP"] {
     contain: layout style;
     backface-visibility: hidden;
     /* Efecto blur para el fondo */
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
 }
 
 .menu-button::after {
