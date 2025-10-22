@@ -518,6 +518,7 @@ img[src$=".WEBP"] {
 .nav-item-category .separator {
     font-weight: 900;
     margin: 0 0.35em;
+    color: var(--text-primary); /* Blanco igual que las categorías */
 }
 
 /* Focus styles for accessibility */
@@ -877,7 +878,7 @@ body.menu-open {
 .profile-description {
     font-size: var(--font-size-sm);
     font-weight: 400;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     text-align: left;
     line-height: 1.5;
     width: 100%;
@@ -1058,7 +1059,7 @@ body.menu-open {
 /* Tags de Skills con esquinas redondeadas (rectángulos, no cápsulas) */
 .skills-lines .tech-tag {
     border-radius: 10px;
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 /* Asegurar tamaño homogéneo de íconos dentro de tech-tag en Skills */
@@ -1935,7 +1936,7 @@ body.menu-open {
 
 .description-content p {
     margin-bottom: var(--space-sm);
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 .project-header {
@@ -1991,6 +1992,7 @@ body.menu-open {
 /* Símbolo separador en light */
 .project-category .separator {
     font-weight: 900; /* Light para el símbolo "|" */
+    color: var(--text-primary); /* Blanco igual que las categorías */
 }
 
 /* Tech Stack */
