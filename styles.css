@@ -915,9 +915,7 @@ body.menu-open {
 /* Nombre del idioma + dos puntos con el mismo weight que el nombre principal */
 .language-label .language-key {
     font-weight: 900;
-    color: var(
-        --text-primary
-    ); /* Mantener blanco para 💬 Spanish, 💬 English */
+    color: var(--text-primary); /* Mantener blanco para 💬 Spanish, 💬 English */
 }
 
 .lang-progress {
