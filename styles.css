@@ -2008,7 +2008,7 @@ body.menu-open {
 
 /* Estilo específico para tags de proyectos: fondo gris oscuro con degradado claro a la derecha, sin borde */
 .tech-stack .tech-tag {
-    background: linear-gradient(to right, rgb(28, 28, 28), rgb(45, 45, 45));
+    background: linear-gradient(to right, rgb(30, 30, 30), rgb(48, 48, 48));
     box-shadow: none; /* Eliminar el stroke */
 }
 
@@ -2020,7 +2020,7 @@ body.menu-open {
 
 /* Hover específico para tags de proyectos */
 .tech-stack .tech-tag:hover {
-    background: linear-gradient(to right, rgb(45, 45, 45), rgb(65, 65, 65));
+    background: linear-gradient(to right, rgb(48, 48, 48), rgb(68, 68, 68));
 }
 
 /* Scroll indicator para project description */
@@ -2337,10 +2337,10 @@ body.menu-open {
         gap: var(--space-2xl); /* mantiene ritmo vertical/horizontal */
         /* Control específico del ancho de la sección personal - ampliado para aprovechar nuevo espacio */
         max-width: clamp(
-            800px,
-            85vw,
-            920px
-        ); /* Ampliado para aprovechar la reducción de padding lateral */
+            900px,
+            88vw,
+            1050px
+        ); /* Aumentado significativamente para mayor amplitud en desktop */
         margin: 0 auto; /* Centrar la sección personal */
         transition: grid-template-columns var(--transition-smooth),
             gap var(--transition-smooth), align-items var(--transition-smooth);
