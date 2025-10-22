@@ -11,6 +11,7 @@
 
     /* Colors */
     --text-primary: rgb(208, 208, 208);
+    --text-secondary: #a1a1a1; /* Gris moderno apagado para textos secundarios */
 
     /* Unified Spacing System */
     --space-xs: 4px;
@@ -227,8 +228,8 @@ img[src$=".WEBP"] {
     contain: layout style;
     backface-visibility: hidden;
     /* Efecto blur para el fondo */
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
 }
 
 .menu-button::after {
@@ -500,13 +501,16 @@ img[src$=".WEBP"] {
 .nav-item-category {
     font-size: var(--font-size-sm);
     font-weight: 400;
-    color: var(--text-primary);
+    color: var(--text-secondary);
     line-height: 1.4;
     margin: 0;
 }
 
 .nav-item-category strong {
     font-weight: 900;
+    color: var(
+        --text-primary
+    ); /* Mantener blanco para Full-Stack, UI/UX Design, etc. */
 }
 
 .nav-item-category .separator {
@@ -871,7 +875,7 @@ body.menu-open {
 .profile-description {
     font-size: var(--font-size-sm);
     font-weight: 400;
-    color: var(--text-primary);
+    color: var(--text-secondary);
     text-align: left;
     line-height: 1.5;
     width: 100%;
@@ -901,13 +905,16 @@ body.menu-open {
 
 .language-label {
     font-size: inherit; /* mismo tamaño que la descripción */
-    color: var(--text-primary);
+    color: var(--text-secondary);
     opacity: 0.9;
 }
 
 /* Nombre del idioma + dos puntos con el mismo weight que el nombre principal */
 .language-label .language-key {
     font-weight: 900;
+    color: var(
+        --text-primary
+    ); /* Mantener blanco para 💬 Spanish, 💬 English */
 }
 
 .lang-progress {
@@ -988,12 +995,17 @@ body.menu-open {
 /* Etiqueta bajo el botón, heredando estilo de idiomas */
 .contact-label {
     font-size: var(--font-size-sm);
-    color: var(--text-primary);
+    color: var(--text-secondary);
     opacity: 0.9; /* igual a .language-label */
     text-align: center;
     line-height: 1.3;
     white-space: normal;
     overflow-wrap: anywhere;
+}
+
+/* Mantener blanco para los textos 📫 Email, ♥️ Contact me!, 👤 View */
+.contact-label .language-key {
+    color: var(--text-primary);
 }
 
 /* Social Media */
@@ -1044,6 +1056,7 @@ body.menu-open {
 /* Tags de Skills con esquinas redondeadas (rectángulos, no cápsulas) */
 .skills-lines .tech-tag {
     border-radius: 10px;
+    color: var(--text-secondary);
 }
 
 /* Asegurar tamaño homogéneo de íconos dentro de tech-tag en Skills */
@@ -1920,6 +1933,7 @@ body.menu-open {
 
 .description-content p {
     margin-bottom: var(--space-sm);
+    color: var(--text-secondary);
 }
 
 .project-header {
@@ -1962,11 +1976,14 @@ body.menu-open {
 .project-category {
     font-size: var(--font-size-sm);
     font-weight: 400;
-    color: var(--text-primary);
+    color: var(--text-secondary);
 }
 
 .project-category strong {
     font-weight: 900; /* Black para "Software" */
+    color: var(
+        --text-primary
+    ); /* Mantener blanco para Full-Stack, UI/UX Design, etc. */
 }
 
 /* Símbolo separador en light */
@@ -2008,8 +2025,9 @@ body.menu-open {
 
 /* Estilo específico para tags de proyectos: fondo gris oscuro con degradado claro a la derecha, sin borde */
 .tech-stack .tech-tag {
-    background: linear-gradient(to right, rgb(30, 30, 30), rgb(48, 48, 48));
+    background: linear-gradient(to right, rgb(28, 28, 28), rgb(45, 45, 45));
     box-shadow: none; /* Eliminar el stroke */
+    color: var(--text-secondary);
 }
 
 /* Efecto hover para las etiquetas de tecnología */
@@ -2020,7 +2038,8 @@ body.menu-open {
 
 /* Hover específico para tags de proyectos */
 .tech-stack .tech-tag:hover {
-    background: linear-gradient(to right, rgb(48, 48, 48), rgb(68, 68, 68));
+    background: linear-gradient(to right, rgb(45, 45, 45), rgb(65, 65, 65));
+    color: #c4c4c4; /* Gris ligeramente más claro en hover */
 }
 
 /* Scroll indicator para project description */
