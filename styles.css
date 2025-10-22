@@ -205,12 +205,12 @@ img[src$=".WEBP"] {
     position: fixed;
     top: clamp(16px, 6vw, 70px);
     right: clamp(32px, 8vw, 48px);
-    /* Glass button styles (identical to social-btn) */
+    /* Fondo degradado gris oscuro (igual que tags de proyectos) */
     width: var(--button-size);
     height: var(--button-size);
     padding: var(--button-padding);
     border-radius: var(--button-radius-md);
-    background: var(--glass-bg);
+    background: linear-gradient(to right, rgb(28, 28, 28), rgb(45, 45, 45));
     border: none;
     color: var(--text-primary);
     cursor: pointer !important;
@@ -246,13 +246,18 @@ img[src$=".WEBP"] {
 }
 
 .menu-button:hover:not(.active) {
-    background: var(--hover-tint);
+    background: linear-gradient(to right, rgb(45, 45, 45), rgb(65, 65, 65));
     transform: translateY(-2px);
 }
 
 .menu-button:hover:not(.active)::after {
     opacity: 1;
     transform: translateY(0) scale(1);
+}
+
+/* Hover cuando el botón está activo (en forma de X) */
+.menu-button.active:hover {
+    background: linear-gradient(to right, rgb(45, 45, 45), rgb(65, 65, 65));
 }
 
 /* Hamburger lines */
@@ -407,8 +412,8 @@ img[src$=".WEBP"] {
     display: block;
     padding: clamp(16px, 3vw, 20px) clamp(18px, 3.5vw, 24px);
     border-radius: var(--button-radius-lg);
-    background: rgba(255, 255, 255, 0.03);
-    border: 1.25px solid rgba(208, 208, 208, 0.25);
+    background: linear-gradient(to right, rgb(28, 28, 28), rgb(45, 45, 45));
+    border: none;
     text-decoration: none;
     color: var(--text-primary);
     transition: all var(--transition-fast);
@@ -435,8 +440,8 @@ img[src$=".WEBP"] {
 }
 
 .nav-menu-item:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: linear-gradient(to right, rgb(45, 45, 45), rgb(65, 65, 65));
+    border: none;
     transform: translateX(4px);
 }
 
