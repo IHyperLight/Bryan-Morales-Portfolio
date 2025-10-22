@@ -1343,9 +1343,33 @@ function initializeNavigationMenu() {
     // State management
     let isScrolling = false;
     let scrollTimeout = null;
+    let fadeObserver = null;
+    let fadeScrollHandler = null;
+
+    // Cleanup function to prevent memory leaks
+    const cleanup = () => {
+        if (scrollTimeout) {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = null;
+        }
+        if (fadeObserver) {
+            fadeObserver.disconnect();
+            fadeObserver = null;
+        }
+        if (fadeScrollHandler && navMenuList) {
+            navMenuList.removeEventListener("scroll", fadeScrollHandler);
+            fadeScrollHandler = null;
+        }
+    };
 
     // Populate menu with project entries
     const populateMenu = () => {
+        // Clear existing items (except "About Me")
+        const existingItems = navMenuList.querySelectorAll(
+            "li:not(:first-child)"
+        );
+        existingItems.forEach((item) => item.remove());
+
         const projects = document.querySelectorAll(
             ".project-item[id^='project-']"
         );
@@ -1445,7 +1469,7 @@ function initializeNavigationMenu() {
         menuButton.setAttribute("aria-label", "Abrir menú");
 
         // Cancel any pending scroll action if menu is closed manually
-        if (scrollTimeout && isScrolling) {
+        if (scrollTimeout) {
             clearTimeout(scrollTimeout);
             scrollTimeout = null;
             isScrolling = false;
@@ -1522,31 +1546,16 @@ function initializeNavigationMenu() {
         }
     };
 
+    const handleOverlayClick = () => {
+        closeMenu();
+    };
+
     const handleEscapeKey = (e) => {
         if (e.key === "Escape" && navMenu.classList.contains("active")) {
             closeMenu();
         }
     };
 
-    // Remove any existing listeners before adding new ones
-    menuButton.removeEventListener("click", handleMenuButtonClick);
-    navMenuList.removeEventListener("click", handleMenuItemClick);
-    document.removeEventListener("keydown", handleEscapeKey);
-
-    // Add event listeners
-    menuButton.addEventListener("click", handleMenuButtonClick);
-
-    if (navMenuOverlay) {
-        navMenuOverlay.addEventListener("click", closeMenu);
-    }
-
-    // Handle menu item clicks
-    navMenuList.addEventListener("click", handleMenuItemClick);
-
-    // Handle keyboard navigation
-    document.addEventListener("keydown", handleEscapeKey);
-
-    // Focus trap for accessibility
     const trapFocus = (e) => {
         if (!navMenu.classList.contains("active")) return;
 
@@ -1573,13 +1582,30 @@ function initializeNavigationMenu() {
         }
     };
 
-    // Remove existing listener before adding
+    // Remove any existing listeners before adding new ones (using the same named functions)
+    menuButton.removeEventListener("click", handleMenuButtonClick);
+    if (navMenuOverlay) {
+        navMenuOverlay.removeEventListener("click", handleOverlayClick);
+    }
+    navMenuList.removeEventListener("click", handleMenuItemClick);
+    document.removeEventListener("keydown", handleEscapeKey);
     document.removeEventListener("keydown", trapFocus);
+
+    // Add event listeners with the named functions
+    menuButton.addEventListener("click", handleMenuButtonClick);
+    if (navMenuOverlay) {
+        navMenuOverlay.addEventListener("click", handleOverlayClick);
+    }
+    navMenuList.addEventListener("click", handleMenuItemClick);
+    document.addEventListener("keydown", handleEscapeKey);
     document.addEventListener("keydown", trapFocus);
 
     // Initialize scroll fade effect for navigation menu
     const initializeNavMenuScrollFade = () => {
         const updateNavFade = () => {
+            // Safety check in case menu was removed from DOM
+            if (!navMenuList || !navMenuList.isConnected) return;
+
             const { scrollTop, scrollHeight, clientHeight } = navMenuList;
             const hasOverflow = scrollHeight > clientHeight + 1;
 
@@ -1618,18 +1644,31 @@ function initializeNavigationMenu() {
             navMenuList.style.webkitMaskImage = maskGradient;
         };
 
+        // Clean up existing fade handler if present
+        if (fadeScrollHandler) {
+            navMenuList.removeEventListener("scroll", fadeScrollHandler);
+        }
+
+        // Store reference to handler for cleanup
+        fadeScrollHandler = updateNavFade;
+
         // Update on scroll
-        navMenuList.addEventListener("scroll", updateNavFade, {
+        navMenuList.addEventListener("scroll", fadeScrollHandler, {
             passive: true,
         });
 
-        // Update on menu open
-        const observer = new MutationObserver(() => {
-            if (navMenu.classList.contains("active")) {
+        // Clean up existing observer if present
+        if (fadeObserver) {
+            fadeObserver.disconnect();
+        }
+
+        // Update on menu open with MutationObserver
+        fadeObserver = new MutationObserver(() => {
+            if (navMenu && navMenu.classList.contains("active")) {
                 setTimeout(updateNavFade, 100);
             }
         });
-        observer.observe(navMenu, {
+        fadeObserver.observe(navMenu, {
             attributes: true,
             attributeFilter: ["class"],
         });
