@@ -26,10 +26,8 @@ const perfMonitor = (() => {
 
 // Pre-create commonly used elements
 const performanceCache = {
-    body: null,
     viewport: null,
     projectItems: null,
-    rafIds: new Set(),
     timers: new Set(),
 };
 
@@ -129,7 +127,6 @@ document.addEventListener("DOMContentLoaded", function () {
     perfMonitor.mark("dom-ready");
 
     // Cache frequently used elements for performance
-    performanceCache.body = document.body;
     performanceCache.viewport = document.querySelector(".portfolio-container");
     performanceCache.projectItems = document.querySelectorAll(".project-item");
 
@@ -148,8 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
         initializeSocialButtons();
         initializeDownloadButtons();
         initializeFullscreenModal();
-        initializeSocialLayout();
-        initializeMenuButton();
+        initializeNavigationMenu();
         initializeCertificateLinks();
         initializeProjectLink();
         perfMonitor.measure("idle-init", "idle-init-start");
@@ -1137,8 +1133,6 @@ function initializeSingleCarousel(projectContainer) {
         next,
         prev,
         setActive,
-        getCurrentIndex: () => index,
-        getSlides: () => slides,
 
         // New viewport-aware functions
         initialize,
@@ -1146,13 +1140,6 @@ function initializeSingleCarousel(projectContainer) {
         resumeFromViewportPause,
         onFullscreenOpen,
         onFullscreenClose,
-
-        // State getters
-        isInitialized: () => initialized,
-        isViewportPaused: () => viewportPaused,
-        isDestroyed: () => destroyed,
-        isPausedByFullscreen: () => pausedByFullscreen,
-        isInViewport: () => isInViewport,
 
         // Comprehensive cleanup function
         cleanup: () => {
@@ -1283,56 +1270,6 @@ function initializeSocialButtons() {
         },
         { passive: false }
     );
-}
-
-// Detects when social media buttons wrap and applies corresponding class
-function initializeSocialLayout() {
-    const container = document.querySelector(".social-media");
-    if (!container) return;
-    const lines = container.querySelector(".social-lines");
-    if (!lines) return;
-
-    const measureAndApply = () => {
-        container.classList.remove("is-wrapping");
-        void container.offsetHeight;
-        void lines.offsetHeight;
-
-        const items = Array.from(lines.querySelectorAll(".social-btn"));
-        if (items.length < 2) return;
-
-        requestAnimationFrame(() => {
-            const firstItemTop = items[0].getBoundingClientRect().top;
-            const hasWrapping = items.some((item, index) => {
-                if (index === 0) return false;
-                const itemTop = item.getBoundingClientRect().top;
-                return Math.abs(itemTop - firstItemTop) > 25;
-            });
-
-            if (hasWrapping) {
-                container.classList.add("is-wrapping");
-            }
-        });
-    };
-
-    const onResize = debounce(measureAndApply, 250);
-
-    // Remove existing listener if present (prevent duplicates)
-    if (container._resizeHandler) {
-        window.removeEventListener("resize", container._resizeHandler);
-    }
-
-    // Store reference for cleanup
-    container._resizeHandler = onResize;
-    window.addEventListener("resize", onResize);
-
-    // Optimized initialization sequence
-    measureAndApply();
-    requestAnimationFrame(() => measureAndApply());
-
-    // After font loading
-    if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(measureAndApply);
-    }
 }
 
 // Navigation Menu functionality
@@ -1692,11 +1629,6 @@ function initializeNavigationMenu() {
     initializeNavMenuScrollFade();
 }
 
-// Legacy function name for compatibility
-function initializeMenuButton() {
-    initializeNavigationMenu();
-}
-
 // Scroll effects
 function initializeScrollEffects() {
     const observerOptions = {
@@ -1861,76 +1793,10 @@ function initializeProjectLink() {
     );
 }
 
-// Loading states and animations
-window.addEventListener("load", function () {
-    document.body.classList.add("loaded");
-    // Animation handling now done by IntersectionObserver in initializeScrollEffects
-});
-
-// Dynamic styles for keyboard navigation
-const style = document.createElement("style");
-style.textContent = `
-    .keyboard-navigation *:focus {
-        outline: 2px solid var(--text-primary) !important;
-        outline-offset: 2px !important;
-    }
-`;
-document.head.appendChild(style);
-
-// Memory cleanup and resource management
-const performanceManager = {
-    observers: new Set(),
-    timers: new Set(),
-    listeners: new Set(),
-
-    addObserver(observer) {
-        this.observers.add(observer);
-        return observer;
-    },
-
-    addTimer(timer) {
-        this.timers.add(timer);
-        return timer;
-    },
-
-    addListener(element, event, handler, options) {
-        element.addEventListener(event, handler, options);
-        this.listeners.add({ element, event, handler, options });
-    },
-
-    cleanup() {
-        // Disconnect all observers
-        for (const observer of this.observers) {
-            observer.disconnect();
-        }
-
-        // Clear all timers
-        for (const timer of this.timers) {
-            clearTimeout(timer);
-            clearInterval(timer);
-        }
-
-        // Remove all listeners
-        for (const { element, event, handler } of this.listeners) {
-            element.removeEventListener(event, handler);
-        }
-
-        // Clear all sets
-        this.observers.clear();
-        this.timers.clear();
-        this.listeners.clear();
-    },
-};
-
 // Memory cleanup on page unload
 window.addEventListener(
     "beforeunload",
     () => {
-        // Clean up RAF callbacks
-        for (const id of performanceCache.rafIds) {
-            cancelAnimationFrame(id);
-        }
-
         // Clean up timers
         for (const id of performanceCache.timers) {
             clearTimeout(id);
@@ -1950,11 +1816,7 @@ window.addEventListener(
             });
         }
 
-        // Clean up all managed resources
-        performanceManager.cleanup();
-
         // Clear caches
-        performanceCache.rafIds.clear();
         performanceCache.timers.clear();
     },
     { once: true }

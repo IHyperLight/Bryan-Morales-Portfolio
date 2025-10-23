@@ -693,13 +693,6 @@ body.menu-open {
     transform: translateY(-2px);
 }
 
-.glass-border {
-    padding: 1px;
-    border-radius: var(--button-radius-sm);
-    border: 0.5px solid var(--glass-border);
-    background: var(--glass-bg);
-}
-
 .glass-pill {
     padding: clamp(12px, 3.5vw, 16px) clamp(20px, 5vw, 26px);
     border-radius: var(--radius-full);
@@ -2583,8 +2576,7 @@ button:focus-visible {
 
 /* Print styles */
 @media print {
-    .menu-button,
-    .next-btn {
+    .menu-button {
         display: none;
     }
 
