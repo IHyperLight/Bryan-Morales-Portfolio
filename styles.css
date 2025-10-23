@@ -915,22 +915,19 @@ body.menu-open {
 /* Nombre del idioma + dos puntos con el mismo weight que el nombre principal */
 .language-label .language-key {
     font-weight: 900;
-    color: var(--text-primary); /* Mantener blanco para 💬 Spanish, 💬 English */
+    color: var(
+        --text-primary
+    ); /* Mantener blanco para 💬 Spanish, 💬 English */
 }
 
 .lang-progress {
     position: relative;
     width: 100%;
-    height: 10px; /* aumentado de 8px a 10px */
+    height: 10px;
     min-height: 10px;
     max-height: 10px;
-    border-radius: 999px; /* cápsula */
-    background: rgba(
-        208,
-        208,
-        208,
-        0.25
-    ); /* similar a carousel-progress pero un poco más suave */
+    border-radius: 999px;
+    background: rgba(208, 208, 208, 0.25);
     overflow: hidden;
 }
 
@@ -938,7 +935,7 @@ body.menu-open {
     height: 100%;
     min-height: 10px;
     max-height: 10px;
-    width: 0; /* definido inline por cada idioma */
+    width: 0;
     background: linear-gradient(
         90deg,
         #4c1d95 0%,
@@ -962,11 +959,11 @@ body.menu-open {
 /* Contact Buttons */
 .contact-buttons {
     display: flex;
-    justify-content: center; /* centrar el grupo horizontalmente */
-    align-items: flex-start; /* alinear los botones en la misma línea (arriba) aunque el texto tenga alturas distintas) */
-    gap: var(--space-2xl); /* consistente con el ritmo general */
+    justify-content: center;
+    align-items: flex-start;
+    gap: var(--space-2xl);
     width: 100%;
-    padding: 0; /* sin padding lateral para evitar desalineación */
+    padding: 0;
     transition: gap var(--transition-smooth), padding var(--transition-smooth);
 }
 
@@ -1981,7 +1978,7 @@ body.menu-open {
 }
 
 .project-category strong {
-    font-weight: 900; /* Black para "Software" */
+    font-weight: 900;
     color: var(
         --text-primary
     ); /* Mantener blanco para Full-Stack, UI/UX Design, etc. */
@@ -1989,7 +1986,8 @@ body.menu-open {
 
 /* Símbolo separador en light */
 .project-category .separator {
-    font-weight: 900; /* Light para el símbolo "|" */
+    font-weight: 900;
+    margin: 0 0.35em;
     color: var(--text-primary); /* Blanco igual que las categorías */
 }
 

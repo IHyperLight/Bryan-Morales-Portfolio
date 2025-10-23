@@ -1315,6 +1315,14 @@ function initializeSocialLayout() {
     };
 
     const onResize = debounce(measureAndApply, 250);
+
+    // Remove existing listener if present (prevent duplicates)
+    if (container._resizeHandler) {
+        window.removeEventListener("resize", container._resizeHandler);
+    }
+
+    // Store reference for cleanup
+    container._resizeHandler = onResize;
     window.addEventListener("resize", onResize);
 
     // Optimized initialization sequence
@@ -1758,59 +1766,99 @@ function initializeScrollEffects() {
 
 // Certificate links functionality
 function initializeCertificateLinks() {
+    // Use event delegation for better performance
+    const container = performanceCache.viewport;
+    if (!container) return;
+
+    // Set up external link buttons (accessibility)
     const items = document.querySelectorAll(".certificate-item.glass-pill");
     items.forEach((item) => {
         const btn = item.querySelector(".external-link");
-        const url = btn?.getAttribute("data-url");
-        if (!url) return;
-
         if (btn) {
             btn.setAttribute("tabindex", "-1");
             btn.setAttribute("aria-hidden", "true");
         }
+    });
 
-        const openLink = () => {
-            const w = window.open(url, "_blank", "noopener,noreferrer");
-            if (w) w.opener = null;
-            animatePress(item, 0.98);
-        };
-
-        item.addEventListener("click", (e) => {
+    // Delegated click handler
+    eventDelegator.addDelegatedListener(
+        container,
+        ".certificate-item.glass-pill",
+        "click",
+        function (e) {
             e.stopPropagation();
-            openLink();
-        });
+            const btn = this.querySelector(".external-link");
+            const url = btn?.getAttribute("data-url");
+            if (url) {
+                const w = window.open(url, "_blank", "noopener,noreferrer");
+                if (w) w.opener = null;
+                animatePress(this, 0.98);
+            }
+        },
+        { passive: false }
+    );
 
-        item.addEventListener("keydown", (e) => {
+    // Delegated keyboard handler
+    eventDelegator.addDelegatedListener(
+        container,
+        ".certificate-item.glass-pill",
+        "keydown",
+        function (e) {
             if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                openLink();
+                const btn = this.querySelector(".external-link");
+                const url = btn?.getAttribute("data-url");
+                if (url) {
+                    const w = window.open(url, "_blank", "noopener,noreferrer");
+                    if (w) w.opener = null;
+                    animatePress(this, 0.98);
+                }
             }
-        });
-    });
+        },
+        { passive: false }
+    );
 }
 
-// Project links functionality - Updated for multiple projects
+// Project links functionality - Updated for event delegation
 function initializeProjectLink() {
-    const projectLinks = document.querySelectorAll(".project-link");
+    // Use event delegation for better performance
+    const container = performanceCache.viewport;
+    if (!container) return;
 
-    projectLinks.forEach((projectLink) => {
-        const url = projectLink.getAttribute("data-url");
-        if (!url) return;
+    // Delegated click handler
+    eventDelegator.addDelegatedListener(
+        container,
+        ".project-link",
+        "click",
+        function () {
+            const url = this.getAttribute("data-url");
+            if (url) {
+                const w = window.open(url, "_blank", "noopener,noreferrer");
+                if (w) w.opener = null;
+                animatePress(this, 0.98);
+            }
+        },
+        { passive: false }
+    );
 
-        const openUrl = () => {
-            const w = window.open(url, "_blank", "noopener,noreferrer");
-            if (w) w.opener = null;
-            animatePress(projectLink, 0.98);
-        };
-
-        projectLink.addEventListener("click", openUrl);
-        projectLink.addEventListener("keydown", (e) => {
+    // Delegated keyboard handler
+    eventDelegator.addDelegatedListener(
+        container,
+        ".project-link",
+        "keydown",
+        function (e) {
             if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                openUrl();
+                const url = this.getAttribute("data-url");
+                if (url) {
+                    const w = window.open(url, "_blank", "noopener,noreferrer");
+                    if (w) w.opener = null;
+                    animatePress(this, 0.98);
+                }
             }
-        });
-    });
+        },
+        { passive: false }
+    );
 }
 
 // Loading states and animations
@@ -1938,6 +1986,7 @@ function initializeProjectScroll(projectContainer) {
     let isDragging = false;
     let startY = 0;
     let startScrollTop = 0;
+    let activeThumb = null; // Track which thumb is being dragged
 
     const updateThumb = () => {
         const { scrollTop, scrollHeight, clientHeight } = desc;
@@ -1968,7 +2017,7 @@ function initializeProjectScroll(projectContainer) {
         }px, 0)`;
 
         // Dynamic will-change optimization
-        if (isDragging) {
+        if (isDragging && activeThumb === thumb) {
             willChangeManager.set(thumb);
         } else {
             willChangeManager.clear(thumb);
@@ -2005,9 +2054,10 @@ function initializeProjectScroll(projectContainer) {
 
     // Ultra-smooth drag functionality
     const handleMouseDown = (e) => {
-        if (e.button !== 0) return; // Only left mouse button
+        if (e.button !== 0 || e.target !== thumb) return; // Only left mouse button and only on this thumb
 
         isDragging = true;
+        activeThumb = thumb;
         startY = e.clientY;
         startScrollTop = desc.scrollTop;
 
@@ -2026,7 +2076,7 @@ function initializeProjectScroll(projectContainer) {
     };
 
     const handleMouseMove = (e) => {
-        if (!isDragging) return;
+        if (!isDragging || activeThumb !== thumb) return;
 
         // Ultra-high precision calculation with immediate response
         const deltaY = e.clientY - startY;
@@ -2054,9 +2104,10 @@ function initializeProjectScroll(projectContainer) {
     };
 
     const handleMouseUp = (e) => {
-        if (!isDragging) return;
+        if (!isDragging || activeThumb !== thumb) return;
 
         isDragging = false;
+        activeThumb = null;
 
         // Restore all original styles
         document.body.style.userSelect = "";
@@ -2071,19 +2122,22 @@ function initializeProjectScroll(projectContainer) {
         e.preventDefault();
     };
 
-    // Event listeners optimized for ultra-smooth performance
-    document.addEventListener(
-        "mousedown",
-        (e) => {
-            if (e.target === thumb) {
-                handleMouseDown(e);
-            }
-        },
-        { passive: false }
-    );
+    // Event listeners - use local handlers instead of global document listeners
+    thumb.addEventListener("mousedown", handleMouseDown, { passive: false });
 
-    document.addEventListener("mousemove", handleMouseMove, { passive: false });
-    document.addEventListener("mouseup", handleMouseUp, { passive: false });
+    // Store handlers for cleanup
+    if (!desc._scrollHandlers) {
+        desc._scrollHandlers = {
+            mouseMove: handleMouseMove,
+            mouseUp: handleMouseUp,
+        };
+
+        // Add global listeners only once per description
+        document.addEventListener("mousemove", handleMouseMove, {
+            passive: false,
+        });
+        document.addEventListener("mouseup", handleMouseUp, { passive: false });
+    }
 
     // Enhanced track click with smooth animation
     track.addEventListener(
@@ -2284,8 +2338,8 @@ function initializeFullscreenModal() {
         }
     });
 
-    // Navegación por teclado
-    document.addEventListener("keydown", (e) => {
+    // Navegación por teclado - con cleanup pattern
+    const modalKeyHandler = (e) => {
         if (!modal.classList.contains("active")) return;
 
         switch (e.key) {
@@ -2301,7 +2355,14 @@ function initializeFullscreenModal() {
                 prevImage();
                 break;
         }
-    });
+    };
+
+    // Remove existing handler if present
+    if (modal._keyHandler) {
+        document.removeEventListener("keydown", modal._keyHandler);
+    }
+    modal._keyHandler = modalKeyHandler;
+    document.addEventListener("keydown", modalKeyHandler);
 
     // Agregar botones de pantalla completa a los carousels inmediatamente
     const carousels = document.querySelectorAll(".project-media");
@@ -2356,23 +2417,35 @@ function exposeCarouselState(projectContainer, carouselState) {
 
 // Initialize Download Buttons
 function initializeDownloadButtons() {
-    const downloadBtns = document.querySelectorAll(
-        ".download-btn[data-download]"
-    );
+    // Use event delegation for better performance
+    const container = performanceCache.viewport;
+    if (!container) return;
 
-    downloadBtns.forEach((btn) => {
-        btn.addEventListener("click", () => {
-            const downloadUrl = btn.getAttribute("data-download");
+    // Delegated click handler
+    eventDelegator.addDelegatedListener(
+        container,
+        ".download-btn[data-download]",
+        "click",
+        function () {
+            const downloadUrl = this.getAttribute("data-download");
             if (downloadUrl) {
                 window.open(downloadUrl, "_blank", "noopener,noreferrer");
             }
-        });
+        },
+        { passive: false }
+    );
 
-        btn.addEventListener("keydown", (e) => {
+    // Delegated keyboard handler
+    eventDelegator.addDelegatedListener(
+        container,
+        ".download-btn[data-download]",
+        "keydown",
+        function (e) {
             if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                btn.click();
+                this.click();
             }
-        });
-    });
+        },
+        { passive: false }
+    );
 }
