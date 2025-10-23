@@ -25,7 +25,7 @@
     --card-padding: clamp(26px, 5.5vw, 46px);
     --card-xpad: clamp(18px, 5vw, 26px);
 
-    --container-padding: clamp(40px, 8vw, 60px) clamp(6px, 1.5vw, 12px);
+    --container-padding: clamp(40px, 8vw, 60px) clamp(0px, 1.5vw, 12px);
     --container-gap: clamp(20px, 4vw, 30px);
 
     /* Project-specific spacing - increased further for better separation */
@@ -2236,6 +2236,13 @@ body.menu-open {
 }
 
 /* Responsive Design */
+/* Móviles pequeños - márgenes mínimos */
+@media (max-width: 480px) {
+    .portfolio-container {
+        padding: clamp(40px, 8vw, 60px) 0;
+    }
+}
+
 /* Breakpoint adicional para tablets pequeñas */
 @media (min-width: 480px) and (max-width: 767px) {
     .portfolio-container {
