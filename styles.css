@@ -503,7 +503,7 @@ img[src$=".WEBP"] {
 .nav-item-category {
     font-size: var(--font-size-sm);
     font-weight: 400;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     line-height: 1.4;
     margin: 0;
 }
@@ -908,7 +908,7 @@ body.menu-open {
 
 .language-label {
     font-size: inherit; /* mismo tamaño que la descripción */
-    color: var(--text-secondary);
+    color: var(--text-primary);
     opacity: 0.9;
 }
 
@@ -993,7 +993,7 @@ body.menu-open {
 /* Etiqueta bajo el botón, heredando estilo de idiomas */
 .contact-label {
     font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+    color: var(--text-primary);
     opacity: 0.9; /* igual a .language-label */
     text-align: center;
     line-height: 1.3;
@@ -2447,7 +2447,7 @@ body.menu-open {
 .project-category {
     font-size: var(--font-size-sm);
     font-weight: 400;
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 .project-category strong {
@@ -2500,7 +2500,7 @@ body.menu-open {
 .tech-stack .tech-tag {
     background: linear-gradient(to right, rgb(28, 28, 28), rgb(45, 45, 45));
     box-shadow: none; /* Eliminar el stroke */
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 /* Efecto hover para las etiquetas de tecnología */
