@@ -1281,31 +1281,218 @@ function initializeNavigationMenu() {
 
     if (!menuButton || !navMenu || !navMenuList) return;
 
-    // Prevent multiple initializations
-    if (navMenuList.dataset.initialized === "true") return;
+    // Prevent multiple initializations - PROTECCIÓN MEJORADA
+    if (navMenuList.dataset.initialized === "true") {
+        // Si ya está inicializado, solo verificar que el estado sea consistente
+        if (navMenuList.dataset.navLocked === "true") {
+            // Limpiar cualquier lock huérfano
+            delete navMenuList.dataset.navLocked;
+            navMenuList.style.pointerEvents = "";
+            navMenuList.removeAttribute("aria-disabled");
+        }
+        if (menuButton.dataset.navLocked === "true") {
+            delete menuButton.dataset.navLocked;
+            menuButton.removeAttribute("aria-disabled");
+            menuButton.style.pointerEvents = "";
+            if (typeof menuButton.disabled === "boolean") {
+                menuButton.disabled = false;
+            }
+        }
+        return;
+    }
     navMenuList.dataset.initialized = "true";
 
     // State management
-    let isScrolling = false;
-    let scrollTimeout = null;
     let fadeObserver = null;
     let fadeScrollHandler = null;
 
-    // Cleanup function to prevent memory leaks
-    const cleanup = () => {
-        if (scrollTimeout) {
-            clearTimeout(scrollTimeout);
-            scrollTimeout = null;
-        }
-        if (fadeObserver) {
-            fadeObserver.disconnect();
-            fadeObserver = null;
-        }
-        if (fadeScrollHandler && navMenuList) {
-            navMenuList.removeEventListener("scroll", fadeScrollHandler);
-            fadeScrollHandler = null;
+    const navInteractionState = {
+        active: false,
+        releaseTimer: null,
+        timers: new Set(),
+        rafId: null,
+    };
+
+    // Debug helper (descomentar para diagnóstico)
+    const debugLog = (action, details = {}) => {
+        // console.log(`[NAV] ${action}`, { active: navInteractionState.active, timers: navInteractionState.timers.size, ...details });
+    };
+
+    const clearNavigationTimers = () => {
+        navInteractionState.timers.forEach((id) => {
+            clearTimeout(id);
+        });
+        navInteractionState.timers.clear();
+    };
+
+    const stopNavigationRaf = () => {
+        if (navInteractionState.rafId !== null) {
+            cancelAnimationFrame(navInteractionState.rafId);
+            navInteractionState.rafId = null;
         }
     };
+
+    const setNavigationPointerState = (locked) => {
+        if (navMenuList) {
+            if (locked) {
+                navMenuList.dataset.navLocked = "true";
+                navMenuList.style.pointerEvents = "none";
+                navMenuList.setAttribute("aria-disabled", "true");
+            } else {
+                delete navMenuList.dataset.navLocked;
+                navMenuList.style.pointerEvents = "";
+                navMenuList.removeAttribute("aria-disabled");
+            }
+        }
+
+        if (menuButton) {
+            if (locked) {
+                menuButton.dataset.navLocked = "true";
+                menuButton.setAttribute("aria-disabled", "true");
+                menuButton.style.pointerEvents = "none";
+                if (typeof menuButton.disabled === "boolean") {
+                    menuButton.disabled = true;
+                }
+            } else {
+                delete menuButton.dataset.navLocked;
+                menuButton.removeAttribute("aria-disabled");
+                menuButton.style.pointerEvents = "";
+                if (typeof menuButton.disabled === "boolean") {
+                    menuButton.disabled = false;
+                }
+            }
+        }
+    };
+
+    const scheduleNavigationTask = (callback, delay) => {
+        const timerId = setTimeout(() => {
+            navInteractionState.timers.delete(timerId);
+            try {
+                callback();
+            } catch (error) {
+                console.error("Navigation task error:", error);
+                // En caso de error, liberar el lock para no dejar el menú bloqueado
+                releaseNavigationLock("task-error", { force: true });
+            }
+        }, delay);
+
+        navInteractionState.timers.add(timerId);
+        return timerId;
+    };
+
+    const releaseNavigationLock = (
+        reason = "complete",
+        { force = false } = {}
+    ) => {
+        if (!navInteractionState.active && !force) {
+            debugLog("Lock release SKIPPED", { reason, notActive: true });
+            if (navInteractionState.releaseTimer) {
+                clearTimeout(navInteractionState.releaseTimer);
+                navInteractionState.releaseTimer = null;
+            }
+            return;
+        }
+
+        debugLog("Lock RELEASED", {
+            reason,
+            force,
+            timersCleared: navInteractionState.timers.size,
+        });
+
+        if (navInteractionState.releaseTimer) {
+            clearTimeout(navInteractionState.releaseTimer);
+            navInteractionState.releaseTimer = null;
+        }
+
+        // CORRECCIÓN: SIEMPRE limpiar timers al liberar el lock
+        clearNavigationTimers();
+
+        stopNavigationRaf();
+
+        navInteractionState.active = false;
+        setNavigationPointerState(false);
+    };
+
+    const acquireNavigationLock = (
+        reason = "navigation",
+        fallbackMs = 6000
+    ) => {
+        if (navInteractionState.active) {
+            debugLog("Lock acquisition DENIED", {
+                reason,
+                currentlyActive: true,
+            });
+            return false;
+        }
+
+        navInteractionState.active = true;
+        debugLog("Lock ACQUIRED", { reason, fallbackMs });
+
+        clearNavigationTimers();
+        stopNavigationRaf();
+
+        setNavigationPointerState(true);
+
+        if (navInteractionState.releaseTimer) {
+            clearTimeout(navInteractionState.releaseTimer);
+        }
+
+        navInteractionState.releaseTimer = setTimeout(() => {
+            debugLog("Lock TIMEOUT", { reason, fallbackMs });
+            releaseNavigationLock("timeout", { force: true });
+        }, fallbackMs);
+
+        return true;
+    };
+
+    const monitorScrollCompletion = (targetPosition) => {
+        let stableFrames = 0;
+        let lastY = window.scrollY;
+        let checksCount = 0;
+        const tolerance = 2;
+        const maxChecks = 180; // 3 segundos a 60fps
+
+        const checkScroll = () => {
+            // Verificación de seguridad: si el lock ya no está activo, cancelar monitoreo
+            if (!navInteractionState.active) {
+                // CORRECCIÓN: Limpiar rafId antes de salir
+                navInteractionState.rafId = null;
+                return;
+            }
+
+            checksCount++;
+            const currentY = window.scrollY;
+
+            // CORRECCIÓN: Actualizar lastY en cada frame para detección precisa
+            const scrollStopped = Math.abs(currentY - lastY) <= 0.5;
+            lastY = currentY;
+
+            // Verificar si alcanzamos la posición objetivo
+            const nearTarget = Math.abs(currentY - targetPosition) <= tolerance;
+
+            if (nearTarget || scrollStopped) {
+                stableFrames += 1;
+            } else {
+                stableFrames = 0;
+            }
+
+            // Liberar si se estabilizó o si superamos el tiempo máximo
+            if (stableFrames >= 6 || checksCount >= maxChecks) {
+                releaseNavigationLock("stabilized");
+                return;
+            }
+
+            // Solo continuar si el estado sigue activo
+            if (navInteractionState.active) {
+                navInteractionState.rafId = requestAnimationFrame(checkScroll);
+            }
+        };
+
+        navInteractionState.rafId = requestAnimationFrame(checkScroll);
+    };
+
+    // NOTA: handleVisibilityChange, cleanup y handleResize se definirán DESPUÉS
+    // de los event handlers para evitar referencias a funciones no definidas
 
     // Populate menu with project entries
     const populateMenu = () => {
@@ -1394,6 +1581,8 @@ function initializeNavigationMenu() {
 
     // Open menu
     const openMenu = () => {
+        if (navInteractionState.active) return;
+
         navMenu.classList.add("active");
         document.body.classList.add("menu-open");
         menuButton.classList.add("active");
@@ -1407,70 +1596,115 @@ function initializeNavigationMenu() {
     };
 
     // Close menu
-    const closeMenu = () => {
+    const closeMenu = ({ preserveLock = false } = {}) => {
         navMenu.classList.remove("active");
         document.body.classList.remove("menu-open");
         menuButton.classList.remove("active");
         menuButton.setAttribute("aria-label", "Abrir menú");
 
-        // Cancel any pending scroll action if menu is closed manually
-        if (scrollTimeout) {
-            clearTimeout(scrollTimeout);
-            scrollTimeout = null;
-            isScrolling = false;
+        clearNavigationTimers();
+
+        if (!preserveLock) {
+            releaseNavigationLock("menu-closed", { force: true });
         }
     };
 
     // Smooth scroll to target
     const scrollToTarget = (targetId) => {
-        // Prevent multiple simultaneous scroll actions
-        if (isScrolling) return;
-
-        const target = document.getElementById(targetId);
-        if (!target) return;
-
-        isScrolling = true;
-        closeMenu();
-
-        // Clear any pending scroll timeout
-        if (scrollTimeout) {
-            clearTimeout(scrollTimeout);
-            scrollTimeout = null;
+        if (!acquireNavigationLock("menu-navigation")) {
+            return;
         }
 
-        // Wait for menu close animation before scrolling
-        scrollTimeout = setTimeout(() => {
-            const offset = 80; // Offset from top for better visibility
-            const targetPosition =
-                target.getBoundingClientRect().top +
-                window.pageYOffset -
-                offset;
+        const target = document.getElementById(targetId);
+        if (!target) {
+            releaseNavigationLock("missing-target", { force: true });
+            return;
+        }
 
-            window.scrollTo({
-                top: targetPosition,
-                behavior: "smooth",
-            });
+        closeMenu({ preserveLock: true });
 
-            // Add subtle highlight animation when arriving at target
-            scrollTimeout = setTimeout(() => {
-                target.style.transition = "transform 0.3s ease-out";
-                target.style.transform = "scale(1.01)";
+        const offset = 80;
+        const targetPosition =
+            target.getBoundingClientRect().top + window.pageYOffset - offset;
 
-                scrollTimeout = setTimeout(() => {
-                    target.style.transform = "";
-                    // Clean up inline styles after animation
-                    scrollTimeout = setTimeout(() => {
-                        target.style.transition = "";
-                        isScrolling = false;
-                        scrollTimeout = null;
+        // CORRECCIÓN: Mover listener cleanup fuera para garantizar limpieza
+        let userScrollDetected = false;
+        let listenersRegistered = false;
+
+        const cleanupScrollListeners = () => {
+            if (listenersRegistered) {
+                window.removeEventListener("wheel", handleUserScroll);
+                window.removeEventListener("touchmove", handleUserScroll);
+                listenersRegistered = false;
+            }
+        };
+
+        const handleUserScroll = () => {
+            // Solo cancelar si el scroll NO es hacia la posición objetivo
+            const currentScroll = window.scrollY;
+            const distanceToTarget = Math.abs(currentScroll - targetPosition);
+
+            // Si el usuario scrollea lejos del objetivo, cancelar animación
+            if (distanceToTarget > 100) {
+                userScrollDetected = true;
+                cleanupScrollListeners();
+                releaseNavigationLock("user-interrupted", { force: true });
+            }
+        };
+
+        scheduleNavigationTask(() => {
+            // CORRECCIÓN: Try-catch para garantizar cleanup en caso de error
+            try {
+                // Registrar listeners para detectar scroll del usuario
+                window.addEventListener("wheel", handleUserScroll, {
+                    passive: true,
+                    once: false,
+                });
+                window.addEventListener("touchmove", handleUserScroll, {
+                    passive: true,
+                    once: false,
+                });
+                listenersRegistered = true;
+
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: "smooth",
+                });
+
+                monitorScrollCompletion(targetPosition);
+
+                scheduleNavigationTask(() => {
+                    // CORRECCIÓN: Limpiar listeners SIEMPRE
+                    cleanupScrollListeners();
+
+                    if (userScrollDetected) return;
+
+                    target.style.transition = "transform 0.3s ease-out";
+                    target.style.transform = "scale(1.01)";
+
+                    scheduleNavigationTask(() => {
+                        if (userScrollDetected) return;
+
+                        target.style.transform = "";
+
+                        scheduleNavigationTask(() => {
+                            target.style.transition = "";
+                            releaseNavigationLock("animation-complete");
+                        }, 300);
                     }, 300);
-                }, 300);
-            }, 800); // Wait for scroll to mostly complete
+                }, 800);
+            } catch (error) {
+                // CORRECCIÓN: Garantizar cleanup en caso de error
+                cleanupScrollListeners();
+                throw error; // Re-throw para que scheduleNavigationTask lo maneje
+            }
         }, 300);
     };
 
     // Event listener handlers (named functions to prevent duplicates)
     const handleMenuButtonClick = () => {
+        if (navInteractionState.active) return;
+
         if (navMenu.classList.contains("active")) {
             closeMenu();
         } else {
@@ -1486,17 +1720,23 @@ function initializeNavigationMenu() {
         e.stopPropagation();
 
         const targetId = menuItem.dataset.target;
-        if (targetId && !isScrolling) {
+        if (navInteractionState.active) {
+            return;
+        }
+
+        if (targetId) {
             scrollToTarget(targetId);
         }
     };
 
     const handleOverlayClick = () => {
+        if (navInteractionState.active) return;
         closeMenu();
     };
 
     const handleEscapeKey = (e) => {
         if (e.key === "Escape" && navMenu.classList.contains("active")) {
+            if (navInteractionState.active) return;
             closeMenu();
         }
     };
@@ -1527,6 +1767,83 @@ function initializeNavigationMenu() {
         }
     };
 
+    // CORRECCIÓN: Definir handleVisibilityChange DESPUÉS de closeMenu
+    const handleVisibilityChange = () => {
+        if (document.hidden) {
+            releaseNavigationLock("visibility-change", { force: true });
+            // Si el menú está abierto cuando se oculta la página, cerrarlo
+            if (navMenu && navMenu.classList.contains("active")) {
+                // CORRECCIÓN: Solo cerrar visualmente, el lock ya fue liberado
+                navMenu.classList.remove("active");
+                document.body.classList.remove("menu-open");
+                menuButton.classList.remove("active");
+                menuButton.setAttribute("aria-label", "Abrir menú");
+            }
+        } else {
+            // Cuando la página vuelve a estar visible, verificar estado
+            // y asegurar que no haya locks huérfanos
+            requestAnimationFrame(() => {
+                if (
+                    navInteractionState.active &&
+                    !navMenu.classList.contains("active")
+                ) {
+                    // Lock activo pero menú cerrado = estado inconsistente
+                    releaseNavigationLock("visibility-restore", {
+                        force: true,
+                    });
+                }
+            });
+        }
+    };
+
+    // CORRECCIÓN: Protección contra resize con debouncing
+    let resizeTimer = null;
+    const handleResize = () => {
+        if (navInteractionState.active) {
+            // CORRECCIÓN: Cancelar timer anterior para evitar acumulación
+            if (resizeTimer) {
+                navInteractionState.timers.delete(resizeTimer);
+                clearTimeout(resizeTimer);
+            }
+            // Si hay un resize durante navegación, puede causar problemas
+            // Liberar el lock después de un breve delay para permitir reajuste
+            resizeTimer = scheduleNavigationTask(() => {
+                if (navInteractionState.active) {
+                    releaseNavigationLock("resize-safety", { force: true });
+                }
+                resizeTimer = null;
+            }, 500);
+        }
+    };
+
+    // CORRECCIÓN: Definir cleanup DESPUÉS de todos los handlers
+    const cleanup = () => {
+        releaseNavigationLock("cleanup", { force: true });
+
+        if (fadeObserver) {
+            fadeObserver.disconnect();
+            fadeObserver = null;
+        }
+        if (fadeScrollHandler && navMenuList) {
+            navMenuList.removeEventListener("scroll", fadeScrollHandler);
+            fadeScrollHandler = null;
+        }
+
+        // Limpiar TODOS los listeners globales
+        menuButton.removeEventListener("click", handleMenuButtonClick);
+        if (navMenuOverlay) {
+            navMenuOverlay.removeEventListener("click", handleOverlayClick);
+        }
+        navMenuList.removeEventListener("click", handleMenuItemClick);
+        document.removeEventListener("keydown", handleEscapeKey);
+        document.removeEventListener("keydown", trapFocus);
+        document.removeEventListener(
+            "visibilitychange",
+            handleVisibilityChange
+        );
+        window.removeEventListener("resize", handleResize);
+    };
+
     // Remove any existing listeners before adding new ones (using the same named functions)
     menuButton.removeEventListener("click", handleMenuButtonClick);
     if (navMenuOverlay) {
@@ -1544,6 +1861,11 @@ function initializeNavigationMenu() {
     navMenuList.addEventListener("click", handleMenuItemClick);
     document.addEventListener("keydown", handleEscapeKey);
     document.addEventListener("keydown", trapFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("resize", handleResize, { passive: true });
+
+    // Registrar cleanup global para prevenir fugas de memoria
+    window.addEventListener("beforeunload", cleanup, { once: true });
 
     // Initialize scroll fade effect for navigation menu
     const initializeNavMenuScrollFade = () => {

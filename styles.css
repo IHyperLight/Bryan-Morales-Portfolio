@@ -2621,7 +2621,7 @@ body.menu-open {
 
 /* Botón de Figma con estilo personalizado */
 .project-link.glass-pill.figma-button {
-    background: #2c2c2c !important;
+    background: #1e1e1e !important;
     color: #ffffff !important;
 }
 
