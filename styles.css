@@ -200,7 +200,7 @@
 
 .profile-name,
 .contact-title,
-.project-title h2,
+.project-title :is(h1, h2),
 .nav-item-title,
 .detail-nav-title,
 .detail-breadcrumb {
@@ -208,7 +208,7 @@
     letter-spacing: 0.01em;
 }
 
-.project-title h2 a,
+.project-title :is(h1, h2) a,
 .profile-name a {
     color: inherit;
     text-decoration: none;
@@ -218,13 +218,13 @@
         transform var(--transition-medium);
 }
 
-.project-title h2 a:hover,
+.project-title :is(h1, h2) a:hover,
 .profile-name a:hover {
     opacity: var(--opacity-70);
     transform: var(--transform-hover-lift-sm);
 }
 
-.project-title h2 a:focus-visible,
+.project-title :is(h1, h2) a:focus-visible,
 .profile-name a:focus-visible {
     outline: 2px solid var(--focus-ring);
     outline-offset: var(--outline-offset);
@@ -350,9 +350,7 @@ body {
 }
 
 img[src$=".svg"],
-img[src$=".webp"],
-img[src$=".SVG"],
-img[src$=".WEBP"] {
+img[src$=".webp"] {
     image-rendering: -webkit-optimize-contrast;
     backface-visibility: var(--backface-hidden);
 }
@@ -1131,21 +1129,6 @@ body.menu-open {
         all var(--transition-medium),
         width var(--transition-smooth),
         height var(--transition-smooth);
-}
-
-.profile-badge {
-    position: absolute;
-    top: 0;
-    right: -12.5px;
-    width: 50px;
-    height: 50px;
-    border-radius: var(--radius-pill);
-    background: var(--glass-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    font-weight: 900;
 }
 
 .profile-info {
@@ -3027,8 +3010,10 @@ body.menu-open {
     align-items: center;
 }
 
-.project-title h2 {
-    font-size: clamp(32px, 4.5vw, 36px);
+.project-title :is(h1, h2) {
+    font-size: clamp(24px, 7.5vw, 36px);
+    min-width: 0;
+    overflow-wrap: break-word;
 
     font-weight: 400;
     color: var(--text-primary);
@@ -3663,15 +3648,13 @@ button:focus-visible {
     }
 }
 
-.project-item .carousel-controls .carousel-progress,
-.project-item .project-media .carousel-progress {
+.project-item .carousel-controls .carousel-progress {
     height: 3px !important;
     min-height: 3px !important;
     max-height: 3px !important;
 }
 
-.project-item .carousel-controls .carousel-progress-fill,
-.project-item .project-media .carousel-progress-fill {
+.project-item .carousel-controls .carousel-progress-fill {
     height: 100% !important;
     min-height: 3px !important;
     max-height: 3px !important;
@@ -3682,8 +3665,6 @@ button:focus-visible {
 }
 
 button,
-input[type="button"],
-input[type="submit"],
 [role="button"],
 .external-link,
 a,
@@ -3712,12 +3693,7 @@ a *,
 .social-btn *,
 .project-link *,
 .certificate-item *,
-.carousel-btn *,
-.carousel-dot *,
 .carousel-fullscreen-btn *,
-.carousel-fullscreen-close *,
-.carousel-fullscreen-prev *,
-.carousel-fullscreen-next *,
 .menu-button *,
 .theme-toggle-button *,
 .download-btn * {

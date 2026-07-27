@@ -1,5 +1,3 @@
-
-
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -133,26 +131,22 @@ if (projects.length === 0)
     throw new Error("No se encontró ningún <article class='project-item'>");
 
 function forDetailPage(block) {
-    return (
-        block
-
-            .replace(/\n\s*<a\n\s+class="section-maximize[\s\S]*?<\/a>/g, "")
-
-            .replace(
-                /\s*style="opacity: 0; transform: translateY\(30px\)"/g,
-                "",
-            )
-            .replace(/ scroll-pending(?=["\s])/g, "")
-
-            .replace(
-                /<h2>\s*<a href="[^"]*"\s*>([\s\S]*?)<\/a\s*>\s*<\/h2>/g,
-                "<h2>$1</h2>",
-            )
-            .replace(
-                /<h1 class="profile-name">\s*<a href="[^"]*">([\s\S]*?)<\/a>\s*<\/h1>/,
-                '<h1 class="profile-name">$1</h1>',
-            )
-    );
+    return block
+        .replace(/\n\s*<a\n\s+class="section-maximize[\s\S]*?<\/a>/g, "")
+        .replace(/\s*style="opacity: 0; transform: translateY\(30px\)"/g, "")
+        .replace(/ scroll-pending(?=["\s])/g, "")
+        .replace(
+            /<h2>\s*<a href="[^"]*"\s*>([\s\S]*?)<\/a\s*>\s*<\/h2>/g,
+            "<h1>$1</h1>",
+        )
+        .replace(
+            /<h2 class="contact-title">([\s\S]*?)<\/h2>/,
+            '<h1 class="contact-title">$1</h1>',
+        )
+        .replace(
+            /<h1 class="profile-name">\s*<a href="[^"]*">([\s\S]*?)<\/a>\s*<\/h1>/,
+            '<h1 class="profile-name">$1</h1>',
+        );
 }
 
 function splitDescription(articleHtml) {

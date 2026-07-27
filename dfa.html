@@ -5,25 +5,52 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Deterministic Finite Automaton | Bryan Morales</title>
-        <meta name="description" content="Full-Stack · HTTPS URL Extractor Using DFA (2021). A project by Bryan Morales." />
+        <meta
+            name="description"
+            content="Full-Stack · HTTPS URL Extractor Using DFA (2021). A project by Bryan Morales."
+        />
         <meta name="author" content="Bryan Morales" />
         <meta name="theme-color" content="#1e1e1e" />
         <meta name="color-scheme" content="dark" />
 
-        <link rel="canonical" href="https://bryan-morales-portfolio.netlify.app/dfa.html" />
+        <link
+            rel="canonical"
+            href="https://bryan-morales-portfolio.netlify.app/dfa.html"
+        />
 
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="Bryan Morales Portfolio" />
-        <meta property="og:title" content="Deterministic Finite Automaton | Bryan Morales" />
-        <meta property="og:description" content="Full-Stack · HTTPS URL Extractor Using DFA (2021). A project by Bryan Morales." />
-        <meta property="og:url" content="https://bryan-morales-portfolio.netlify.app/dfa.html" />
-        <meta property="og:image" content="https://bryan-morales-portfolio.netlify.app/assets/profile.webp" />
+        <meta
+            property="og:title"
+            content="Deterministic Finite Automaton | Bryan Morales"
+        />
+        <meta
+            property="og:description"
+            content="Full-Stack · HTTPS URL Extractor Using DFA (2021). A project by Bryan Morales."
+        />
+        <meta
+            property="og:url"
+            content="https://bryan-morales-portfolio.netlify.app/dfa.html"
+        />
+        <meta
+            property="og:image"
+            content="https://bryan-morales-portfolio.netlify.app/assets/profile.webp"
+        />
         <meta property="og:locale" content="en_US" />
 
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Deterministic Finite Automaton | Bryan Morales" />
-        <meta name="twitter:description" content="Full-Stack · HTTPS URL Extractor Using DFA (2021). A project by Bryan Morales." />
-        <meta name="twitter:image" content="https://bryan-morales-portfolio.netlify.app/assets/profile.webp" />
+        <meta
+            name="twitter:title"
+            content="Deterministic Finite Automaton | Bryan Morales"
+        />
+        <meta
+            name="twitter:description"
+            content="Full-Stack · HTTPS URL Extractor Using DFA (2021). A project by Bryan Morales."
+        />
+        <meta
+            name="twitter:image"
+            content="https://bryan-morales-portfolio.netlify.app/assets/profile.webp"
+        />
 
         <link rel="icon" type="image/png" href="assets/favicon.png" />
         <link rel="apple-touch-icon" href="assets/favicon.png" />
@@ -45,440 +72,459 @@
         </script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Sekuya&display=swap" rel="stylesheet" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Sekuya&display=swap"
+            rel="stylesheet"
+        />
     </head>
     <body class="detail-page detail-project" data-page="dfa.html">
         <div class="background-video" aria-hidden="true">
-                    <video muted loop playsinline preload="none" id="bg-video">
-                        <source src="assets/back-oo.mp4" type="video/mp4" />
-                    </video>
-                </div>
+            <video muted loop playsinline preload="none" id="bg-video">
+                <source src="assets/back-oo.mp4" type="video/mp4" />
+            </video>
+        </div>
         <div class="portfolio-container">
             <button
-                            class="theme-toggle-button"
-                            aria-label="Toggle theme"
-                            title="Toggle theme"
-                            aria-pressed="true"
-                        >
-                            <svg
-                                class="theme-icon theme-icon-dark"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path
-                                    d="M12 3V4M12 20V21M4 12H3M6.31412 6.31412L5.5 5.5M17.6859 6.31412L18.5 5.5M6.31412 17.69L5.5 18.5M17.6859 17.69L18.5 18.5M21 12H20M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                />
-                            </svg>
-                            <svg
-                                class="theme-icon theme-icon-light"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path
-                                    d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                />
-                            </svg>
-                        </button>
+                class="theme-toggle-button"
+                aria-label="Toggle theme"
+                title="Toggle theme"
+                aria-pressed="true"
+            >
+                <svg
+                    class="theme-icon theme-icon-dark"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M12 3V4M12 20V21M4 12H3M6.31412 6.31412L5.5 5.5M17.6859 6.31412L18.5 5.5M6.31412 17.69L5.5 18.5M17.6859 17.69L18.5 18.5M21 12H20M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                </svg>
+                <svg
+                    class="theme-icon theme-icon-light"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                </svg>
+            </button>
 
             <button class="menu-button" aria-label="Open menu">
-                            <span class="menu-button-line"></span>
-                            <span class="menu-button-line"></span>
-                            <span class="menu-button-line"></span>
-                        </button>
+                <span class="menu-button-line"></span>
+                <span class="menu-button-line"></span>
+                <span class="menu-button-line"></span>
+            </button>
 
             <nav class="nav-menu" aria-label="Main navigation">
-                            <div class="nav-menu-overlay"></div>
-                            <div class="nav-menu-content glass-card">
-                                <ul class="nav-menu-list">
-                                    <li>
-                                        <a
-                                            href="#profile"
-                                            class="nav-menu-item"
-                                            data-target="profile-section"
-                                        >
-                                            <div class="nav-item-content">
-                                                <span class="nav-item-title"
-                                                    >🪄 About Me</span
-                                                >
-                                            </div>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </nav>
+                <div class="nav-menu-overlay"></div>
+                <div class="nav-menu-content glass-card">
+                    <ul class="nav-menu-list">
+                        <li>
+                            <a
+                                href="#profile"
+                                class="nav-menu-item"
+                                data-target="profile-section"
+                            >
+                                <div class="nav-item-content">
+                                    <span class="nav-item-title"
+                                        >🪄 About Me</span
+                                    >
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
 
             <div class="detail-topbar">
                 <a class="detail-back" href="index.html">
                     <span class="detail-back-arrow" aria-hidden="true">←</span>
                     <span>Portfolio</span>
                 </a>
-                <span class="detail-breadcrumb">Deterministic Finite Automaton</span>
+                <span class="detail-breadcrumb"
+                    >Deterministic Finite Automaton</span
+                >
             </div>
 
             <main class="portfolio-main">
                 <section class="projects-section">
                     <article
-                                            id="project-dfa"
-                                            class="project-item glass-card"
-                                            data-project-title="🔀 Deterministic Finite Automaton"
-                                            data-project-category="Full-Stack"
-                                            data-project-description="HTTPS URL Extractor Using DFA"
+                        id="project-dfa"
+                        class="project-item glass-card"
+                        data-project-title="🔀 Deterministic Finite Automaton"
+                        data-project-category="Full-Stack"
+                        data-project-description="HTTPS URL Extractor Using DFA"
+                    >
+                        <div class="project-media">
+                            <div
+                                class="carousel"
+                                role="region"
+                                aria-roledescription="carousel"
+                                aria-label="Deterministic Finite Automaton project gallery"
+                                tabindex="0"
+                            >
+                                <div class="carousel-viewport">
+                                    <div class="carousel-track">
+                                        <div class="carousel-slide is-active">
+                                            <img
+                                                src="assets/projects/deterministic-finite-automaton/deterministic-finite-automaton-1.webp"
+                                                alt="Deterministic Finite Automaton screenshot 1"
+                                                width="1920"
+                                                height="1080"
+                                                loading="lazy"
+                                                decoding="async"
+                                            />
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img
+                                                src="assets/projects/deterministic-finite-automaton/deterministic-finite-automaton-2.webp"
+                                                alt="Deterministic Finite Automaton screenshot 2"
+                                                width="1920"
+                                                height="1080"
+                                                loading="lazy"
+                                                decoding="async"
+                                            />
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img
+                                                src="assets/projects/deterministic-finite-automaton/deterministic-finite-automaton-3.webp"
+                                                alt="Deterministic Finite Automaton screenshot 3"
+                                                width="1920"
+                                                height="1080"
+                                                loading="lazy"
+                                                decoding="async"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="carousel-controls"
+                            aria-label="Carousel controls"
+                        >
+                            <div class="carousel-controls-top">
+                                <button
+                                    class="carousel-btn prev"
+                                    aria-label="Previous image"
+                                ></button>
+                                <div class="carousel-center">
+                                    <div
+                                        class="carousel-indicators"
+                                        role="tablist"
+                                        aria-label="Image pagination"
+                                    >
+                                        <button
+                                            class="carousel-dot is-active"
+                                            role="tab"
+                                            aria-selected="true"
+                                            aria-label="Go to image 1"
+                                        ></button>
+                                        <button
+                                            class="carousel-dot"
+                                            role="tab"
+                                            aria-label="Go to image 2"
+                                        ></button>
+                                        <button
+                                            class="carousel-dot"
+                                            role="tab"
+                                            aria-label="Go to image 3"
+                                        ></button>
+                                    </div>
+                                    <div
+                                        class="carousel-progress"
+                                        aria-hidden="true"
+                                    >
+                                        <div
+                                            class="carousel-progress-fill"
+                                        ></div>
+                                    </div>
+                                </div>
+                                <button
+                                    class="carousel-btn next"
+                                    aria-label="Next image"
+                                ></button>
+                            </div>
+                        </div>
+                        <div class="project-header">
+                            <div class="project-title">
+                                <h1>🔀 Deterministic Finite Automaton</h1>
+                            </div>
+                        </div>
+                        <div class="project-meta">
+                            <button
+                                class="project-icon glass-button"
+                                aria-label="Project type: Code"
+                            >
+                                <img
+                                    src="assets/icons/code.svg"
+                                    alt="Project icon"
+                                    width="26"
+                                    height="26"
+                                />
+                            </button>
+                            <p class="project-category">
+                                <strong>Full-Stack</strong>
+                                <span class="separator">·</span>
+                                HTTPS URL Extractor Using DFA
+                            </p>
+                            <span class="project-date">2021</span>
+                        </div>
+                        <div class="tech-stack">
+                            <div class="tech-row">
+                                <span class="tech-tag">🐍 Python</span>
+                                <span class="tech-tag">🍷 Flask</span>
+                                <span class="tech-tag">🖼️ HTML</span>
+                                <span class="tech-tag">🎨 CSS</span>
+                                <span class="tech-tag">🔀 DFA</span>
+                                <span class="tech-tag">🕸️ Web Scraping</span>
+                                <span class="tech-tag">🌐 Web App</span>
+                                <span class="tech-tag">📱 Responsive</span>
+                            </div>
+                        </div>
+                        <div class="detail-desc-stack">
+                            <div class="project-description glass-container">
+                                <div class="description-content">
+                                    <p>
+                                        🤖
+                                        <span class="bold-text">Overview</span>
+                                        <br /><br />
+                                        📌 This is a web application that
+                                        demonstrates the practical
+                                        implementation of automata theory in
+                                        computer science.
+                                        <br /><br />
+                                        📌 The project features a deterministic
+                                        finite automaton (DFA) designed to parse
+                                        and extract secure HTTPS external links
+                                        from web pages.
+                                        <br /><br />
+                                        📌 Built with Flask and Python, the
+                                        application takes a URL as input,
+                                        fetches the webpage content, and uses a
+                                        custom-built finite state machine to
+                                        identify and validate HTTPS URLs while
+                                        filtering out internal links.
+                                        <br /><br />
+                                        📌 The automaton processes each
+                                        character of the HTML content through
+                                        defined states and transitions,
+                                        showcasing how theoretical computer
+                                        science concepts can be applied to
+                                        real-world web scraping and URL
+                                        validation tasks.
+                                        <br /><br />
+                                        📌 This educational tool combines web
+                                        development with formal language theory,
+                                        making it an excellent example of how
+                                        automata can be used for pattern
+                                        recognition and text processing in
+                                        modern applications.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="project-description glass-container">
+                                <div class="description-content">
+                                    <p>
+                                        🩷
+                                        <span class="bold-text">Features</span>
+                                        <br /><br />
+                                        🌐
+                                        <span class="bold-text"
+                                            >Automata Implementation:</span
                                         >
-                                            <div class="project-media">
-                                                <div
-                                                    class="carousel"
-                                                    role="region"
-                                                    aria-roledescription="carousel"
-                                                    aria-label="Deterministic Finite Automaton project gallery"
-                                                    tabindex="0"
-                                                >
-                                                    <div class="carousel-viewport">
-                                                        <div class="carousel-track">
-                                                            <div class="carousel-slide is-active">
-                                                                <img
-                                                                    src="assets/projects/deterministic-finite-automaton/deterministic-finite-automaton-1.webp"
-                                                                    alt="Deterministic Finite Automaton screenshot 1"
-                                                                    width="1920"
-                                                                    height="1080"
-                                                                    loading="lazy"
-                                                                    decoding="async"
-                                                                />
-                                                            </div>
-                                                            <div class="carousel-slide">
-                                                                <img
-                                                                    src="assets/projects/deterministic-finite-automaton/deterministic-finite-automaton-2.webp"
-                                                                    alt="Deterministic Finite Automaton screenshot 2"
-                                                                    width="1920"
-                                                                    height="1080"
-                                                                    loading="lazy"
-                                                                    decoding="async"
-                                                                />
-                                                            </div>
-                                                            <div class="carousel-slide">
-                                                                <img
-                                                                    src="assets/projects/deterministic-finite-automaton/deterministic-finite-automaton-3.webp"
-                                                                    alt="Deterministic Finite Automaton screenshot 3"
-                                                                    width="1920"
-                                                                    height="1080"
-                                                                    loading="lazy"
-                                                                    decoding="async"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div
-                                                class="carousel-controls"
-                                                aria-label="Carousel controls"
-                                            >
-                                                <div class="carousel-controls-top">
-                                                    <button
-                                                        class="carousel-btn prev"
-                                                        aria-label="Previous image"
-                                                    ></button>
-                                                    <div class="carousel-center">
-                                                        <div
-                                                            class="carousel-indicators"
-                                                            role="tablist"
-                                                            aria-label="Image pagination"
-                                                        >
-                                                            <button
-                                                                class="carousel-dot is-active"
-                                                                role="tab"
-                                                                aria-selected="true"
-                                                                aria-label="Go to image 1"
-                                                            ></button>
-                                                            <button
-                                                                class="carousel-dot"
-                                                                role="tab"
-                                                                aria-label="Go to image 2"
-                                                            ></button>
-                                                            <button
-                                                                class="carousel-dot"
-                                                                role="tab"
-                                                                aria-label="Go to image 3"
-                                                            ></button>
-                                                        </div>
-                                                        <div
-                                                            class="carousel-progress"
-                                                            aria-hidden="true"
-                                                        >
-                                                            <div
-                                                                class="carousel-progress-fill"
-                                                            ></div>
-                                                        </div>
-                                                    </div>
-                                                    <button
-                                                        class="carousel-btn next"
-                                                        aria-label="Next image"
-                                                    ></button>
-                                                </div>
-                                            </div>
-                                            <div class="project-header">
-                                                <div class="project-title">
-                                                    <h2>🔀 Deterministic Finite Automaton</h2>
-                                                </div>
-                                            </div>
-                                            <div class="project-meta">
-                                                <button
-                                                    class="project-icon glass-button"
-                                                    aria-label="Project type: Code"
-                                                >
-                                                    <img
-                                                        src="assets/icons/code.svg"
-                                                        alt="Project icon"
-                                                        width="26"
-                                                        height="26"
-                                                    />
-                                                </button>
-                                                <p class="project-category">
-                                                    <strong>Full-Stack</strong>
-                                                    <span class="separator">·</span>
-                                                    HTTPS URL Extractor Using DFA
-                                                </p>
-                                                <span class="project-date">2021</span>
-                                            </div>
-                                            <div class="tech-stack">
-                                                <div class="tech-row">
-                                                    <span class="tech-tag">🐍 Python</span>
-                                                    <span class="tech-tag">🍷 Flask</span>
-                                                    <span class="tech-tag">🖼️ HTML</span>
-                                                    <span class="tech-tag">🎨 CSS</span>
-                                                    <span class="tech-tag">🔀 DFA</span>
-                                                    <span class="tech-tag">🕸️ Web Scraping</span>
-                                                    <span class="tech-tag">🌐 Web App</span>
-                                                    <span class="tech-tag">📱 Responsive</span>
-                                                </div>
-                                            </div>
-                                            <div class="detail-desc-stack">
-                                        <div class="project-description glass-container">
-                                            <div class="description-content">
-                                                <p>
-                                                    🤖 <span class="bold-text">Overview</span>
-                                                    <br /><br />
-                                                    📌 This is a web application that
-                                                    demonstrates the practical implementation of
-                                                    automata theory in computer science.
-                                                    <br /><br />
-                                                    📌 The project features a deterministic
-                                                    finite automaton (DFA) designed to parse and
-                                                    extract secure HTTPS external links from web
-                                                    pages.
-                                                    <br /><br />
-                                                    📌 Built with Flask and Python, the
-                                                    application takes a URL as input, fetches
-                                                    the webpage content, and uses a custom-built
-                                                    finite state machine to identify and
-                                                    validate HTTPS URLs while filtering out
-                                                    internal links.
-                                                    <br /><br />
-                                                    📌 The automaton processes each character of
-                                                    the HTML content through defined states and
-                                                    transitions, showcasing how theoretical
-                                                    computer science concepts can be applied to
-                                                    real-world web scraping and URL validation
-                                                    tasks.
-                                                    <br /><br />
-                                                    📌 This educational tool combines web
-                                                    development with formal language theory,
-                                                    making it an excellent example of how
-                                                    automata can be used for pattern recognition
-                                                    and text processing in modern applications.
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div class="project-description glass-container">
-                                            <div class="description-content">
-                                                <p>
-                                                    🩷 <span class="bold-text">Features</span>
-                                                    <br /><br />
-                                                    🌐
-                                                    <span class="bold-text"
-                                                    >Automata Implementation:</span
-                                                    >
-                                                    Demonstrates the practical implementation of
-                                                    automata theory in computer science.
-                                                    <br /><br />
-                                                    🔄
-                                                    <span class="bold-text"
-                                                    >DFA Link Extraction:</span
-                                                    >
-                                                    Features a deterministic finite automaton
-                                                    (DFA) designed to parse and extract secure
-                                                    HTTPS external links. <br /><br />
-                                                    ⚙️
-                                                    <span class="bold-text"
-                                                    >Custom State Machine:</span
-                                                    >
-                                                    Uses a custom-built finite state machine to
-                                                    identify and validate HTTPS URLs while
-                                                    filtering out internal links. <br /><br />
-                                                    🔤
-                                                    <span class="bold-text"
-                                                    >Character Processing:</span
-                                                    >
-                                                    Processes each character of the HTML content
-                                                    through defined states and transitions.
-                                                    <br /><br />
-                                                    🎓
-                                                    <span class="bold-text"
-                                                    >Educational Tool:</span
-                                                    >
-                                                    Combines web development with formal
-                                                    language theory for pattern recognition and
-                                                    text processing.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                            <div class="project-buttons">
-                                                <div
-                                                    class="project-link glass-pill"
-                                                    role="link"
-                                                    tabindex="0"
-                                                    data-url="https://github.com/IHyperLight/Automata-finito-determinista"
-                                                >
-                                                    <img
-                                                        src="assets/icons/github.svg"
-                                                        alt="GitHub"
-                                                        width="30"
-                                                        height="30"
-                                                    />
-                                                    <span>Code On GitHub</span>
-                                                    <img
-                                                        src="assets/icons/external.svg"
-                                                        alt="External"
-                                                        width="16"
-                                                        height="16"
-                                                    />
-                                                </div>
-                                                <div
-                                                    class="project-link glass-pill download-btn"
-                                                    role="button"
-                                                    tabindex="0"
-                                                    data-download="https://automata-finito-determinista.onrender.com"
-                                                >
-                                                    <img
-                                                        src="assets/icons/try.svg"
-                                                        alt="Download"
-                                                        width="28"
-                                                        height="28"
-                                                    />
-                                                    <span>View Now</span>
-                                                    <img
-                                                        src="assets/icons/external.svg"
-                                                        alt="External"
-                                                        width="16"
-                                                        height="16"
-                                                    />
-                                                </div>
-                                            </div>
-                                    <div class="detail-gallery glass-container">
-                                        <div class="detail-gallery-scroll" aria-label="Project gallery">
-                                            <button
-                                                class="detail-gallery-item"
-                                                type="button"
-                                                data-index="0"
-                                                aria-label="View image 1 of 3 fullscreen"
-                                            >
-                                                <img
-                                                    src="assets/projects/deterministic-finite-automaton/deterministic-finite-automaton-1.webp"
-                                                    alt="Deterministic Finite Automaton screenshot 1"
-                                                    width="1920"
-                                                    height="1080"
-                                                    loading="lazy"
-                                                    decoding="async"
-                                                />
-                                            </button>
-                                            <button
-                                                class="detail-gallery-item"
-                                                type="button"
-                                                data-index="1"
-                                                aria-label="View image 2 of 3 fullscreen"
-                                            >
-                                                <img
-                                                    src="assets/projects/deterministic-finite-automaton/deterministic-finite-automaton-2.webp"
-                                                    alt="Deterministic Finite Automaton screenshot 2"
-                                                    width="1920"
-                                                    height="1080"
-                                                    loading="lazy"
-                                                    decoding="async"
-                                                />
-                                            </button>
-                                            <button
-                                                class="detail-gallery-item"
-                                                type="button"
-                                                data-index="2"
-                                                aria-label="View image 3 of 3 fullscreen"
-                                            >
-                                                <img
-                                                    src="assets/projects/deterministic-finite-automaton/deterministic-finite-automaton-3.webp"
-                                                    alt="Deterministic Finite Automaton screenshot 3"
-                                                    width="1920"
-                                                    height="1080"
-                                                    loading="lazy"
-                                                    decoding="async"
-                                                />
-                                            </button>
-                                        </div>
-                                        <div class="scroll-indicator">
-                                            <div class="scroll-track">
-                                                <div class="scroll-thumb"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                        </article>
+                                        Demonstrates the practical
+                                        implementation of automata theory in
+                                        computer science.
+                                        <br /><br />
+                                        🔄
+                                        <span class="bold-text"
+                                            >DFA Link Extraction:</span
+                                        >
+                                        Features a deterministic finite
+                                        automaton (DFA) designed to parse and
+                                        extract secure HTTPS external links.
+                                        <br /><br />
+                                        ⚙️
+                                        <span class="bold-text"
+                                            >Custom State Machine:</span
+                                        >
+                                        Uses a custom-built finite state machine
+                                        to identify and validate HTTPS URLs
+                                        while filtering out internal links.
+                                        <br /><br />
+                                        🔤
+                                        <span class="bold-text"
+                                            >Character Processing:</span
+                                        >
+                                        Processes each character of the HTML
+                                        content through defined states and
+                                        transitions.
+                                        <br /><br />
+                                        🎓
+                                        <span class="bold-text"
+                                            >Educational Tool:</span
+                                        >
+                                        Combines web development with formal
+                                        language theory for pattern recognition
+                                        and text processing.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="project-buttons">
+                            <div
+                                class="project-link glass-pill"
+                                role="link"
+                                tabindex="0"
+                                data-url="https://github.com/IHyperLight/Automata-finito-determinista"
+                            >
+                                <img
+                                    src="assets/icons/github.svg"
+                                    alt="GitHub"
+                                    width="30"
+                                    height="30"
+                                />
+                                <span>Code On GitHub</span>
+                                <img
+                                    src="assets/icons/external.svg"
+                                    alt="External"
+                                    width="16"
+                                    height="16"
+                                />
+                            </div>
+                            <div
+                                class="project-link glass-pill download-btn"
+                                role="button"
+                                tabindex="0"
+                                data-download="https://automata-finito-determinista.onrender.com"
+                            >
+                                <img
+                                    src="assets/icons/try.svg"
+                                    alt="Download"
+                                    width="28"
+                                    height="28"
+                                />
+                                <span>View Now</span>
+                                <img
+                                    src="assets/icons/external.svg"
+                                    alt="External"
+                                    width="16"
+                                    height="16"
+                                />
+                            </div>
+                        </div>
+                        <div class="detail-gallery glass-container">
+                            <div
+                                class="detail-gallery-scroll"
+                                aria-label="Project gallery"
+                            >
+                                <button
+                                    class="detail-gallery-item"
+                                    type="button"
+                                    data-index="0"
+                                    aria-label="View image 1 of 3 fullscreen"
+                                >
+                                    <img
+                                        src="assets/projects/deterministic-finite-automaton/deterministic-finite-automaton-1.webp"
+                                        alt="Deterministic Finite Automaton screenshot 1"
+                                        width="1920"
+                                        height="1080"
+                                        loading="lazy"
+                                        decoding="async"
+                                    />
+                                </button>
+                                <button
+                                    class="detail-gallery-item"
+                                    type="button"
+                                    data-index="1"
+                                    aria-label="View image 2 of 3 fullscreen"
+                                >
+                                    <img
+                                        src="assets/projects/deterministic-finite-automaton/deterministic-finite-automaton-2.webp"
+                                        alt="Deterministic Finite Automaton screenshot 2"
+                                        width="1920"
+                                        height="1080"
+                                        loading="lazy"
+                                        decoding="async"
+                                    />
+                                </button>
+                                <button
+                                    class="detail-gallery-item"
+                                    type="button"
+                                    data-index="2"
+                                    aria-label="View image 3 of 3 fullscreen"
+                                >
+                                    <img
+                                        src="assets/projects/deterministic-finite-automaton/deterministic-finite-automaton-3.webp"
+                                        alt="Deterministic Finite Automaton screenshot 3"
+                                        width="1920"
+                                        height="1080"
+                                        loading="lazy"
+                                        decoding="async"
+                                    />
+                                </button>
+                            </div>
+                            <div class="scroll-indicator">
+                                <div class="scroll-track">
+                                    <div class="scroll-thumb"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
                 </section>
 
-            <nav class="detail-nav" aria-label="Section navigation">
-                <a class="detail-nav-link" href="restful-api.html">
-                    <span class="detail-nav-dir">← Previous</span>
-                    <span class="detail-nav-title">🔗 RESTful API</span>
-                </a>
-                <a class="detail-nav-link is-next" href="analyzer.html">
-                    <span class="detail-nav-dir">Next →</span>
-                    <span class="detail-nav-title">📚 Lexical, Syntactic &amp; Semantic Analyzer</span>
-                </a>
-            </nav>
+                <nav class="detail-nav" aria-label="Section navigation">
+                    <a class="detail-nav-link" href="restful-api.html">
+                        <span class="detail-nav-dir">← Previous</span>
+                        <span class="detail-nav-title">🔗 RESTful API</span>
+                    </a>
+                    <a class="detail-nav-link is-next" href="analyzer.html">
+                        <span class="detail-nav-dir">Next →</span>
+                        <span class="detail-nav-title"
+                            >📚 Lexical, Syntactic &amp; Semantic Analyzer</span
+                        >
+                    </a>
+                </nav>
             </main>
         </div>
 
         <button
-                    class="scroll-top-button"
-                    type="button"
-                    aria-label="Back to top"
-                    title="Back to top"
-                >
-                    <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        aria-hidden="true"
-                    >
-                        <path
-                            d="M12 19V5M12 5L5 12M12 5L19 12"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        />
-                    </svg>
-                </button>
+            class="scroll-top-button"
+            type="button"
+            aria-label="Back to top"
+            title="Back to top"
+        >
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+            >
+                <path
+                    d="M12 19V5M12 5L5 12M12 5L19 12"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                />
+            </svg>
+        </button>
 
         <script src="sections.js"></script>
         <script src="script.js"></script>
