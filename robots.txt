@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /thanks.html
+
+Sitemap: https://ihyperlight.github.io/Bryan-Morales-Portfolio/sitemap.xml
