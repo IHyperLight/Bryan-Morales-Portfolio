@@ -7,7 +7,7 @@ import { dirname, join } from "node:path";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (f) => readFileSync(join(ROOT, f), "utf8");
 
-const SITE_URL = "https://ihyperlight.github.io/Bryan-Morales-Portfolio";
+const SITE_URL = "https://bryan-morales-portfolio.netlify.app";
 const AUTHOR = "Bryan Morales";
 
 const FONT_URL =
@@ -281,7 +281,7 @@ function page({
         <link rel="canonical" href="${canonical}" />
 
         <meta property="og:type" content="article" />
-        <meta property="og:site_name" content="${AUTHOR} — Portfolio" />
+        <meta property="og:site_name" content="${AUTHOR} Portfolio" />
         <meta property="og:title" content="${escapeAttr(title)}" />
         <meta property="og:description" content="${escapeAttr(description)}" />
         <meta property="og:url" content="${canonical}" />
@@ -372,7 +372,7 @@ const written = [];
 writeFileSync(
     join(ROOT, "about.html"),
     page({
-        title: `About ${AUTHOR} — Full-Stack Developer & UX/UI Designer`,
+        title: `About ${AUTHOR} | Full-Stack Developer & UX/UI Designer`,
         description:
             "AI Engineering student and freelance full-stack developer from Mexico. Skills, languages, certifications and contact details.",
         canonical: `${SITE_URL}/about.html`,
@@ -431,7 +431,7 @@ projects.forEach((p, i) => {
     writeFileSync(
         join(ROOT, `${p.slug}.html`),
         page({
-            title: `${name} — ${AUTHOR}`,
+            title: `${name} | ${AUTHOR}`,
             description: `${desc}${p.date ? ` (${p.date})` : ""}. A project by ${AUTHOR}.`,
             canonical: `${SITE_URL}/${p.slug}.html`,
             bodyClass: "detail-page detail-project",
@@ -453,7 +453,7 @@ writeFileSync(
     join(ROOT, "contact.html"),
     page({
         title: `Contact ${AUTHOR}`,
-        description: `Send a message to ${AUTHOR} — freelance full-stack developer and UX/UI designer.`,
+        description: `Send a message to ${AUTHOR}, freelance full-stack developer and UX/UI designer.`,
         canonical: `${SITE_URL}/contact.html`,
         bodyClass: "detail-page detail-contact",
         dataPage: "contact.html",
@@ -470,7 +470,7 @@ written.push("contact.html");
 writeFileSync(
     join(ROOT, "thanks.html"),
     page({
-        title: `Message sent — ${AUTHOR}`,
+        title: `Message sent | ${AUTHOR}`,
         description: `Thanks for getting in touch with ${AUTHOR}.`,
         canonical: `${SITE_URL}/thanks.html`,
         bodyClass: "detail-page detail-thanks",
@@ -488,7 +488,7 @@ writeFileSync(
                     <span class="thanks-mark" aria-hidden="true">✉️</span>
                     <h1 class="contact-title">Message sent</h1>
                     <p class="contact-intro">
-                        Thanks for reaching out — I'll get back to you as soon as
+                        Thanks for reaching out. I'll get back to you as soon as
                         I can.
                     </p>
                 </section>

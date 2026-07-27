@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /thanks.html
 
-Sitemap: https://ihyperlight.github.io/Bryan-Morales-Portfolio/sitemap.xml
+Sitemap: https://bryan-morales-portfolio.netlify.app/sitemap.xml

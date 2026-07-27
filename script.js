@@ -441,8 +441,8 @@ const carouselViewportObserver = (() => {
         return observer;
     };
 
-    const observe = (projectContainer, carouselState) => {
-        if (isDestroying || !projectContainer || !carouselState) return;
+    const observe = (target, carouselState) => {
+        if (isDestroying || !target || !carouselState) return;
 
         try {
             const obs = initObserver();
@@ -450,25 +450,25 @@ const carouselViewportObserver = (() => {
 
             const isInitialized = { value: false };
 
-            observedCarousels.set(projectContainer, {
+            observedCarousels.set(target, {
                 carouselState,
                 isInitialized,
             });
 
-            obs.observe(projectContainer);
+            obs.observe(target);
         } catch (error) {
             console.warn("Failed to observe carousel:", error);
         }
     };
 
-    const unobserve = (projectContainer) => {
-        if (!projectContainer) return;
+    const unobserve = (target) => {
+        if (!target) return;
 
         try {
             if (observer) {
-                observer.unobserve(projectContainer);
+                observer.unobserve(target);
             }
-            observedCarousels.delete(projectContainer);
+            observedCarousels.delete(target);
         } catch (error) {
             console.warn("Failed to unobserve carousel:", error);
         }
@@ -1295,7 +1295,7 @@ function initializeSingleCarousel(projectContainer) {
         },
     };
 
-    carouselViewportObserver.observe(projectContainer, carouselState);
+    carouselViewportObserver.observe(media, carouselState);
 
     exposeCarouselState(projectContainer, carouselState);
 }
