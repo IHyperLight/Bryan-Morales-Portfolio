@@ -2635,6 +2635,7 @@ const spotlightEffect = (() => {
     const spotlightSelectors = [
         ".profile-section.glass-card",
         ".project-item.glass-card",
+        ".contact-section.glass-card",
     ];
 
     let spotlightContainers = [];

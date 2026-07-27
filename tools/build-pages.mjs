@@ -369,7 +369,7 @@ writeFileSync(
         title: `About ${AUTHOR} | Full-Stack Developer & UX/UI Designer`,
         description:
             "AI Engineering student and freelance full-stack developer from Mexico. Skills, languages, certifications and contact details.",
-        canonical: `${SITE_URL}/about.html`,
+        canonical: `${SITE_URL}/about`,
         bodyClass: "detail-page detail-about",
         dataPage: "about.html",
         main: `${topbar("About Me")}
@@ -427,7 +427,7 @@ projects.forEach((p, i) => {
         page({
             title: `${name} | ${AUTHOR}`,
             description: `${desc}${p.date ? ` (${p.date})` : ""}. A project by ${AUTHOR}.`,
-            canonical: `${SITE_URL}/${p.slug}.html`,
+            canonical: `${SITE_URL}/${p.slug}`,
             bodyClass: "detail-page detail-project",
             dataPage: `${p.slug}.html`,
             main: `${topbar(name)}
@@ -448,7 +448,7 @@ writeFileSync(
     page({
         title: `Contact ${AUTHOR}`,
         description: `Send a message to ${AUTHOR}, freelance full-stack developer and UX/UI designer.`,
-        canonical: `${SITE_URL}/contact.html`,
+        canonical: `${SITE_URL}/contact`,
         bodyClass: "detail-page detail-contact",
         dataPage: "contact.html",
         main: `${topbar("Contact")}
@@ -466,7 +466,7 @@ writeFileSync(
     page({
         title: `Message sent | ${AUTHOR}`,
         description: `Thanks for getting in touch with ${AUTHOR}.`,
-        canonical: `${SITE_URL}/thanks.html`,
+        canonical: `${SITE_URL}/thanks`,
         bodyClass: "detail-page detail-thanks",
         dataPage: "thanks.html",
         noindex: true,
@@ -491,7 +491,12 @@ writeFileSync(
 );
 written.push("thanks.html");
 
-const indexable = ["", ...written.filter((f) => f !== "thanks.html")];
+const indexable = [
+    "",
+    ...written
+        .filter((f) => f !== "thanks.html")
+        .map((f) => f.replace(/\.html$/, "")),
+];
 writeFileSync(
     join(ROOT, "sitemap.xml"),
     `<?xml version="1.0" encoding="UTF-8"?>
@@ -504,7 +509,7 @@ writeFileSync(
     join(ROOT, "robots.txt"),
     `User-agent: *
 Allow: /
-Disallow: /thanks.html
+Disallow: /thanks
 
 Sitemap: ${SITE_URL}/sitemap.xml
 `,
