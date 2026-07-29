@@ -140,7 +140,7 @@ function forDetailPage(block) {
             "<h1>$1</h1>",
         )
         .replace(
-            /<h2 class="contact-title">([\s\S]*?)<\/h2>/,
+            /<h2 class="contact-title">\s*<a href="[^"]*"\s*>([\s\S]*?)<\/a\s*>\s*<\/h2>/,
             '<h1 class="contact-title">$1</h1>',
         )
         .replace(
@@ -443,6 +443,14 @@ ${prevNext(i + 1)}
     written.push(`${p.slug}.html`);
 });
 
+const contactDetail = forDetailPage(contact);
+if (!contactDetail.includes('<h1 class="contact-title">')) {
+    throw new Error(
+        "contact-section: el título no se promovió a <h1>. " +
+            'Revisa el formato del <h2 class="contact-title"> en index.html.',
+    );
+}
+
 writeFileSync(
     join(ROOT, "contact.html"),
     page({
@@ -454,7 +462,7 @@ writeFileSync(
         main: `${topbar("Contact")}
 
             <main class="portfolio-main">
-${reindent(forDetailPage(contact), 16)}
+${reindent(contactDetail, 16)}
 ${prevNext(cycle.length - 1)}
             </main>`,
     }),

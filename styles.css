@@ -21,9 +21,6 @@
         #2d2d2d 100%
     );
 
-    --obsidian-accent-purple: #a855f7;
-    --obsidian-accent-violet: #8b5cf6;
-
     --obsidian-border: rgba(255, 255, 255, 0.1);
     --obsidian-border-hover: rgba(255, 255, 255, 0.2);
 
@@ -44,6 +41,25 @@
         var(--btn-gradient-end)
     );
 
+    --btn-gradient-purple: linear-gradient(
+        135deg,
+        #4c1d95 0%,
+        #5b21b6 25%,
+        #8b2adf 50%,
+        #d946ef 75%,
+        #ec4899 100%
+    );
+    --btn-gradient-purple-hover: linear-gradient(
+        135deg,
+        #5b21b6 0%,
+        #6d28d9 15%,
+        #7c3aed 30%,
+        #8b5cf6 45%,
+        #a855f7 65%,
+        #c084fc 80%,
+        #f0abfc 100%
+    );
+
     --text-primary: rgb(208, 208, 208);
     --text-secondary: #a1a1a1;
 
@@ -62,6 +78,23 @@
     --text-primary-25: rgba(208, 208, 208, 0.25);
     --text-primary-30: rgba(208, 208, 208, 0.3);
     --text-primary-70: rgba(208, 208, 208, 0.7);
+
+    --scroll-track-bg: linear-gradient(
+        180deg,
+        rgba(124, 58, 237, 0.3) 0%,
+        rgba(139, 92, 246, 0.3) 35%,
+        rgba(217, 70, 239, 0.3) 70%,
+        rgba(236, 72, 153, 0.3) 100%
+    );
+    --scroll-track-bg-hover: linear-gradient(
+        180deg,
+        rgba(124, 58, 237, 0.6) 0%,
+        rgba(139, 92, 246, 0.6) 35%,
+        rgba(217, 70, 239, 0.6) 70%,
+        rgba(236, 72, 153, 0.6) 100%
+    );
+    --scroll-thumb-bg: rgba(208, 208, 208, 0.6);
+    --scroll-thumb-bg-hover: rgba(208, 208, 208, 0.8);
 
     --space-xs: 4px;
     --space-sm: 8px;
@@ -90,6 +123,7 @@
     --position-right: clamp(32px, 8vw, 48px);
 
     --button-size: 50px;
+    --floating-button-size: 44px;
     --button-padding: 10px;
     --button-radius-sm: 10px;
     --button-radius-md: 15px;
@@ -123,6 +157,10 @@
 
     --hover-tint: var(--text-primary-22);
     --focus-ring: var(--text-primary-70);
+
+    --hover-stroke: rgba(217, 70, 239, 0.6);
+    --hover-glow: 0 0 12px rgba(217, 70, 239, 0.22);
+    --current-stroke: #a855f7;
 
     --gpu-layer: translateZ(0);
 
@@ -209,7 +247,8 @@
 }
 
 .project-title :is(h1, h2) a,
-.profile-name a {
+.profile-name a,
+.contact-title a {
     color: inherit;
     text-decoration: none;
     display: inline-block;
@@ -219,13 +258,15 @@
 }
 
 .project-title :is(h1, h2) a:hover,
-.profile-name a:hover {
+.profile-name a:hover,
+.contact-title a:hover {
     opacity: var(--opacity-70);
     transform: var(--transform-hover-lift-sm);
 }
 
 .project-title :is(h1, h2) a:focus-visible,
-.profile-name a:focus-visible {
+.profile-name a:focus-visible,
+.contact-title a:focus-visible {
     outline: 2px solid var(--focus-ring);
     outline-offset: var(--outline-offset);
     border-radius: var(--radius-sm);
@@ -235,8 +276,8 @@
     position: fixed;
     right: var(--position-right);
     bottom: clamp(20px, 5vw, 40px);
-    width: var(--button-size);
-    height: var(--button-size);
+    width: var(--floating-button-size);
+    height: var(--floating-button-size);
     padding: var(--button-padding);
     border: none;
     border-radius: var(--button-radius-md);
@@ -275,7 +316,7 @@
 }
 
 .scroll-top-button:focus-visible {
-    outline: 2px solid var(--text-primary);
+    outline: 2px solid var(--focus-ring);
     outline-offset: var(--outline-offset);
 }
 
@@ -420,8 +461,8 @@ img[src$=".webp"] {
     position: fixed;
     top: var(--position-top);
     right: var(--position-right);
-    width: var(--button-size);
-    height: var(--button-size);
+    width: var(--floating-button-size);
+    height: var(--floating-button-size);
     padding: var(--button-padding);
     border-radius: var(--button-radius-md);
     background: linear-gradient(to right, rgb(28, 28, 28), rgb(45, 45, 45));
@@ -526,9 +567,9 @@ img[src$=".webp"] {
 .theme-toggle-button {
     position: fixed;
     top: var(--position-top);
-    right: calc(var(--position-right) + 60px);
-    width: var(--button-size);
-    height: var(--button-size);
+    right: calc(var(--position-right) + var(--floating-button-size) + 10px);
+    width: var(--floating-button-size);
+    height: var(--floating-button-size);
     padding: var(--button-padding);
     border-radius: var(--button-radius-md);
     background: linear-gradient(to right, rgb(28, 28, 28), rgb(45, 45, 45));
@@ -575,7 +616,7 @@ img[src$=".webp"] {
 }
 
 .theme-toggle-button:focus-visible {
-    outline: 2px solid rgba(124, 58, 237, 0.6);
+    outline: 2px solid var(--focus-ring);
     outline-offset: var(--outline-offset);
 }
 
@@ -650,8 +691,6 @@ body.obsidian-theme .theme-icon-light {
     padding-right: 16px;
     margin-right: -8px;
     scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #a855f7 transparent;
     -webkit-mask-image: linear-gradient(
         to bottom,
         rgba(0, 0, 0, 1) 0%,
@@ -675,30 +714,45 @@ body.obsidian-theme .theme-icon-light {
         mask-image 0.15s ease-out;
 }
 
+html::-webkit-scrollbar {
+    width: 10px;
+}
+
 .nav-menu-list::-webkit-scrollbar {
     width: 6px;
 }
 
+html::-webkit-scrollbar-track,
 .nav-menu-list::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: var(--border-radius-sm-alt);
+    background: var(--scroll-track-bg);
+    border-radius: var(--border-radius-max);
 }
 
+html::-webkit-scrollbar-thumb,
 .nav-menu-list::-webkit-scrollbar-thumb {
-    background: linear-gradient(
-        180deg,
-        #7c3aed 0%,
-        #a855f7 35%,
-        #d946ef 65%,
-        #ec4899 100%
-    );
-    border-radius: var(--border-radius-sm-alt);
-    transition: opacity var(--transition-fast);
-    opacity: var(--opacity-70);
+    background: var(--scroll-thumb-bg);
+    border-radius: var(--border-radius-max);
+    transition: background var(--transition-fast);
 }
 
+html::-webkit-scrollbar-thumb:hover,
 .nav-menu-list::-webkit-scrollbar-thumb:hover {
-    opacity: var(--opacity-90);
+    background: var(--scroll-thumb-bg-hover);
+}
+
+html::-webkit-scrollbar-thumb:active,
+.nav-menu-list::-webkit-scrollbar-thumb:active {
+    background: var(--text-primary);
+}
+
+/* Chrome drops every ::-webkit-scrollbar rule as soon as it sees
+   scrollbar-color, so the flat fallback is fenced off for Firefox only. */
+@supports not selector(::-webkit-scrollbar) {
+    html,
+    .nav-menu-list {
+        scrollbar-width: thin;
+        scrollbar-color: var(--scroll-thumb-bg) rgba(139, 92, 246, 0.3);
+    }
 }
 
 .nav-menu-item {
@@ -710,7 +764,6 @@ body.obsidian-theme .theme-icon-light {
         rgba(0, 0, 0, 0.4) 0%,
         rgba(255, 255, 255, 0.08) 100%
     );
-    border: 1px solid rgba(255, 255, 255, 0.14);
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.08),
         0 1px 2px rgba(0, 0, 0, 0.2);
@@ -718,21 +771,27 @@ body.obsidian-theme .theme-icon-light {
     color: var(--text-primary);
     transition: all var(--transition-fast);
     cursor: var(--cursor-pointer);
-    position: relative;
     overflow: hidden;
 }
 
-.nav-menu-item::before {
+.nav-menu-item,
+.detail-back,
+.detail-nav-link {
+    position: relative;
+    border: none;
+}
+
+.nav-menu-item::before,
+.detail-back::before,
+.detail-nav-link::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: transparent;
-    opacity: 0;
-    transition: opacity var(--transition-fast);
+    inset: 0;
+    border: var(--border-width) var(--border-style) var(--glass-border);
+    border-left: none;
+    border-radius: inherit;
     pointer-events: var(--pointer-events-none);
+    transition: border-color var(--transition-fast);
 }
 
 .nav-menu-item:hover {
@@ -741,20 +800,18 @@ body.obsidian-theme .theme-icon-light {
         rgba(0, 0, 0, 0.45) 0%,
         rgba(255, 255, 255, 0.12) 100%
     );
-    border-color: #a855f7;
-    border-width: 2px;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.12),
-        0 2px 4px rgba(0, 0, 0, 0.25);
-    transform: translateX(4px);
+        0 2px 4px rgba(0, 0, 0, 0.25),
+        var(--hover-glow);
 }
 
 .nav-menu-item:hover::before {
-    opacity: 0;
+    border-color: var(--hover-stroke);
 }
 
 .nav-menu-item:active {
-    transform: translateX(2px) scale(0.98);
+    transform: scale(0.98);
 }
 
 .nav-item-content {
@@ -820,7 +877,7 @@ body.obsidian-theme .theme-icon-light {
 
 .menu-button:focus-visible,
 .nav-menu-item:focus-visible {
-    outline: 2px solid rgba(124, 58, 237, 0.6);
+    outline: 2px solid var(--focus-ring);
     outline-offset: var(--outline-offset);
 }
 
@@ -1007,6 +1064,8 @@ body.menu-open {
     transition:
         transform var(--transition-fast),
         background var(--transition-fast),
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
         width var(--transition-smooth),
         height var(--transition-smooth),
         padding var(--transition-smooth);
@@ -1052,11 +1111,12 @@ body.menu-open {
 
 .certificate-item.glass-pill:hover {
     background: var(--text-primary-12);
-    transform: var(--transform-hover-lift-sm);
+    transform: var(--transform-hover-lift);
 }
 
 .contact-btn.glass-bubble:hover::after,
 .social-btn.glass-pill:hover::after,
+.certificate-item.glass-pill:hover::after,
 .project-icon.glass-button:hover::after {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -1065,11 +1125,6 @@ body.menu-open {
 .project-link.glass-pill:hover::after {
     opacity: 0 !important;
     display: none !important;
-}
-
-.certificate-item.glass-pill:hover::after {
-    opacity: var(--opacity-60);
-    transform: translateY(0) scale(1);
 }
 
 .contact-btn.glass-bubble:active,
@@ -2091,7 +2146,7 @@ body.menu-open {
 }
 
 .certificate-item.glass-pill:focus-visible {
-    outline: 2px solid var(--text-primary);
+    outline: 2px solid var(--focus-ring);
     outline-offset: var(--outline-offset);
 }
 
@@ -2508,14 +2563,14 @@ body.menu-open {
     position: relative;
 }
 
-.profile-section > .section-maximize {
+:is(.profile-section, .contact-section) > .section-maximize {
     top: clamp(18px, 3vw, 26px);
     left: clamp(18px, 3vw, 26px);
     opacity: 0.55;
     filter: none;
 }
 
-.profile-section > .section-maximize:hover {
+:is(.profile-section, .contact-section) > .section-maximize:hover {
     opacity: 1;
     filter: none;
 }
@@ -2635,8 +2690,8 @@ body.menu-open {
     position: fixed;
     top: var(--position-top);
     right: var(--position-right);
-    width: var(--button-size);
-    height: var(--button-size);
+    width: var(--floating-button-size);
+    height: var(--floating-button-size);
     padding: var(--button-padding);
     border-radius: var(--button-radius-md);
     background: var(--btn-gradient-default);
@@ -2701,12 +2756,12 @@ body.menu-open {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 26px;
-    height: 26px;
-    min-width: 26px;
-    min-height: 26px;
+    width: var(--floating-button-size);
+    height: var(--floating-button-size);
+    min-width: var(--floating-button-size);
+    min-height: var(--floating-button-size);
     padding: 0;
-    border-radius: 8px;
+    border-radius: var(--button-radius-md);
     border: none;
     background: var(--glass-bg);
     color: var(--text-primary);
@@ -2716,7 +2771,9 @@ body.menu-open {
     cursor: var(--cursor-pointer);
     transition:
         transform var(--transition-quick),
-        background var(--transition-quick);
+        background var(--transition-quick),
+        border-color var(--transition-quick),
+        box-shadow var(--transition-quick);
     z-index: var(--z-modal-plus);
     box-sizing: border-box;
     flex-shrink: 0;
@@ -2742,8 +2799,8 @@ body.menu-open {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 8px;
-    height: 8px;
+    width: 11px;
+    height: 11px;
     border-top: 3px solid currentColor;
     border-right: 3px solid currentColor;
     transform: translate(-50%, -50%);
@@ -2751,12 +2808,12 @@ body.menu-open {
 }
 
 .carousel-fullscreen-prev::before {
-    left: calc(50% + 1.5px);
+    left: calc(50% + 2px);
     transform: translate(-50%, -50%) rotate(-135deg);
 }
 
 .carousel-fullscreen-next::before {
-    left: calc(50% - 1.5px);
+    left: calc(50% - 2px);
     transform: translate(-50%, -50%) rotate(45deg);
 }
 
@@ -2803,29 +2860,31 @@ body.menu-open {
     .carousel-fullscreen-close {
         top: 10px;
         right: 10px;
-        width: 24px;
-        height: 24px;
+        width: 36px;
+        height: 36px;
     }
 
     .carousel-fullscreen-close::before,
     .carousel-fullscreen-close::after {
-        width: 9px;
+        width: 16px;
         height: 2px;
     }
 
     .carousel-fullscreen-nav button {
-        width: 24px;
-        height: 24px;
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        min-height: 36px;
         padding: 0;
         box-sizing: border-box;
     }
 
     .carousel-fullscreen-prev::before,
     .carousel-fullscreen-next::before {
-        width: 7px;
-        height: 7px;
-        border-top: 2px solid currentColor;
-        border-right: 2px solid currentColor;
+        width: 9px;
+        height: 9px;
+        border-top: 2.5px solid currentColor;
+        border-right: 2.5px solid currentColor;
     }
 
     .carousel-fullscreen-prev {
@@ -2988,6 +3047,8 @@ body.menu-open {
     border: none;
     transition:
         background var(--transition-fast),
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
         transform var(--transition-fast);
 }
 
@@ -2998,7 +3059,6 @@ body.menu-open {
 
 .project-icon {
     flex-shrink: 0;
-    cursor: default !important;
 }
 
 .project-title {
@@ -3076,16 +3136,10 @@ body.menu-open {
 }
 
 .tech-stack .tech-tag {
-    background: linear-gradient(
-        120deg,
-        rgba(0, 0, 0, 0.4) 0%,
-        rgba(255, 255, 255, 0.08) 100%
-    );
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: var(--glass-bg);
+    border: none;
     gap: 6px;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.08),
-        0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: none;
     color: var(--text-primary);
 }
 
@@ -3106,15 +3160,7 @@ body.menu-open {
 }
 
 .tech-stack .tech-tag:hover {
-    background: linear-gradient(
-        120deg,
-        rgba(0, 0, 0, 0.45) 0%,
-        rgba(255, 255, 255, 0.12) 100%
-    );
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.12),
-        0 2px 4px rgba(0, 0, 0, 0.25);
+    background: var(--hover-tint);
     color: var(--text-primary);
 }
 
@@ -3130,33 +3176,21 @@ body.menu-open {
     width: 6px;
     height: 100%;
     border-radius: var(--border-radius-sm-alt);
-    background: linear-gradient(
-        180deg,
-        rgba(124, 58, 237, 0.3) 0%,
-        rgba(139, 92, 246, 0.3) 35%,
-        rgba(217, 70, 239, 0.3) 70%,
-        rgba(236, 72, 153, 0.3) 100%
-    );
+    background: var(--scroll-track-bg);
     position: relative;
     cursor: var(--cursor-pointer);
     transition: background var(--transition-medium);
 }
 
 .scroll-track:hover {
-    background: linear-gradient(
-        180deg,
-        rgba(124, 58, 237, 0.6) 0%,
-        rgba(139, 92, 246, 0.6) 35%,
-        rgba(217, 70, 239, 0.6) 70%,
-        rgba(236, 72, 153, 0.6) 100%
-    );
+    background: var(--scroll-track-bg-hover);
 }
 
 .scroll-thumb {
     width: 6px;
     min-height: 20px;
     border-radius: var(--border-radius-sm-alt);
-    background: rgba(208, 208, 208, 0.6);
+    background: var(--scroll-thumb-bg);
     position: absolute;
     top: 0;
     cursor: default;
@@ -3167,7 +3201,7 @@ body.menu-open {
 }
 
 .scroll-thumb:hover {
-    background: rgba(208, 208, 208, 0.8);
+    background: var(--scroll-thumb-bg-hover);
     cursor: default;
 }
 
@@ -3248,7 +3282,7 @@ body.menu-open {
 }
 
 .project-link:focus-visible {
-    outline: 2px solid var(--text-primary);
+    outline: 2px solid var(--focus-ring);
     outline-offset: var(--outline-offset);
 }
 
@@ -3276,30 +3310,14 @@ body.menu-open {
 }
 
 .download-btn.glass-pill {
-    background: linear-gradient(
-        135deg,
-        #4c1d95 0%,
-        #5b21b6 25%,
-        #8b2adf 50%,
-        #d946ef 75%,
-        #ec4899 100%
-    ) !important;
+    background: var(--btn-gradient-purple) !important;
     color: #ffffff !important;
     border: none !important;
     box-shadow: none !important;
 }
 
 .download-btn.glass-pill:hover {
-    background: linear-gradient(
-        135deg,
-        #5b21b6 0%,
-        #6d28d9 15%,
-        #7c3aed 30%,
-        #8b5cf6 45%,
-        #a855f7 65%,
-        #c084fc 80%,
-        #f0abfc 100%
-    ) !important;
+    background: var(--btn-gradient-purple-hover) !important;
     color: #ffffff !important;
     transform: var(--transform-hover-lift);
 }
@@ -3576,7 +3594,7 @@ body.menu-open {
 }
 
 button:focus-visible {
-    outline: 2px solid var(--text-primary);
+    outline: 2px solid var(--focus-ring);
     outline-offset: var(--outline-offset);
 }
 
@@ -3699,6 +3717,11 @@ a *,
 .download-btn * {
     cursor: pointer !important;
 }
+
+.project-icon,
+.project-icon * {
+    cursor: default !important;
+}
 body.obsidian-theme .background-video,
 html.obsidian-theme-loading .background-video {
     opacity: 0;
@@ -3775,16 +3798,20 @@ body.obsidian-theme .nav-menu-content {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
+body.obsidian-theme .nav-menu-item::before,
+body.obsidian-theme .detail-back::before,
+body.obsidian-theme .detail-nav-link::before {
+    border: none;
+}
+
 body.obsidian-theme .nav-menu-item {
     background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: var(--border-width) var(--border-style) rgba(255, 255, 255, 0.08);
 }
 
 body.obsidian-theme .nav-menu-item:hover {
     background: linear-gradient(135deg, #3a3a3a 0%, #454545 100%);
-    border-color: #a855f7;
-    border-width: 2px;
-    transform: translateX(4px);
+    border-color: var(--hover-stroke);
 }
 
 body.obsidian-theme .profile-picture {
@@ -3799,12 +3826,13 @@ body.obsidian-theme .social-media {
 
 body.obsidian-theme .contact-btn {
     background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 body.obsidian-theme .contact-btn:hover {
     background: linear-gradient(135deg, #3a3a3a 0%, #454545 100%);
-    border-color: rgba(168, 85, 247, 0.3);
+    border-color: var(--hover-stroke);
+    box-shadow: var(--hover-glow);
 }
 
 body.obsidian-theme .social-btn {
@@ -3841,14 +3869,14 @@ body.obsidian-theme .skills-section {
 
 body.obsidian-theme .skills-lines .tech-tag {
     background: rgba(45, 45, 45, 0.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
     box-shadow: none !important;
 }
 
 body.obsidian-theme .skills-lines .tech-tag:hover {
     background: rgba(58, 58, 58, 0.9) !important;
-    border-color: rgba(168, 85, 247, 0.4) !important;
-    box-shadow: 0 0 12px rgba(168, 85, 247, 0.2) !important;
+    border-color: var(--hover-stroke) !important;
+    box-shadow: var(--hover-glow) !important;
 }
 
 body.obsidian-theme .tech-stack .tech-tag {
@@ -3859,7 +3887,8 @@ body.obsidian-theme .tech-stack .tech-tag {
 
 body.obsidian-theme .tech-stack .tech-tag:hover {
     background: linear-gradient(135deg, #3a3a3a 0%, #454545 100%);
-    border-color: rgba(168, 85, 247, 0.3);
+    border-color: var(--hover-stroke);
+    box-shadow: var(--hover-glow);
 }
 
 body.obsidian-theme .project-date {
@@ -3870,7 +3899,8 @@ body.obsidian-theme .project-date {
 
 body.obsidian-theme .project-date:hover {
     background: linear-gradient(135deg, #3a3a3a 0%, #454545 100%);
-    border-color: rgba(168, 85, 247, 0.3);
+    border-color: var(--hover-stroke);
+    box-shadow: var(--hover-glow);
 }
 
 body.obsidian-theme .certificate-item.glass-pill {
@@ -3879,8 +3909,7 @@ body.obsidian-theme .certificate-item.glass-pill {
 }
 
 body.obsidian-theme .certificate-item.glass-pill:hover {
-    background: linear-gradient(135deg, #363636 0%, #424242 100%);
-    border-color: rgba(168, 85, 247, 0.3);
+    background: linear-gradient(135deg, #3a3a3a 0%, #454545 100%);
 }
 
 body.obsidian-theme .certificate-logo {
@@ -3899,7 +3928,8 @@ body.obsidian-theme .carousel-btn {
 
 body.obsidian-theme .carousel-btn:hover {
     background: linear-gradient(135deg, #3a3a3a 0%, #454545 100%);
-    border-color: rgba(168, 85, 247, 0.3);
+    border-color: var(--hover-stroke);
+    box-shadow: var(--hover-glow);
 }
 
 body.obsidian-theme .carousel-progress {
@@ -3923,7 +3953,8 @@ body.obsidian-theme .project-icon.glass-button {
 
 body.obsidian-theme .project-icon.glass-button:hover {
     background: linear-gradient(135deg, #3a3a3a 0%, #454545 100%);
-    border-color: rgba(168, 85, 247, 0.3);
+    border-color: var(--hover-stroke);
+    box-shadow: var(--hover-glow);
 }
 
 body.obsidian-theme .nav-item-icon {
@@ -3942,7 +3973,8 @@ body.obsidian-theme .carousel-fullscreen-close {
 
 body.obsidian-theme .carousel-fullscreen-close:hover {
     background: linear-gradient(135deg, #3a3a3a 0%, #454545 100%);
-    border-color: rgba(168, 85, 247, 0.3);
+    border-color: var(--hover-stroke);
+    box-shadow: var(--hover-glow);
 }
 
 body.obsidian-theme .carousel-fullscreen-nav button {
@@ -3952,7 +3984,8 @@ body.obsidian-theme .carousel-fullscreen-nav button {
 
 body.obsidian-theme .carousel-fullscreen-nav button:hover {
     background: linear-gradient(135deg, #3a3a3a 0%, #454545 100%);
-    border-color: rgba(168, 85, 247, 0.3);
+    border-color: var(--hover-stroke);
+    box-shadow: var(--hover-glow);
 }
 
 body.obsidian-theme .carousel-fullscreen-counter {
@@ -4232,12 +4265,7 @@ body.obsidian-theme .spotlight-container.spotlight-active {
     padding: var(--space-md) var(--space-2xl);
     border: none;
     border-radius: var(--radius-pill);
-    background: linear-gradient(
-        135deg,
-        rgb(124, 58, 237) 0%,
-        rgb(217, 70, 239) 55%,
-        rgb(236, 72, 153) 100%
-    );
+    background: var(--btn-gradient-purple);
     color: #ffffff;
     font-family: inherit;
     font-size: var(--font-size-sm);
@@ -4245,7 +4273,7 @@ body.obsidian-theme .spotlight-container.spotlight-active {
     cursor: var(--cursor-pointer);
     transition:
         transform var(--transition-medium),
-        filter var(--transition-medium),
+        background var(--transition-medium),
         opacity var(--transition-medium);
 }
 
@@ -4255,7 +4283,7 @@ body.obsidian-theme .spotlight-container.spotlight-active {
 
 .contact-submit:hover:not(:disabled) {
     transform: var(--transform-hover-lift);
-    filter: brightness(1.1);
+    background: var(--btn-gradient-purple-hover);
 }
 
 .contact-submit:active:not(:disabled) {
@@ -4268,7 +4296,7 @@ body.obsidian-theme .spotlight-container.spotlight-active {
 }
 
 .contact-submit:focus-visible {
-    outline: 2px solid var(--text-primary);
+    outline: 2px solid var(--focus-ring);
     outline-offset: var(--outline-offset);
 }
 

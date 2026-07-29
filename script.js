@@ -144,6 +144,7 @@ document.addEventListener("DOMContentLoaded", function () {
         initializeCertificateLinks();
         initializeProjectLink();
         initializeProjectTechTagIcons();
+        initializeTechStackDivider();
         initializeScrollTopButton();
         initializeDetailGallery();
         initializeContactForm();
@@ -1969,6 +1970,30 @@ function initializeNavigationMenu() {
     initializeNavMenuScrollFade();
 }
 
+function revealSection(element) {
+    element.dataset.revealed = "true";
+    element.style.opacity = "";
+    element.style.transform = "";
+    element.classList.remove("scroll-pending");
+    element.classList.add("scroll-animated");
+
+    let fallbackId;
+
+    // scroll-animated fija transform y transition con !important; si se queda
+    // puesto anula el hover y la transición de tema del elemento.
+    const settle = (event) => {
+        if (event && event.target !== element) return;
+        element.removeEventListener("transitionend", settle);
+        clearTimeout(fallbackId);
+        performanceCache.timers.delete(fallbackId);
+        element.classList.remove("scroll-animated");
+    };
+
+    element.addEventListener("transitionend", settle);
+    fallbackId = setTimeout(settle, 1200);
+    performanceCache.timers.add(fallbackId);
+}
+
 function initializeScrollEffects() {
     if (document.body.classList.contains("detail-page")) return;
 
@@ -1980,12 +2005,7 @@ function initializeScrollEffects() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
             if (entry.isIntersecting) {
-                if (!entry.target.classList.contains("scroll-animated")) {
-                    entry.target.style.opacity = "";
-                    entry.target.style.transform = "";
-                    entry.target.classList.add("scroll-animated");
-                    entry.target.classList.remove("scroll-pending");
-                }
+                if (!entry.target.dataset.revealed) revealSection(entry.target);
                 observer.unobserve(entry.target);
             }
         });
@@ -1996,30 +2016,18 @@ function initializeScrollEffects() {
     );
 
     sections.forEach((section) => {
-        if (!section.classList.contains("scroll-animated")) {
-            const isCertificate =
-                section.classList.contains("certificate-item");
+        if (section.dataset.revealed) return;
 
-            if (isCertificate) {
-                const rect = section.getBoundingClientRect();
-                const isInViewport =
-                    rect.top < window.innerHeight && rect.bottom > 0;
+        const isCertificate = section.classList.contains("certificate-item");
+        const rect = section.getBoundingClientRect();
+        const isInViewport =
+            isCertificate && rect.top < window.innerHeight && rect.bottom > 0;
 
-                if (isInViewport) {
-                    requestAnimationFrame(() => {
-                        section.style.opacity = "";
-                        section.style.transform = "";
-                        section.classList.add("scroll-animated");
-                        section.classList.remove("scroll-pending");
-                    });
-                } else {
-                    section.classList.add("scroll-pending");
-                    observer.observe(section);
-                }
-            } else {
-                section.classList.add("scroll-pending");
-                observer.observe(section);
-            }
+        if (isInViewport) {
+            requestAnimationFrame(() => revealSection(section));
+        } else {
+            section.classList.add("scroll-pending");
+            observer.observe(section);
         }
     });
 }
@@ -2225,6 +2233,30 @@ function initializeProjectTechTagIcons() {
         tag.dataset.tech = iconMeta.dataTech;
         tag.dataset.iconized = "true";
     });
+}
+
+function initializeTechStackDivider() {
+    if (!document.body.classList.contains("detail-project")) return;
+
+    const stack = document.querySelector(".tech-stack");
+    if (!stack || stack.querySelector(".tech-divider")) return;
+
+    const tags = Array.from(stack.querySelectorAll(".tech-tag"));
+
+    let lastTech = -1;
+    for (let i = tags.length - 1; i >= 0; i--) {
+        if (tags[i].dataset.iconized === "true") {
+            lastTech = i;
+            break;
+        }
+    }
+
+    if (lastTech === -1 || lastTech === tags.length - 1) return;
+
+    const divider = document.createElement("span");
+    divider.className = "tech-divider";
+    divider.setAttribute("aria-hidden", "true");
+    tags[lastTech].after(divider);
 }
 
 window.addEventListener(
@@ -2997,7 +3029,7 @@ function initializeScrollTopButton() {
     const button = document.querySelector(".scroll-top-button");
     if (!button) return;
 
-    const threshold = () => Math.max(200, window.innerHeight * 0.5);
+    const threshold = () => Math.max(400, window.innerHeight);
     let visible = false;
 
     const update = () => {

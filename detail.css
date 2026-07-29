@@ -6,11 +6,19 @@
     .detail-page .portfolio-container {
         max-width: clamp(1040px, 96vw, 1400px);
     }
+
+    .detail-project .portfolio-container {
+        max-width: clamp(1100px, 97vw, 1520px);
+    }
 }
 
 @media (min-width: 1600px) {
     .detail-page .portfolio-container {
         max-width: 1440px;
+    }
+
+    .detail-project .portfolio-container {
+        max-width: 1560px;
     }
 }
 
@@ -21,7 +29,7 @@
     flex-wrap: wrap;
 
     padding-right: clamp(112px, 22vw, 150px);
-    min-height: var(--button-size);
+    min-height: var(--floating-button-size);
 }
 
 .detail-back {
@@ -35,15 +43,19 @@
     color: var(--text-primary);
     text-decoration: none;
     background: var(--glass-bg);
-    border: var(--border-width) var(--border-style) var(--glass-border);
     transition:
         background var(--transition-medium),
         border-color var(--transition-medium),
+        box-shadow var(--transition-medium),
         transform var(--transition-medium);
 }
 
 .detail-back:hover {
     transform: translateX(-3px);
+}
+
+.detail-back:hover::before,
+.detail-nav-link:hover::before {
     border-color: var(--hover-tint);
 }
 
@@ -79,7 +91,8 @@ body.obsidian-theme .detail-back {
 
 body.obsidian-theme .detail-back:hover {
     background: linear-gradient(135deg, #363636 0%, #424242 100%);
-    border-color: rgba(168, 85, 247, 0.3);
+    border-color: var(--hover-stroke);
+    box-shadow: var(--hover-glow);
 }
 
 .detail-page .section-maximize {
@@ -123,6 +136,20 @@ body.obsidian-theme .detail-back:hover {
     min-width: 0;
 
     align-self: start;
+}
+
+.tech-divider {
+    flex: 0 0 100%;
+    height: 6px;
+    margin: var(--space-xs) 0;
+    border-radius: var(--border-radius-sm-alt);
+    background: linear-gradient(
+        90deg,
+        rgba(124, 58, 237, 0.35) 0%,
+        rgba(139, 92, 246, 0.45) 28%,
+        rgba(217, 70, 239, 0.7) 62%,
+        rgba(236, 72, 153, 0.95) 100%
+    );
 }
 
 .detail-gallery {
@@ -173,6 +200,7 @@ body.obsidian-theme .detail-back:hover {
     line-height: 0;
     transition:
         border-color var(--transition-medium),
+        box-shadow var(--transition-medium),
         transform var(--transition-medium),
         opacity var(--transition-medium);
     opacity: 0.75;
@@ -202,7 +230,8 @@ body.obsidian-theme .detail-back:hover {
 
 body.obsidian-theme .detail-gallery-item:hover,
 body.obsidian-theme .detail-gallery-item:focus-visible {
-    border-color: rgba(168, 85, 247, 0.4);
+    border-color: var(--hover-stroke);
+    box-shadow: var(--hover-glow);
 }
 
 @media (max-width: 1023px) {
@@ -213,7 +242,7 @@ body.obsidian-theme .detail-gallery-item:focus-visible {
 
 @media (min-width: 1024px) {
     .detail-page .project-item {
-        grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
         grid-template-areas:
             "image    image"
             "controls controls"
@@ -279,17 +308,16 @@ body.obsidian-theme .detail-gallery-item:focus-visible {
     text-decoration: none;
     color: var(--text-primary);
     background: var(--glass-bg);
-    border: var(--border-width) var(--border-style) var(--glass-border);
     transition:
         background var(--transition-medium),
         border-color var(--transition-medium),
+        box-shadow var(--transition-medium),
         transform var(--transition-medium);
     min-width: 0;
 }
 
 .detail-nav-link:hover {
     transform: var(--transform-hover-lift);
-    border-color: var(--hover-tint);
 }
 
 .detail-nav-link:focus-visible {
@@ -328,14 +356,16 @@ body.obsidian-theme .detail-nav-link {
 
 body.obsidian-theme .detail-nav-link:hover {
     background: linear-gradient(135deg, #363636 0%, #424242 100%);
-    border-color: rgba(168, 85, 247, 0.3);
+    border-color: var(--hover-stroke);
+    box-shadow: var(--hover-glow);
 }
 
-.nav-menu-item[aria-current="page"] {
-    border-color: var(--hover-tint);
+.nav-menu-item[aria-current="page"]::before {
+    border-color: var(--current-stroke);
+    border-width: 2px;
 }
 
 body.obsidian-theme .nav-menu-item[aria-current="page"] {
-    border-color: #a855f7;
+    border-color: var(--current-stroke);
     border-width: 2px;
 }
